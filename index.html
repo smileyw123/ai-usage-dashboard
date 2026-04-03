@@ -54,8 +54,8 @@ td.z{color:var(--sf2);}
 .kv{font-size:26px;font-weight:800;line-height:1;margin-bottom:4px;}
 .ks{font-size:11px;color:var(--mt);}
 /* tabs */
-.tabs{display:flex;gap:4px;margin-bottom:22px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:4px;width:fit-content;}
-.tab{padding:8px 18px;border:none;background:none;color:var(--mt);font-family:'IBM Plex Sans KR',sans-serif;font-size:12px;cursor:pointer;border-radius:8px;transition:all .2s;}
+.tabs{display:flex;gap:4px;margin-bottom:22px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:4px;width:100%;}
+.tab{flex:1;padding:8px 18px;border:none;background:none;color:var(--mt);font-family:'IBM Plex Sans KR',sans-serif;font-size:12px;cursor:pointer;border-radius:8px;transition:all .2s;text-align:center;}
 .tab.on{background:var(--sf2);color:var(--tx);border:1px solid var(--bd);}
 .sec{display:none;}.sec.on{display:block;}
 /* charts */
@@ -138,7 +138,7 @@ tr.detail-row.open .detail-inner{display:block;}
 .dg-value.hi{color:var(--ac);}
 /* IO card inner layout */
 .io-inner{display:flex;gap:20px;align-items:flex-start;}
-.io-left{flex:none;}
+.io-left{flex:1.5;}
 .io-right{flex:1;border-left:1px solid var(--bd);padding-left:20px;display:flex;flex-direction:column;gap:10px;margin-top:4px;}
 .io-detail-row{display:grid;grid-template-columns:1fr auto;align-items:center;width:100%;}
 @media(max-width:600px){
@@ -226,10 +226,6 @@ tr.detail-row.open .detail-inner{display:block;}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;" id="modelGrid"></div>
-    </div>
-    <div class="g2">
-      <div class="cc"><div class="ct">Top 10 비용 사용자</div><div class="cs">전체 비용 기준</div><div class="cwt"><canvas id="c3"></canvas></div></div>
-      <div class="cc"><div class="ct">Input / Output / Cache 비율</div><div class="cs">유형별 분포</div><div class="cw"><canvas id="c4"></canvas></div></div>
     </div>
     <!-- IO Analysis -->
     <div class="ah">
@@ -410,12 +406,6 @@ function rov(){
       <div class="io-card-tokens">${fmt(c.tokens)} tokens</div>
       <div class="io-card-desc">${c.desc}</div>
     </div>`).join('');
-
-  const t10=[...all].sort((a,b)=>b.cost-a.cost).slice(0,10);
-  ch.c3=new Chart(document.getElementById('c3'),{type:'bar',data:{labels:t10.map(d=>d.name),datasets:[{data:t10.map(d=>d.cost),backgroundColor:t10.map((_,i)=>DC[i%DC.length]),borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>`$${c.raw.toLocaleString()}`}}},scales:{x:{grid:gd,ticks:{...tk,callback:v=>`$${v}`}},y:{grid:{display:false},ticks:tk}}}});
-
-  const tI=all.reduce((s,d)=>s+d.inp.tot,0),tOut=all.reduce((s,d)=>s+d.out.tot,0),tC=all.reduce((s,d)=>s+d.cac.tot,0);
-  ch.c4=new Chart(document.getElementById('c4'),{type:'doughnut',data:{labels:['Input','Output','Cache'],datasets:[{data:[tI,tOut,tC],backgroundColor:['rgba(52,211,153,0.85)','rgba(244,114,182,0.85)','rgba(96,165,250,0.85)'],borderColor:'#0f1623',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{family:'IBM Plex Sans KR',size:11},padding:14,boxWidth:10}},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}}}});
 
   // IO detail
   const ih=all.reduce((s,d)=>s+d.ih,0),io=all.reduce((s,d)=>s+d.io,0),is_=all.reduce((s,d)=>s+d.is,0);
