@@ -363,15 +363,15 @@ function se(idx){
       <div><div class="dn">${d.name}</div><div class="dm">${d.id} · ${d.d6} · ${d.d7}</div></div>
       <div class="dcost"><div class="dcl">TOTAL COST</div><div class="dcv">$${d.cost.toLocaleString()}</div></div>
     </div>
+    <div class="ind-charts fu">
+      <div class="cc"><div class="ct">모델별 토큰 분포</div><div id="cp" style="margin-top:8px"></div></div>
+      <div class="cc"><div class="ct">Input / Output / Cache</div><div id="cb" style="margin-top:8px"></div></div>
+    </div>
     <div class="tg fu">
       <div class="tc2"><div class="th2"><div class="td2" style="background:#34d399"></div><span style="color:#34d399">Input</span></div><div class="tt2" style="color:#34d399">${fmt(d.inp.tot)}</div>${mr('HAIKU',d.inp.h,mI,'#34d399')}${mr('SONNET',d.inp.s,mI,'#34d399')}${mr('OPUS',d.inp.o,mI,'#34d399')}</div>
       <div class="tc2"><div class="th2"><div class="td2" style="background:#f472b6"></div><span style="color:#f472b6">Output</span></div><div class="tt2" style="color:#f472b6">${fmt(d.out.tot)}</div>${mr('HAIKU',d.out.h,mO,'#f472b6')}${mr('SONNET',d.out.s,mO,'#f472b6')}${mr('OPUS',d.out.o,mO,'#f472b6')}</div>
       <div class="tc2"><div class="th2"><div class="td2" style="background:#00d4ff"></div><span style="color:#00d4ff">Cache Read</span></div><div class="tt2" style="color:#00d4ff">${fmt(d.cac.rh+d.cac.ro+d.cac.rs)}</div>${mr('HAIKU',d.cac.rh,Math.max(d.cac.rh,d.cac.ro,d.cac.rs,1),'#00d4ff')}${mr('SONNET',d.cac.rs,Math.max(d.cac.rh,d.cac.ro,d.cac.rs,1),'#00d4ff')}${mr('OPUS',d.cac.ro,Math.max(d.cac.rh,d.cac.ro,d.cac.rs,1),'#00d4ff')}</div>
       <div class="tc2"><div class="th2"><div class="td2" style="background:#a78bfa"></div><span style="color:#a78bfa">Cache Write</span></div><div class="tt2" style="color:#a78bfa">${fmt(d.cac.wh+d.cac.wo+d.cac.ws)}</div>${mr('HAIKU',d.cac.wh,Math.max(d.cac.wh,d.cac.wo,d.cac.ws,1),'#a78bfa')}${mr('SONNET',d.cac.ws,Math.max(d.cac.wh,d.cac.wo,d.cac.ws,1),'#a78bfa')}${mr('OPUS',d.cac.wo,Math.max(d.cac.wh,d.cac.wo,d.cac.ws,1),'#a78bfa')}</div>
-    </div>
-    <div class="ind-charts fu">
-      <div class="cc"><div class="ct">모델별 토큰 분포</div><div id="cp" style="margin-top:8px"></div></div>
-      <div class="cc"><div class="ct">Input / Output / Cache</div><div id="cb" style="margin-top:8px"></div></div>
     </div>`;
   const isMobile=window.innerWidth<=600;
   if(isMobile){
