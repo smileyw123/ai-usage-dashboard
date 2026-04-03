@@ -136,7 +136,16 @@ tr.detail-row.open .detail-inner{display:block;}
 .dg-value{font-size:12px;font-weight:600;color:#94a3b8;}
 .dg-value.z{color:var(--sf2);}
 .dg-value.hi{color:var(--ac);}
-/* IO ratio grid */
+/* IO card inner layout */
+.io-inner{display:flex;gap:20px;align-items:flex-start;}
+.io-left{flex:none;}
+.io-right{flex:1;border-left:1px solid var(--bd);padding-left:20px;display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+.io-detail-row{display:grid;grid-template-columns:1fr auto;align-items:center;width:100%;}
+@media(max-width:600px){
+  .io-inner{flex-direction:column;gap:0;}
+  .io-right{border-left:none;border-top:1px solid var(--bd);padding-left:0;padding-top:14px;margin-top:14px;width:100%;}
+  .io-detail-row{grid-template-columns:1fr auto;}
+}
 .io-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-items:stretch;}
 @media(max-width:600px){.io-grid{grid-template-columns:1fr;}}
 .io-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;display:flex;flex-direction:column;}
@@ -498,39 +507,25 @@ function rio(){
   document.getElementById('ioGrid').innerHTML=`
     <div class="io-card fu">
       <div class="io-card-top" style="background:linear-gradient(90deg,#34d399,#00d4ff)"></div>
-      <div class="io-card-label">입력 (Input)</div>
-      <div class="io-card-pct" style="color:#34d399">${gp(totalInput)}%</div>
-      <div class="io-card-tokens">${fmt(totalInput)} tokens</div>
-      <div class="io-card-desc">전체 토큰 대비 입력 비율</div>
-      <div style="margin-top:16px;border-top:1px solid var(--bd);padding-top:14px;display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div style="width:8px;height:8px;border-radius:50%;background:#34d399;flex-shrink:0"></div>
-            <span style="font-size:12px;color:var(--mt)">Input</span>
-          </div>
-          <div style="text-align:right">
-            <span style="font-size:13px;font-weight:700;color:#34d399">${ip(input)}%</span>
-            <span style="font-size:11px;color:var(--mt);margin-left:6px">${fmt(input)}</span>
-          </div>
+      <div class="io-inner">
+        <div class="io-left">
+          <div class="io-card-label">입력 (Input)</div>
+          <div class="io-card-pct" style="color:#34d399">${gp(totalInput)}%</div>
+          <div class="io-card-tokens">${fmt(totalInput)} tokens</div>
+          <div class="io-card-desc">전체 토큰 대비 입력 비율</div>
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div style="width:8px;height:8px;border-radius:50%;background:#00d4ff;flex-shrink:0"></div>
-            <span style="font-size:12px;color:var(--mt)">Cache Read</span>
+        <div class="io-right">
+          <div class="io-detail-row">
+            <div style="display:flex;align-items:center;gap:6px;"><div style="width:7px;height:7px;border-radius:50%;background:#34d399;flex-shrink:0"></div><span style="font-size:11px;color:var(--mt)">Input</span></div>
+            <div style="white-space:nowrap"><span style="font-size:12px;font-weight:700;color:#34d399">${ip(input)}%</span><span style="font-size:10px;color:var(--mt);margin-left:5px">${fmt(input)}</span></div>
           </div>
-          <div style="text-align:right">
-            <span style="font-size:13px;font-weight:700;color:#00d4ff">${ip(cacheRead)}%</span>
-            <span style="font-size:11px;color:var(--mt);margin-left:6px">${fmt(cacheRead)}</span>
+          <div class="io-detail-row">
+            <div style="display:flex;align-items:center;gap:6px;"><div style="width:7px;height:7px;border-radius:50%;background:#00d4ff;flex-shrink:0"></div><span style="font-size:11px;color:var(--mt)">Cache Read</span></div>
+            <div style="white-space:nowrap"><span style="font-size:12px;font-weight:700;color:#00d4ff">${ip(cacheRead)}%</span><span style="font-size:10px;color:var(--mt);margin-left:5px">${fmt(cacheRead)}</span></div>
           </div>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div style="width:8px;height:8px;border-radius:50%;background:#a78bfa;flex-shrink:0"></div>
-            <span style="font-size:12px;color:var(--mt)">Cache Write</span>
-          </div>
-          <div style="text-align:right">
-            <span style="font-size:13px;font-weight:700;color:#a78bfa">${ip(cacheWrite)}%</span>
-            <span style="font-size:11px;color:var(--mt);margin-left:6px">${fmt(cacheWrite)}</span>
+          <div class="io-detail-row">
+            <div style="display:flex;align-items:center;gap:6px;"><div style="width:7px;height:7px;border-radius:50%;background:#a78bfa;flex-shrink:0"></div><span style="font-size:11px;color:var(--mt)">Cache Write</span></div>
+            <div style="white-space:nowrap"><span style="font-size:12px;font-weight:700;color:#a78bfa">${ip(cacheWrite)}%</span><span style="font-size:10px;color:var(--mt);margin-left:5px">${fmt(cacheWrite)}</span></div>
           </div>
         </div>
       </div>
