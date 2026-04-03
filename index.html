@@ -204,9 +204,15 @@ tr.detail-row.open .detail-inner{display:block;}
   </div>
   <!-- Overview -->
   <div class="sec on" id="sec-ov">
-    <div class="g2">
-      <div class="cc"><div class="ct">부서별 총 비용</div><div class="cs">본부 기준</div><div class="cw"><canvas id="c1"></canvas></div></div>
-      <div class="cc"><div class="ct">모델별 토큰 사용량</div><div class="cs">Haiku / Sonnet / Opus</div><div class="cw"><canvas id="c2"></canvas></div></div>
+    <!-- 모델별 토큰 사용 비율 그리드 -->
+    <div style="margin-bottom:16px">
+      <div class="sec-head" style="margin-bottom:14px">
+        <div>
+          <div class="sec-title" style="font-size:14px">모델별 토큰 사용 비율</div>
+          <div class="sec-desc">전체 토큰 대비 Haiku · Sonnet · Opus 비중</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;" id="modelGrid"></div>
     </div>
     <div class="g2">
       <div class="cc"><div class="ct">Top 10 비용 사용자</div><div class="cs">전체 비용 기준</div><div class="cwt"><canvas id="c3"></canvas></div></div>
@@ -376,12 +382,21 @@ function rov(){
   const tk={color:'#64748b',font:{family:'IBM Plex Sans KR',size:11}};
   const gd={color:'rgba(255,255,255,0.04)'};
 
-  const dm={};all.forEach(d=>{dm[d.d6]=(dm[d.d6]||0)+d.cost;});
-  const depts=Object.entries(dm).sort((a,b)=>b[1]-a[1]);
-  ch.c1=new Chart(document.getElementById('c1'),{type:'bar',data:{labels:depts.map(d=>d[0]),datasets:[{data:depts.map(d=>d[1]),backgroundColor:DC.slice(0,depts.length),borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>`$${c.raw.toLocaleString()}`}}},scales:{x:{grid:gd,ticks:tk},y:{grid:gd,ticks:{...tk,callback:v=>`$${v}`}}}}});
-
   const tH=all.reduce((s,d)=>s+d.haiku,0),tS=all.reduce((s,d)=>s+d.sonnet,0),tO=all.reduce((s,d)=>s+d.opus,0);
-  ch.c2=new Chart(document.getElementById('c2'),{type:'doughnut',data:{labels:['Haiku','Sonnet','Opus'],datasets:[{data:[tH,tS,tO],backgroundColor:['rgba(0,212,255,0.85)','rgba(167,139,250,0.85)','rgba(245,158,11,0.85)'],borderColor:'#0f1623',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{family:'IBM Plex Sans KR',size:11},padding:14,boxWidth:10}},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}}}});
+  const tM=tH+tS+tO||1;
+  const mp=(v)=>(v/tM*100).toFixed(2);
+  document.getElementById('modelGrid').innerHTML=[
+    {label:'Opus',tokens:tO,pct:mp(tO),color:'#f59e0b',desc:'고성능 모델'},
+    {label:'Sonnet',tokens:tS,pct:mp(tS),color:'#a78bfa',desc:'균형형 모델'},
+    {label:'Haiku',tokens:tH,pct:mp(tH),color:'#00d4ff',desc:'경량 고속 모델'},
+  ].map(c=>`
+    <div class="io-card fu">
+      <div class="io-card-top" style="background:${c.color}"></div>
+      <div class="io-card-label" style="font-size:9px">${c.label}</div>
+      <div class="io-card-pct" style="color:${c.color};font-size:17px">${c.pct}%</div>
+      <div class="io-card-tokens" style="font-size:11px">${fmt(c.tokens)} tokens</div>
+      <div class="io-card-desc" style="font-size:10px">${c.desc}</div>
+    </div>`).join('');
 
   const t10=[...all].sort((a,b)=>b.cost-a.cost).slice(0,10);
   ch.c3=new Chart(document.getElementById('c3'),{type:'bar',data:{labels:t10.map(d=>d.name),datasets:[{data:t10.map(d=>d.cost),backgroundColor:t10.map((_,i)=>DC[i%DC.length]),borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>`$${c.raw.toLocaleString()}`}}},scales:{x:{grid:gd,ticks:{...tk,callback:v=>`$${v}`}},y:{grid:{display:false},ticks:tk}}}});
