@@ -136,6 +136,17 @@ tr.detail-row.open .detail-inner{display:block;}
 .dg-value{font-size:12px;font-weight:600;color:#94a3b8;}
 .dg-value.z{color:var(--sf2);}
 .dg-value.hi{color:var(--ac);}
+/* IO ratio grid */
+.io-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-items:stretch;}
+@media(max-width:600px){.io-grid{grid-template-columns:1fr;}}
+.io-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+.io-card-top{position:absolute;top:0;left:0;right:0;height:3px;}
+.io-card-label{font-size:10px;color:var(--mt);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+.io-card-tokens{font-size:14px;font-weight:700;margin-bottom:2px;color:var(--mt);}
+.io-card-pct{font-size:28px;font-weight:800;margin-bottom:6px;line-height:1;}
+.io-card-desc{font-size:11px;color:var(--mt);margin-bottom:14px;}
+.io-bar-wrap{height:6px;background:var(--sf2);border-radius:3px;overflow:hidden;}
+.io-bar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
 @keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .fu{animation:fu .3s ease forwards;}
 </style>
@@ -173,6 +184,18 @@ tr.detail-row.open .detail-inner{display:block;}
       <div class="tf"><span id="rfc"></span><span id="rft"></span></div>
     </div>
   </div>
+
+  <!-- Input / Output 비율 그리드 -->
+  <div style="margin-bottom:28px">
+    <div class="sec-head" style="margin-bottom:14px">
+      <div>
+        <div class="sec-title">📊 Input · Output <span>토큰 비율</span></div>
+        <div class="sec-desc">전체 토큰 대비 각 유형별 사용 비중</div>
+      </div>
+    </div>
+    <div class="io-grid" id="ioGrid"></div>
+  </div>
+
   <div class="div"></div>
   <!-- Tabs -->
   <div class="tabs">
@@ -443,7 +466,70 @@ function se(idx){
   ch.cb=new Chart(document.getElementById('cb'),{type:'bar',data:{labels:['Haiku','Sonnet','Opus'],datasets:[{label:'Input',data:[d.inp.h,d.inp.s,d.inp.o],backgroundColor:'rgba(52,211,153,0.75)',borderRadius:4},{label:'Output',data:[d.out.h,d.out.s,d.out.o],backgroundColor:'rgba(244,114,182,0.75)',borderRadius:4},{label:'Cache',data:[d.cac.rh+d.cac.wh,d.cac.rs+d.cac.ws,d.cac.ro+d.cac.wo],backgroundColor:'rgba(96,165,250,0.75)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{family:'IBM Plex Sans KR',size:11},padding:10,boxWidth:10}},tooltip:{...tip,callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw)}`}}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{family:'IBM Plex Sans KR',size:11}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{family:'IBM Plex Sans KR',size:11},callback:v=>fmt(v)}}}}});
 }
 
-rr();rkpi();rov();rl();
+function rio(){
+  const ih=all.reduce((s,d)=>s+d.ih,0),io=all.reduce((s,d)=>s+d.io,0),is_=all.reduce((s,d)=>s+d.is,0);
+  const oh=all.reduce((s,d)=>s+d.oh,0),oo=all.reduce((s,d)=>s+d.oo,0),os_=all.reduce((s,d)=>s+d.os,0);
+  const crh=all.reduce((s,d)=>s+d.crh,0),cro=all.reduce((s,d)=>s+d.cro,0),crs=all.reduce((s,d)=>s+d.crs,0);
+  const cwh=all.reduce((s,d)=>s+d.cwh,0),cwo=all.reduce((s,d)=>s+d.cwo,0),cws=all.reduce((s,d)=>s+d.cws,0);
+  const input=ih+io+is_;
+  const cacheRead=crh+cro+crs;
+  const cacheWrite=cwh+cwo+cws;
+  const output=oh+oo+os_;
+  const totalInput=input+cacheRead+cacheWrite;
+  const grand=totalInput+output;
+  const gp=(v)=>grand>0?(v/grand*100).toFixed(2):0;
+  const ip=(v)=>totalInput>0?(v/totalInput*100).toFixed(2):0;
+
+  document.getElementById('ioGrid').innerHTML=`
+    <div class="io-card fu">
+      <div class="io-card-top" style="background:linear-gradient(90deg,#34d399,#00d4ff)"></div>
+      <div class="io-card-label">입력 (Input)</div>
+      <div class="io-card-pct" style="color:#34d399">${gp(totalInput)}%</div>
+      <div class="io-card-tokens">${fmt(totalInput)} tokens</div>
+      <div class="io-card-desc">전체 토큰 대비 입력 비율</div>
+      <div style="margin-top:16px;border-top:1px solid var(--bd);padding-top:14px;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#34d399;flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--mt)">Input</span>
+          </div>
+          <div style="text-align:right">
+            <span style="font-size:13px;font-weight:700;color:#34d399">${ip(input)}%</span>
+            <span style="font-size:11px;color:var(--mt);margin-left:6px">${fmt(input)}</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#00d4ff;flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--mt)">Cache Read</span>
+          </div>
+          <div style="text-align:right">
+            <span style="font-size:13px;font-weight:700;color:#00d4ff">${ip(cacheRead)}%</span>
+            <span style="font-size:11px;color:var(--mt);margin-left:6px">${fmt(cacheRead)}</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#a78bfa;flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--mt)">Cache Write</span>
+          </div>
+          <div style="text-align:right">
+            <span style="font-size:13px;font-weight:700;color:#a78bfa">${ip(cacheWrite)}%</span>
+            <span style="font-size:11px;color:var(--mt);margin-left:6px">${fmt(cacheWrite)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="io-card fu">
+      <div class="io-card-top" style="background:#f472b6"></div>
+      <div class="io-card-label">출력 (Output)</div>
+      <div class="io-card-pct" style="color:#f472b6">${gp(output)}%</div>
+      <div class="io-card-tokens">${fmt(output)} tokens</div>
+      <div class="io-card-desc">전체 토큰 대비 출력 비율</div>
+    </div>`;
+}
+
+rr();rkpi();rio();rov();rl();
 </script>
 </body>
 </html>
