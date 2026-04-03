@@ -45,7 +45,7 @@ td.z{color:var(--sf2);}
 /* divider */
 .div{height:1px;background:linear-gradient(90deg,transparent,var(--bd),transparent);margin:8px 0 28px;}
 /* kpi */
-.kg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.kg{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:24px;}
 @media(max-width:600px){.kg{grid-template-columns:1fr;}}
 .kc{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:20px 22px;position:relative;overflow:hidden;transition:transform .2s;}
 .kc:hover{transform:translateY(-2px);}
@@ -146,6 +146,12 @@ tr.detail-row.open .detail-inner{display:block;}
   <div class="badge" id="badge">샘플 데이터</div>
 </header>
 <div id="app">
+  <!-- KPI 2개 - 테이블 위 -->
+  <div class="kg" style="margin-bottom:20px">
+    <div class="kc fu"><div class="kt" style="background:linear-gradient(90deg,#00d4ff,transparent)"></div><div class="kl">TOTAL COST</div><div class="kv" style="color:#00d4ff" id="kv-total"></div><div class="ks" id="ks-total"></div></div>
+    <div class="kc fu"><div class="kt" style="background:linear-gradient(90deg,#a78bfa,transparent)"></div><div class="kl">인당 평균 비용</div><div class="kv" style="color:#a78bfa" id="kv-avg"></div><div class="ks" id="ks-avg"></div></div>
+  </div>
+
   <!-- Raw Table -->
   <div style="margin-bottom:28px">
     <div class="sec-head">
@@ -168,8 +174,6 @@ tr.detail-row.open .detail-inner{display:block;}
     </div>
   </div>
   <div class="div"></div>
-  <!-- KPIs -->
-  <div class="kg" id="kg"></div>
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab on" onclick="sw('ov')">📊 전체 현황</button>
@@ -329,14 +333,12 @@ function rr(){
 
 // kpis
 function rkpi(){
-  const tc=all.reduce((s,d)=>s+d.cost,0),tt=all.reduce((s,d)=>s+d.total,0);
-  const ti=all.reduce((s,d)=>s+d.inp.tot,0),to=all.reduce((s,d)=>s+d.out.tot,0);
-  document.getElementById('kg').innerHTML=[
-    {l:'TOTAL COST',v:`$${tc.toLocaleString()}`,s:`${all.length}명 합계`,c:'#00d4ff'},
-    {l:'TOTAL TOKENS',v:fmt(tt),s:'Input+Output+Cache',c:'#a78bfa'},
-    {l:'INPUT TOKENS',v:fmt(ti),s:`Output ${fmt(to)}`,c:'#f59e0b'},
-    {l:'EMPLOYEES',v:all.length,s:'데이터 수록 인원',c:'#f472b6'},
-  ].map(k=>`<div class="kc fu"><div class="kt" style="background:linear-gradient(90deg,${k.c},transparent)"></div><div class="kl">${k.l}</div><div class="kv" style="color:${k.c}">${k.v}</div><div class="ks">${k.s}</div></div>`).join('');
+  const tc=all.reduce((s,d)=>s+d.cost,0);
+  const avg=all.length?Math.round(tc/all.length):0;
+  document.getElementById('kv-total').textContent=`$${tc.toLocaleString()}`;
+  document.getElementById('ks-total').textContent=`${all.length}명 합계`;
+  document.getElementById('kv-avg').textContent=`$${avg.toLocaleString()}`;
+  document.getElementById('ks-avg').textContent=`1인당 평균`;
 }
 
 function sw(t){
