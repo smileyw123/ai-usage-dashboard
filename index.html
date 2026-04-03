@@ -17,10 +17,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 header{position:sticky;top:0;z-index:100;background:rgba(7,9,15,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;}
 .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.5px;}
 .logo span{color:var(--accent);}
-.header-right{display:flex;align-items:center;gap:12px;}
 .data-badge{font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:4px 10px;border-radius:20px;}
-.btn{font-family:'DM Mono',monospace;font-size:12px;background:none;border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:8px;cursor:pointer;transition:all .2s;}
-.btn:hover{border-color:var(--accent);color:var(--accent);}
 
 /* Loading */
 #loading{position:relative;z-index:1;min-height:calc(100vh - 57px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
@@ -32,14 +29,48 @@ header{position:sticky;top:0;z-index:100;background:rgba(7,9,15,0.95);backdrop-f
 .loading-text{font-size:13px;color:var(--muted);}
 
 /* Dashboard */
-#dashboard{display:none;position:relative;z-index:1;max-width:1440px;margin:0 auto;padding:28px 24px 80px;}
+#dashboard{display:none;position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:28px 24px 80px;}
 
-/* Nav tabs */
-.nav-tabs{display:flex;gap:4px;margin-bottom:28px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;width:fit-content;}
-.nav-tab{padding:9px 20px;border:none;background:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;border-radius:8px;transition:all .2s;letter-spacing:.5px;}
-.nav-tab.active{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+/* ── RAW TABLE SECTION ── */
+.raw-table-section{margin-bottom:32px;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.section-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:-0.3px;}
+.section-title span{color:var(--accent);}
+.section-desc{font-size:11px;color:var(--muted);margin-top:2px;}
+.table-controls{display:flex;align-items:center;gap:10px;}
+.search-input{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);outline:none;width:220px;transition:border-color .2s;}
+.search-input:focus{border-color:var(--accent);}
+.search-input::placeholder{color:var(--muted);}
+.row-count{font-size:11px;color:var(--muted);white-space:nowrap;}
 
-/* KPIs */
+.raw-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.raw-table-scroll{overflow-x:auto;max-height:420px;overflow-y:auto;}
+.raw-table-scroll::-webkit-scrollbar{width:5px;height:5px;}
+.raw-table-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+table.raw{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;}
+table.raw thead{position:sticky;top:0;z-index:10;}
+table.raw thead tr{background:var(--surface2);}
+table.raw th{padding:10px 14px;text-align:left;font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;border-bottom:2px solid var(--border);cursor:pointer;user-select:none;transition:color .2s;white-space:nowrap;}
+table.raw th:hover{color:var(--accent);}
+table.raw th.sorted{color:var(--accent);}
+table.raw th .si{margin-left:3px;opacity:.5;font-size:10px;}
+table.raw th.sorted .si{opacity:1;}
+table.raw tbody tr{border-bottom:1px solid var(--surface2);transition:background .15s;}
+table.raw tbody tr:hover{background:rgba(0,212,255,0.04);}
+table.raw tbody tr:last-child{border-bottom:none;}
+table.raw td{padding:9px 14px;color:var(--text);font-size:11px;}
+table.raw td.num{font-family:'Syne',sans-serif;font-weight:600;text-align:right;color:#94a3b8;}
+table.raw td.cost-cell{font-family:'Syne',sans-serif;font-weight:700;text-align:right;color:var(--accent3);}
+table.raw td.name-cell{font-family:'Syne',sans-serif;font-weight:600;}
+table.raw td.id-cell{color:var(--muted);font-size:10px;}
+table.raw td.zero{color:var(--surface2);}
+.raw-table-footer{padding:10px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:8px 0 32px;}
+
+/* ── KPIs ── */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
 @media(max-width:800px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
 .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;position:relative;overflow:hidden;transition:transform .2s;}
@@ -49,11 +80,16 @@ header{position:sticky;top:0;z-index:100;background:rgba(7,9,15,0.95);backdrop-f
 .kpi-value{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1;margin-bottom:4px;}
 .kpi-sub{font-size:11px;color:var(--muted);}
 
+/* Nav tabs */
+.nav-tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;width:fit-content;}
+.nav-tab{padding:9px 20px;border:none;background:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;border-radius:8px;transition:all .2s;letter-spacing:.5px;}
+.nav-tab.active{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+
 /* Section panels */
 .section{display:none;}
 .section.active{display:block;}
 
-/* ── OVERVIEW section ── */
+/* Overview */
 .overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
 @media(max-width:900px){.overview-grid{grid-template-columns:1fr;}}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;}
@@ -62,7 +98,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(7,9,15,0.95);backdrop-f
 .chart-wrap{position:relative;height:240px;}
 .chart-wrap-tall{position:relative;height:300px;}
 
-/* ── INDIVIDUAL section ── */
+/* Individual */
 .individual-grid{display:grid;grid-template-columns:280px 1fr;gap:16px;}
 @media(max-width:1000px){.individual-grid{grid-template-columns:1fr;}}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;align-self:start;}
@@ -73,7 +109,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(7,9,15,0.95);backdrop-f
 .search-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);outline:none;transition:border-color .2s;}
 .search-wrap input:focus{border-color:var(--accent);}
 .search-wrap input::placeholder{color:var(--muted);}
-.emp-list{max-height:580px;overflow-y:auto;}
+.emp-list{max-height:540px;overflow-y:auto;}
 .emp-list::-webkit-scrollbar{width:4px;}
 .emp-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
 .emp-item{padding:11px 15px;cursor:pointer;border-bottom:1px solid var(--surface2);display:flex;align-items:center;gap:10px;transition:all .15s;border-left:2px solid transparent;}
@@ -109,32 +145,6 @@ header{position:sticky;top:0;z-index:100;background:rgba(7,9,15,0.95);backdrop-f
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
 @media(max-width:800px){.charts-row{grid-template-columns:1fr;}}
 
-/* ── TABLE section ── */
-.table-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
-.table-search input{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);outline:none;width:260px;transition:border-color .2s;}
-.table-search input:focus{border-color:var(--accent);}
-.table-search input::placeholder{color:var(--muted);}
-.sort-info{font-size:11px;color:var(--muted);}
-.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-.table-scroll{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:12px;}
-thead tr{background:var(--surface2);border-bottom:2px solid var(--border);}
-th{padding:12px 14px;text-align:left;font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;cursor:pointer;user-select:none;transition:color .2s;}
-th:hover{color:var(--accent);}
-th .sort-icon{margin-left:4px;opacity:.4;}
-th.sorted .sort-icon{opacity:1;color:var(--accent);}
-tbody tr{border-bottom:1px solid var(--surface2);transition:background .15s;}
-tbody tr:hover{background:rgba(0,212,255,0.04);}
-tbody tr:last-child{border-bottom:none;}
-td{padding:11px 14px;white-space:nowrap;}
-td.num{font-family:'Syne',sans-serif;font-weight:600;text-align:right;}
-td.cost{color:var(--accent3);}
-td.name-cell{display:flex;align-items:center;gap:10px;}
-.mini-avatar{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;flex-shrink:0;}
-.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;}
-.model-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);}
-.table-footer{padding:12px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;}
-
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .fade-up{animation:fadeUp .3s ease forwards;}
 </style>
@@ -143,27 +153,71 @@ td.name-cell{display:flex;align-items:center;gap:10px;}
 
 <header>
   <div class="logo">AI<span>.</span>USAGE</div>
-  <div class="header-right">
-    <div class="data-badge" id="dataBadge">로딩 중...</div>
-  </div>
+  <div class="data-badge" id="dataBadge">로딩 중...</div>
 </header>
 
-<!-- Loading -->
 <div id="loading">
   <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
   <div class="loading-text">데이터 불러오는 중...</div>
 </div>
 
-<!-- Dashboard -->
 <div id="dashboard">
-  <!-- KPIs -->
+
+  <!-- ① 원본 데이터 테이블 -->
+  <div class="raw-table-section">
+    <div class="section-header">
+      <div>
+        <div class="section-title">📋 원본 데이터 <span>테이블</span></div>
+        <div class="section-desc">엑셀 원본과 동일한 형태 · 모든 필드 표시</div>
+      </div>
+      <div class="table-controls">
+        <input class="search-input" id="rawSearch" placeholder="이름, 부서, 사번 검색..." oninput="renderRaw()">
+        <div class="row-count" id="rawCount"></div>
+      </div>
+    </div>
+    <div class="raw-table-wrap">
+      <div class="raw-table-scroll">
+        <table class="raw" id="rawTable">
+          <thead>
+            <tr>
+              <th onclick="rawSort('id')">사번<span class="si">↕</span></th>
+              <th onclick="rawSort('name')">이름<span class="si">↕</span></th>
+              <th onclick="rawSort('dept6')">본부<span class="si">↕</span></th>
+              <th onclick="rawSort('dept7')">팀<span class="si">↕</span></th>
+              <th onclick="rawSort('cost')" class="sorted">total_cost<span class="si">↓</span></th>
+              <th onclick="rawSort('ih')">input_haiku<span class="si">↕</span></th>
+              <th onclick="rawSort('io')">input_opus<span class="si">↕</span></th>
+              <th onclick="rawSort('is')">input_sonnet<span class="si">↕</span></th>
+              <th onclick="rawSort('oh')">output_haiku<span class="si">↕</span></th>
+              <th onclick="rawSort('oo')">output_opus<span class="si">↕</span></th>
+              <th onclick="rawSort('os')">output_sonnet<span class="si">↕</span></th>
+              <th onclick="rawSort('crh')">cache_read_haiku<span class="si">↕</span></th>
+              <th onclick="rawSort('cro')">cache_read_opus<span class="si">↕</span></th>
+              <th onclick="rawSort('crs')">cache_read_sonnet<span class="si">↕</span></th>
+              <th onclick="rawSort('cwh')">cache_write_haiku<span class="si">↕</span></th>
+              <th onclick="rawSort('cwo')">cache_write_opus<span class="si">↕</span></th>
+              <th onclick="rawSort('cws')">cache_write_sonnet<span class="si">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="rawBody"></tbody>
+        </table>
+      </div>
+      <div class="raw-table-footer">
+        <span id="rawFooterCount"></span>
+        <span id="rawFooterTotal"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ② KPIs -->
   <div class="kpi-grid" id="kpiGrid"></div>
 
-  <!-- Nav -->
+  <!-- ③ Nav tabs -->
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="switchTab('overview')">📊 전체 현황</button>
     <button class="nav-tab" onclick="switchTab('individual')">👤 개인별 현황</button>
-    <button class="nav-tab" onclick="switchTab('table')">📋 전체 데이터</button>
   </div>
 
   <!-- Overview -->
@@ -211,98 +265,101 @@ td.name-cell{display:flex;align-items:center;gap:10px;}
     </div>
   </div>
 
-  <!-- Table -->
-  <div class="section" id="sec-table">
-    <div class="table-toolbar">
-      <div class="table-search"><input id="tableSearch" placeholder="🔍  이름, 부서, 사번 검색..." oninput="renderTable()"></div>
-      <div class="sort-info" id="sortInfo"></div>
-    </div>
-    <div class="table-wrap">
-      <div class="table-scroll">
-        <table id="dataTable">
-          <thead>
-            <tr>
-              <th onclick="sortTable('rank')">#<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('name')">직원<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('dept6')">본부<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('dept7')">팀<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('cost')" class="sorted">비용($)<span class="sort-icon">↓</span></th>
-              <th onclick="sortTable('totalTokens')">총 토큰<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('input')">Input<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('output')">Output<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('cache')">Cache<span class="sort-icon">↕</span></th>
-              <th>모델 비중</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-      <div class="table-footer">
-        <span id="tableCount"></span>
-        <span id="tableTotal"></span>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script>
-const XLSX_URL = 'https://raw.githubusercontent.com/smileyw123/ai-usage-dashboard/main/ai_usage_sample.xlsx';
+const XLSX_URL='https://raw.githubusercontent.com/smileyw123/ai-usage-dashboard/main/ai_usage_sample.xlsx';
 const AVATAR=[["#00d4ff","rgba(0,212,255,0.15)"],["#a78bfa","rgba(167,139,250,0.15)"],["#f59e0b","rgba(245,158,11,0.15)"],["#f472b6","rgba(244,114,182,0.15)"],["#34d399","rgba(52,211,153,0.15)"],["#fb923c","rgba(251,146,60,0.15)"]];
+const DEPT_COLORS=['rgba(0,212,255,0.8)','rgba(167,139,250,0.8)','rgba(245,158,11,0.8)','rgba(244,114,182,0.8)','rgba(52,211,153,0.8)','rgba(251,146,60,0.8)'];
 
-let allData=[], filtered=[], tableFiltered=[], sortKey='cost', sortAsc=false, selectedIdx=null, charts={};
+let allData=[],rawSortKey='cost',rawSortAsc=false,filtered=[],selectedIdx=null,charts={};
 
 function pn(v){if(v==='-'||v===''||v==null)return 0;if(typeof v==='number')return v;return parseInt(String(v).replace(/,/g,''))||0;}
 function fmt(n){if(n>=1e9)return(n/1e9).toFixed(1)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return n.toLocaleString();}
-function fmtFull(n){return n.toLocaleString();}
+function fmtRaw(v){if(v===0||v==='-')return '-';return v.toLocaleString();}
 
 function buildRow(r,i){
   const ih=pn(r.input_haiku),io=pn(r.input_opus),is_=pn(r.input_sonnet);
   const oh=pn(r.output_haiku),oo=pn(r.output_opus),os_=pn(r.output_sonnet);
   const crh=pn(r.cache_read_haiku),cro=pn(r.cache_read_opus),crs=pn(r.cache_read_sonnet);
   const cwh=pn(r.cache_write_haiku),cwo=pn(r.cache_write_opus),cws=pn(r.cache_write_sonnet);
-  const ti=ih+io+is_, to=oh+oo+os_, tc=crh+cro+crs+cwh+cwo+cws;
+  const ti=ih+io+is_,to=oh+oo+os_,tc=crh+cro+crs+cwh+cwo+cws;
   return{
     id:r.employee_id||`EMP${i+1}`,name:r.employee_namekor||r.employee_name||`직원${i+1}`,
     dept6:r.dept_level_6_name||'-',dept7:r.dept_level_7_name||'-',cost:pn(r.total_cost),
+    ih,io,is:is_,oh,oo,os:os_,crh,cro,crs,cwh,cwo,cws,
     input:{haiku:ih,opus:io,sonnet:is_,total:ti},
     output:{haiku:oh,opus:oo,sonnet:os_,total:to},
     cache:{read:{haiku:crh,opus:cro,sonnet:crs},write:{haiku:cwh,opus:cwo,sonnet:cws},total:tc},
-    haiku:ih+oh+crh+cwh, sonnet:is_+os_+crs+cws, opus:io+oo+cro+cwo,
+    haiku:ih+oh+crh+cwh,sonnet:is_+os_+crs+cws,opus:io+oo+cro+cwo,
     totalTokens:ti+to+tc,
   };
 }
 
-// ── Load data ──
 async function loadData(){
   try{
-    const res = await fetch(XLSX_URL);
-    if(!res.ok) throw new Error('fetch failed');
-    const buf = await res.arrayBuffer();
-    const wb = XLSX.read(buf,{type:'array'});
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const raw = XLSX.utils.sheet_to_json(ws,{defval:'-'});
-    allData = raw.map(buildRow);
-    filtered = [...allData].sort((a,b)=>b.cost-a.cost);
-    tableFiltered = [...filtered];
+    const res=await fetch(XLSX_URL);
+    if(!res.ok)throw new Error('fetch failed');
+    const buf=await res.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array'});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const raw=XLSX.utils.sheet_to_json(ws,{defval:'-'});
+    allData=raw.map(buildRow);
+    filtered=[...allData].sort((a,b)=>b.cost-a.cost);
     document.getElementById('loading').style.display='none';
     document.getElementById('dashboard').style.display='block';
     document.getElementById('dataBadge').textContent=`${allData.length}명 · 샘플 데이터`;
-    renderAll();
-  } catch(e){
+    renderRaw();renderKPIs();renderOverview();renderList();
+  }catch(e){
     document.querySelector('.loading-text').textContent='데이터 로드 실패. 잠시 후 다시 시도해 주세요.';
-    console.error(e);
   }
 }
 
-function renderAll(){renderKPIs();renderOverview();renderList();renderTable();}
+// ── Raw Table ──
+function rawSort(key){
+  if(rawSortKey===key){rawSortAsc=!rawSortAsc;}else{rawSortKey=key;rawSortAsc=key==='name'||key==='id'||key==='dept6'||key==='dept7';}
+  document.querySelectorAll('table.raw th').forEach(th=>{th.classList.remove('sorted');const si=th.querySelector('.si');if(si)si.textContent='↕';});
+  const keyMap=['id','name','dept6','dept7','cost','ih','io','is','oh','oo','os','crh','cro','crs','cwh','cwo','cws'];
+  const idx=keyMap.indexOf(key);
+  const ths=document.querySelectorAll('table.raw th');
+  if(idx>=0&&ths[idx]){ths[idx].classList.add('sorted');const si=ths[idx].querySelector('.si');if(si)si.textContent=rawSortAsc?'↑':'↓';}
+  renderRaw();
+}
 
-// ── Tab switch ──
-let activeTab='overview';
-function switchTab(t){
-  activeTab=t;
-  document.querySelectorAll('.nav-tab').forEach((b,i)=>{b.classList.toggle('active',['overview','individual','table'][i]===t);});
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById('sec-'+t).classList.add('active');
+function renderRaw(){
+  const q=document.getElementById('rawSearch').value.toLowerCase();
+  let data=[...allData].filter(d=>!q||d.name.includes(q)||d.dept6.includes(q)||d.dept7.includes(q)||d.id.toLowerCase().includes(q));
+  data.sort((a,b)=>{
+    const av=a[rawSortKey]??0,bv=b[rawSortKey]??0;
+    if(typeof av==='string')return rawSortAsc?(av>bv?1:-1):(av<bv?1:-1);
+    return rawSortAsc?av-bv:bv-av;
+  });
+  const totalCost=data.reduce((s,d)=>s+d.cost,0);
+  document.getElementById('rawCount').textContent=`${data.length}명`;
+  document.getElementById('rawFooterCount').textContent=`총 ${data.length}명`;
+  document.getElementById('rawFooterTotal').textContent=`합계 비용: $${totalCost.toLocaleString()}`;
+
+  const numCls=(v)=>v===0?'num zero':'num';
+  document.getElementById('rawBody').innerHTML=data.map(d=>`
+    <tr>
+      <td class="id-cell">${d.id}</td>
+      <td class="name-cell">${d.name}</td>
+      <td>${d.dept6}</td>
+      <td>${d.dept7}</td>
+      <td class="cost-cell">$${d.cost.toLocaleString()}</td>
+      <td class="${numCls(d.ih)}">${fmtRaw(d.ih)}</td>
+      <td class="${numCls(d.io)}">${fmtRaw(d.io)}</td>
+      <td class="${numCls(d.is)}">${fmtRaw(d.is)}</td>
+      <td class="${numCls(d.oh)}">${fmtRaw(d.oh)}</td>
+      <td class="${numCls(d.oo)}">${fmtRaw(d.oo)}</td>
+      <td class="${numCls(d.os)}">${fmtRaw(d.os)}</td>
+      <td class="${numCls(d.crh)}">${fmtRaw(d.crh)}</td>
+      <td class="${numCls(d.cro)}">${fmtRaw(d.cro)}</td>
+      <td class="${numCls(d.crs)}">${fmtRaw(d.crs)}</td>
+      <td class="${numCls(d.cwh)}">${fmtRaw(d.cwh)}</td>
+      <td class="${numCls(d.cwo)}">${fmtRaw(d.cwo)}</td>
+      <td class="${numCls(d.cws)}">${fmtRaw(d.cws)}</td>
+    </tr>`).join('');
 }
 
 // ── KPIs ──
@@ -317,38 +374,38 @@ function renderKPIs(){
   ].map(k=>`<div class="kpi-card fade-up"><div class="kpi-top" style="background:linear-gradient(90deg,${k.color},transparent)"></div><div class="kpi-label">${k.label}</div><div class="kpi-value" style="color:${k.color}">${k.val}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
 }
 
-// ── Overview charts ──
+// ── Tab switch ──
+function switchTab(t){
+  document.querySelectorAll('.nav-tab').forEach((b,i)=>b.classList.toggle('active',['overview','individual'][i]===t));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+t).classList.add('active');
+}
+
+// ── Overview ──
 function renderOverview(){
   const tip={backgroundColor:'#1a2535',titleColor:'#e2e8f0',bodyColor:'#94a3b8'};
-  const tickStyle={color:'#64748b',font:{family:'DM Mono',size:11}};
-  const gridStyle={color:'rgba(255,255,255,0.04)'};
+  const ticks={color:'#64748b',font:{family:'DM Mono',size:11}};
+  const grid={color:'rgba(255,255,255,0.04)'};
 
-  // Dept cost bar
-  const deptMap={};
-  allData.forEach(d=>{deptMap[d.dept6]=(deptMap[d.dept6]||0)+d.cost;});
+  const deptMap={};allData.forEach(d=>{deptMap[d.dept6]=(deptMap[d.dept6]||0)+d.cost;});
   const depts=Object.entries(deptMap).sort((a,b)=>b[1]-a[1]);
-  const deptColors=['rgba(0,212,255,0.8)','rgba(167,139,250,0.8)','rgba(245,158,11,0.8)','rgba(244,114,182,0.8)','rgba(52,211,153,0.8)','rgba(251,146,60,0.8)'];
-  charts.deptCost=new Chart(document.getElementById('chartDeptCost'),{type:'bar',data:{labels:depts.map(d=>d[0]),datasets:[{data:depts.map(d=>d[1]),backgroundColor:deptColors.slice(0,depts.length),borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>`$${c.raw.toLocaleString()}`}}},scales:{x:{grid:gridStyle,ticks:tickStyle},y:{grid:gridStyle,ticks:{...tickStyle,callback:v=>`$${v}`}}}}});
+  charts.dept=new Chart(document.getElementById('chartDeptCost'),{type:'bar',data:{labels:depts.map(d=>d[0]),datasets:[{data:depts.map(d=>d[1]),backgroundColor:DEPT_COLORS.slice(0,depts.length),borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>`$${c.raw.toLocaleString()}`}}},scales:{x:{grid,ticks},y:{grid,ticks:{...ticks,callback:v=>`$${v}`}}}}});
 
-  // Model token doughnut
   const totH=allData.reduce((s,d)=>s+d.haiku,0),totS=allData.reduce((s,d)=>s+d.sonnet,0),totO=allData.reduce((s,d)=>s+d.opus,0);
-  charts.modelToken=new Chart(document.getElementById('chartModelToken'),{type:'doughnut',data:{labels:['Haiku','Sonnet','Opus'],datasets:[{data:[totH,totS,totO],backgroundColor:['rgba(0,212,255,0.85)','rgba(167,139,250,0.85)','rgba(245,158,11,0.85)'],borderColor:'#0f1623',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{family:'DM Mono',size:11},padding:16,boxWidth:10}},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}}}});
+  charts.model=new Chart(document.getElementById('chartModelToken'),{type:'doughnut',data:{labels:['Haiku','Sonnet','Opus'],datasets:[{data:[totH,totS,totO],backgroundColor:['rgba(0,212,255,0.85)','rgba(167,139,250,0.85)','rgba(245,158,11,0.85)'],borderColor:'#0f1623',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{family:'DM Mono',size:11},padding:16,boxWidth:10}},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}}}});
 
-  // Top 10 horizontal bar
   const top10=[...allData].sort((a,b)=>b.cost-a.cost).slice(0,10);
-  charts.top10=new Chart(document.getElementById('chartTop10'),{type:'bar',data:{labels:top10.map(d=>d.name),datasets:[{data:top10.map(d=>d.cost),backgroundColor:top10.map((_,i)=>deptColors[i%deptColors.length]),borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>`$${c.raw.toLocaleString()}`}}},scales:{x:{grid:gridStyle,ticks:{...tickStyle,callback:v=>`$${v}`}},y:{grid:{display:false},ticks:tickStyle}}}});
+  charts.top10=new Chart(document.getElementById('chartTop10'),{type:'bar',data:{labels:top10.map(d=>d.name),datasets:[{data:top10.map(d=>d.cost),backgroundColor:top10.map((_,i)=>DEPT_COLORS[i%DEPT_COLORS.length]),borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>`$${c.raw.toLocaleString()}`}}},scales:{x:{grid,ticks:{...ticks,callback:v=>`$${v}`}},y:{grid:{display:false},ticks}}}});
 
-  // IOC doughnut
   const totI=allData.reduce((s,d)=>s+d.input.total,0),totOut=allData.reduce((s,d)=>s+d.output.total,0),totC=allData.reduce((s,d)=>s+d.cache.total,0);
   charts.ioc=new Chart(document.getElementById('chartIOC'),{type:'doughnut',data:{labels:['Input','Output','Cache'],datasets:[{data:[totI,totOut,totC],backgroundColor:['rgba(52,211,153,0.85)','rgba(244,114,182,0.85)','rgba(96,165,250,0.85)'],borderColor:'#0f1623',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{family:'DM Mono',size:11},padding:16,boxWidth:10}},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}}}});
 }
 
-// ── Employee list ──
+// ── Employee List ──
 function renderList(){
   document.getElementById('empCount').textContent=`${filtered.length}명`;
   document.getElementById('empList').innerHTML=filtered.map(emp=>{
-    const oi=allData.indexOf(emp);
-    const[fg,bg]=AVATAR[oi%AVATAR.length];
+    const oi=allData.indexOf(emp);const[fg,bg]=AVATAR[oi%AVATAR.length];
     return`<div class="emp-item${oi===selectedIdx?' active':''}" onclick="selectEmp(${oi})"><div class="emp-avatar" style="background:${bg};color:${fg}">${emp.name.charAt(0)}</div><div class="emp-info"><div class="emp-name">${emp.name} <span style="font-size:10px;color:var(--muted);font-weight:400">${emp.id}</span></div><div class="emp-dept">${emp.dept6} · ${emp.dept7}</div></div><div class="emp-cost">$${emp.cost}</div></div>`;
   }).join('');
 }
@@ -365,9 +422,8 @@ function mRow(lbl,val,max,color){
 
 function selectEmp(idx){
   selectedIdx=idx;renderList();
-  const emp=allData[idx];
-  const[fg,bg]=AVATAR[idx%AVATAR.length];
-  if(charts.pie){charts.pie.destroy();}if(charts.bar2){charts.bar2.destroy();}
+  const emp=allData[idx];const[fg,bg]=AVATAR[idx%AVATAR.length];
+  if(charts.pie)charts.pie.destroy();if(charts.bar2)charts.bar2.destroy();
   const maxI=Math.max(emp.input.haiku,emp.input.opus,emp.input.sonnet,1);
   const maxO=Math.max(emp.output.haiku,emp.output.opus,emp.output.sonnet,1);
   const maxC=Math.max(emp.cache.read.haiku+emp.cache.write.haiku,emp.cache.read.opus+emp.cache.write.opus,emp.cache.read.sonnet+emp.cache.write.sonnet,1);
@@ -393,73 +449,6 @@ function selectEmp(idx){
   const oT=emp.input.opus+emp.output.opus+emp.cache.read.opus+emp.cache.write.opus;
   charts.pie=new Chart(document.getElementById('chartPie'),{type:'doughnut',data:{labels:['Haiku','Sonnet','Opus'],datasets:[{data:[hT,sT,oT],backgroundColor:['rgba(0,212,255,0.85)','rgba(167,139,250,0.85)','rgba(245,158,11,0.85)'],borderColor:'#0f1623',borderWidth:3,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{family:'DM Mono',size:11},padding:14,boxWidth:10}},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}}}});
   charts.bar2=new Chart(document.getElementById('chartBar2'),{type:'bar',data:{labels:['Haiku','Sonnet','Opus'],datasets:[{label:'Input',data:[emp.input.haiku,emp.input.sonnet,emp.input.opus],backgroundColor:'rgba(52,211,153,0.75)',borderRadius:4},{label:'Output',data:[emp.output.haiku,emp.output.sonnet,emp.output.opus],backgroundColor:'rgba(244,114,182,0.75)',borderRadius:4},{label:'Cache',data:[emp.cache.read.haiku+emp.cache.write.haiku,emp.cache.read.sonnet+emp.cache.write.sonnet,emp.cache.read.opus+emp.cache.write.opus],backgroundColor:'rgba(96,165,250,0.75)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{family:'DM Mono',size:11},padding:10,boxWidth:10}},tooltip:{...tip,callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw)}`}}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{family:'DM Mono',size:11}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{family:'DM Mono',size:11},callback:v=>fmt(v)}}}}});
-}
-
-// ── Table ──
-function sortTable(key){
-  if(sortKey===key){sortAsc=!sortAsc;}else{sortKey=key;sortAsc=key==='name'||key==='dept6'||key==='dept7';}
-  document.querySelectorAll('th').forEach(th=>{
-    th.classList.remove('sorted');
-    const icon=th.querySelector('.sort-icon');
-    if(icon)icon.textContent='↕';
-  });
-  const ths=document.querySelectorAll('th');
-  const keyMap=['rank','name','dept6','dept7','cost','totalTokens','input','output','cache','model'];
-  const tIdx=keyMap.indexOf(key);
-  if(tIdx>=0&&ths[tIdx]){ths[tIdx].classList.add('sorted');const ic=ths[tIdx].querySelector('.sort-icon');if(ic)ic.textContent=sortAsc?'↑':'↓';}
-  renderTable();
-}
-
-function renderTable(){
-  const q=document.getElementById('tableSearch').value.toLowerCase();
-  let data=[...allData].filter(d=>!q||d.name.includes(q)||d.dept6.includes(q)||d.dept7.includes(q)||d.id.toLowerCase().includes(q));
-  const getVal=d=>{
-    if(sortKey==='name')return d.name;
-    if(sortKey==='dept6')return d.dept6;
-    if(sortKey==='dept7')return d.dept7;
-    if(sortKey==='input')return d.input.total;
-    if(sortKey==='output')return d.output.total;
-    if(sortKey==='cache')return d.cache.total;
-    return d[sortKey]||0;
-  };
-  data.sort((a,b)=>{const av=getVal(a),bv=getVal(b);return sortAsc?(av>bv?1:-1):(av<bv?1:-1);});
-  tableFiltered=data;
-
-  const totalCost=data.reduce((s,d)=>s+d.cost,0);
-  document.getElementById('tableCount').textContent=`총 ${data.length}명`;
-  document.getElementById('tableTotal').textContent=`합계 비용: $${totalCost.toLocaleString()}`;
-  document.getElementById('sortInfo').textContent=`정렬: ${sortKey} ${sortAsc?'↑':'↓'}`;
-
-  const sortedAll=[...allData].sort((a,b)=>b.cost-a.cost);
-
-  document.getElementById('tableBody').innerHTML=data.map((emp,i)=>{
-    const oi=allData.indexOf(emp);
-    const[fg,bg]=AVATAR[oi%AVATAR.length];
-    const rank=sortedAll.indexOf(emp)+1;
-    const rankColor=rank===1?'#f59e0b':rank===2?'#94a3b8':rank===3?'#fb923c':'var(--surface2)';
-    const rankText=rank<=3?['🥇','🥈','🥉'][rank-1]:rank;
-    const total=emp.haiku+emp.sonnet+emp.opus||1;
-    const hPct=Math.round(emp.haiku/total*100),sPct=Math.round(emp.sonnet/total*100),oPct=100-hPct-sPct;
-    return`<tr>
-      <td><span class="rank-badge" style="background:${rankColor};color:${rank<=3?'#07090f':'var(--muted)'}">${rankText}</span></td>
-      <td><div style="display:flex;align-items:center;gap:10px"><div class="mini-avatar" style="background:${bg};color:${fg}">${emp.name.charAt(0)}</div><div><div style="font-size:13px;font-family:'Syne',sans-serif;font-weight:600">${emp.name}</div><div style="font-size:10px;color:var(--muted)">${emp.id}</div></div></div></td>
-      <td style="color:#94a3b8">${emp.dept6}</td>
-      <td style="color:#94a3b8">${emp.dept7}</td>
-      <td class="num cost">$${emp.cost.toLocaleString()}</td>
-      <td class="num">${fmt(emp.totalTokens)}</td>
-      <td class="num" style="color:#34d399">${fmt(emp.input.total)}</td>
-      <td class="num" style="color:#f472b6">${fmt(emp.output.total)}</td>
-      <td class="num" style="color:#60a5fa">${fmt(emp.cache.total)}</td>
-      <td>
-        <div style="display:flex;gap:3px;align-items:center">
-          <div style="height:6px;width:${hPct*0.8}px;background:rgba(0,212,255,0.7);border-radius:2px;min-width:2px"></div>
-          <div style="height:6px;width:${sPct*0.8}px;background:rgba(167,139,250,0.7);border-radius:2px;min-width:2px"></div>
-          <div style="height:6px;width:${oPct*0.8}px;background:rgba(245,158,11,0.7);border-radius:2px;min-width:2px"></div>
-          <span style="font-size:9px;color:var(--muted);margin-left:4px">${hPct}/${sPct}/${oPct}</span>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
 }
 
 loadData();
