@@ -46,7 +46,6 @@ td.z{color:var(--sf2);}
 .div{height:1px;background:linear-gradient(90deg,transparent,var(--bd),transparent);margin:8px 0 28px;}
 /* kpi */
 .kg{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:24px;}
-@media(max-width:600px){.kg{grid-template-columns:1fr;}}
 .kc{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:20px 22px;position:relative;overflow:hidden;transition:transform .2s;}
 .kc:hover{transform:translateY(-2px);}
 .kt{position:absolute;top:0;left:0;right:0;height:2px;}
@@ -78,6 +77,7 @@ td.z{color:var(--sf2);}
 .kip{font-size:10px;color:var(--mt);margin-top:2px;}
 /* individual */
 .ig{display:grid;grid-template-columns:270px 1fr;gap:16px;}
+@media(max-width:600px){.ig{grid-template-columns:1fr;}}
 .panel{background:var(--sf);border:1px solid var(--bd);border-radius:14px;overflow:hidden;align-self:start;}
 .ph{padding:14px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
 .pt{font-size:13px;font-weight:700;}
@@ -96,7 +96,20 @@ td.z{color:var(--sf2);}
 .en{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .ed{font-size:11px;color:var(--mt);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .ec{font-size:12px;font-weight:700;color:var(--ac3);}
+.pagination{display:none;}
+.tbl-pagination{display:flex !important;justify-content:center;align-items:center;gap:6px;padding:10px 14px;border-top:1px solid var(--bd);}
+@media(max-width:600px){
+  .pagination{display:flex;justify-content:center;align-items:center;gap:6px;padding:10px 14px;border-top:1px solid var(--bd);}
+  .pg-btn{background:var(--sf2);border:1px solid var(--bd);color:var(--mt);font-family:'IBM Plex Sans KR',sans-serif;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;transition:all .2s;}
+  .pg-btn:hover,.pg-btn.on{background:var(--ac);border-color:var(--ac);color:#000;font-weight:700;}
+  .pg-btn:disabled{opacity:.3;cursor:default;}
+}
+.pg-btn{background:var(--sf2);border:1px solid var(--bd);color:var(--mt);font-family:'IBM Plex Sans KR',sans-serif;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;transition:all .2s;}
+.pg-btn:hover,.pg-btn.on{background:var(--ac);border-color:var(--ac);color:#000;font-weight:700;}
+.pg-btn:disabled{opacity:.3;cursor:default;}
+@media(max-width:600px){.ind-charts{grid-template-columns:1fr;}}
 .dp{display:flex;flex-direction:column;gap:14px;}
+@media(max-width:600px){#dp{display:none;}}
 .ns{background:var(--sf);border:1px solid var(--bd);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;gap:10px;color:var(--mt);}
 .dh{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;}
 .dg{position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;pointer-events:none;}
@@ -106,7 +119,7 @@ td.z{color:var(--sf2);}
 .dcost{margin-left:auto;text-align:right;}
 .dcl{font-size:10px;color:var(--mt);letter-spacing:2px;text-transform:uppercase;}
 .dcv{font-size:28px;font-weight:800;color:var(--ac3);}
-.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.tg{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
 .tc2{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:15px;}
 .th2{display:flex;align-items:center;gap:7px;margin-bottom:10px;font-size:10px;letter-spacing:2px;text-transform:uppercase;}
 .td2{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
@@ -151,7 +164,6 @@ tr.detail-row.open .detail-inner{display:block;}
   #modelGrid .io-card-desc,#cacheGrid .io-card-desc{font-size:10px;}
 }
 .io-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-items:stretch;}
-@media(max-width:600px){.io-grid{grid-template-columns:1fr;}}
 .io-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;display:flex;flex-direction:column;}
 .io-card-top{position:absolute;top:0;left:0;right:0;height:3px;}
 .io-card-label{font-size:10px;color:var(--mt);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
@@ -160,6 +172,8 @@ tr.detail-row.open .detail-inner{display:block;}
 .io-card-desc{font-size:11px;color:var(--mt);margin-bottom:14px;}
 .io-bar-wrap{height:6px;background:var(--sf2);border-radius:3px;overflow:hidden;}
 .io-bar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+.viz-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;}
+.viz-title{font-size:12px;font-weight:600;color:var(--mt);margin-bottom:14px;letter-spacing:.5px;}
 @keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .fu{animation:fu .3s ease forwards;}
 </style>
@@ -205,7 +219,11 @@ tr.detail-row.open .detail-inner{display:block;}
           <div class="sec-desc">입력 토큰 내 유형별 비중</div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;" id="cacheGrid"></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;" id="cacheGrid"></div>
+      <div class="viz-card">
+        <div class="viz-title">입력 유형별 토큰 분포</div>
+        <div style="position:relative;height:180px;"><canvas id="chartCache"></canvas></div>
+      </div>
     </div>
 
     <!-- 4. 모델별 토큰 사용 비율 -->
@@ -216,7 +234,37 @@ tr.detail-row.open .detail-inner{display:block;}
           <div class="sec-desc">전체 토큰 대비 Haiku · Sonnet · Opus 비중</div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;" id="modelGrid"></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;" id="modelGrid"></div>
+      <div class="viz-card">
+        <div class="viz-title">모델별 토큰 분포</div>
+        <div style="position:relative;height:120px;"><canvas id="chartModel"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 5. 원본 데이터 테이블 -->
+    <div style="margin-bottom:16px">
+      <div class="sec-head" style="margin-bottom:14px">
+        <div>
+          <div class="sec-title" style="font-size:14px">📋 원본 데이터 <span>테이블</span></div>
+          <div class="sec-desc">행을 탭하면 상세 데이터가 표시됩니다</div>
+        </div>
+        <div class="tbl-ctrl"><input class="si" id="rs" placeholder="이름, 부서, 사번 검색..." oninput="rr()"><span style="font-size:11px;color:var(--mt)" id="rc"></span></div>
+      </div>
+      <div class="tw">
+        <div class="ts">
+          <table>
+            <thead><tr>
+              <th onclick="rsort('id')">사번<span class="s">↕</span></th>
+              <th onclick="rsort('name')">이름<span class="s">↕</span></th>
+              <th onclick="rsort('cost')" class="on">전체 비용<span class="s">↓</span></th>
+            </tr></thead>
+            <tbody id="rb"></tbody>
+          </table>
+        </div>
+        <div class="tf"><span id="rfc"></span><span id="rft"></span></div>
+        <div class="pagination tbl-pagination" id="tblPagination"></div>
+      </div>
+      <div id="tblDetail"><div class="ns" style="margin-top:14px"><div style="font-size:34px;opacity:.2">👤</div><div style="font-size:13px">행을 선택하면 상세 데이터가 표시됩니다</div></div></div>
     </div>
 
   </div>
@@ -225,9 +273,10 @@ tr.detail-row.open .detail-inner{display:block;}
   <div class="sec" id="sec-ind">
     <div class="ig">
       <div class="panel">
-        <div class="ph"><span class="pt">직원 목록</span><span class="pc" id="ec">0명</span></div>
+        <div class="ph"><span class="pt">사용자 목록</span><span class="pc" id="ec">0명</span></div>
         <div class="sw"><input id="si2" placeholder="이름 또는 부서 검색..." oninput="fl()"></div>
         <div class="el" id="el"></div>
+        <div class="pagination" id="pagination"></div>
       </div>
       <div class="dp" id="dp">
         <div class="ns"><div style="font-size:34px;opacity:.2">👤</div><div style="font-size:13px">직원을 선택하면 상세 현황이 표시됩니다</div></div>
@@ -238,7 +287,7 @@ tr.detail-row.open .detail-inner{display:block;}
 <script>
 const AV=[["#00d4ff","rgba(0,212,255,0.15)"],["#a78bfa","rgba(167,139,250,0.15)"],["#f59e0b","rgba(245,158,11,0.15)"],["#f472b6","rgba(244,114,182,0.15)"],["#34d399","rgba(52,211,153,0.15)"],["#fb923c","rgba(251,146,60,0.15)"]];
 const DC=['rgba(0,212,255,0.8)','rgba(167,139,250,0.8)','rgba(245,158,11,0.8)','rgba(244,114,182,0.8)','rgba(52,211,153,0.8)','rgba(251,146,60,0.8)'];
-let all=[],fil=[],rk='cost',ra=false,sel=null,ch={};
+let all=[],fil=[],rk='cost',ra=false,sel=null,ch={},openRow=null;
 const pn=v=>{if(v==='-'||v===''||v==null)return 0;if(typeof v==='number')return v;return parseInt(String(v).replace(/,/g,''))||0;};
 const fmt=n=>n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':n.toLocaleString();
 const fn=v=>v===0?'-':v.toLocaleString();
@@ -248,6 +297,9 @@ const RAW=[
   {id:'EMP1001',name:'홍길동',d6:'개발본부',d7:'AI팀',cost:125,ih:6916,io:181881,is:0,oh:17404,oo:646480,os:0,crh:2827527,cro:145498844,crs:0,cwh:0,cwo:278595,cws:5481863},
   {id:'EMP1002',name:'김민준',d6:'마케팅본부',d7:'디지털마케팅팀',cost:87,ih:470,io:676,is:24,oh:36817,oo:78008,os:1405,crh:1555954,cro:107491310,crs:1291674,cwh:124890,cwo:3820273,cws:1673806},
   {id:'EMP1003',name:'이서연',d6:'인사본부',d7:'교육팀',cost:78,ih:37847,io:89803,is:20474,oh:6751,oo:279678,os:204259,crh:721170,cro:20740812,crs:33105337,cwh:132325,cwo:4534186,cws:5035746},
+  {id:'EMP1004',name:'박준혁',d6:'개발본부',d7:'백엔드팀',cost:104,ih:12340,io:156200,is:3200,oh:24100,oo:512300,os:8700,crh:1923400,cro:98234100,crs:2341200,cwh:0,cwo:198400,cws:4123500},
+  {id:'EMP1005',name:'최지영',d6:'마케팅본부',d7:'콘텐츠팀',cost:63,ih:890,io:1240,is:580,oh:18900,oo:54300,os:3200,crh:987600,cro:62341800,crs:1876500,cwh:98300,cwo:2341500,cws:1234700},
+  {id:'EMP1006',name:'정다은',d6:'개발본부',d7:'AI팀',cost:91,ih:24300,io:134500,is:8900,oh:11200,oo:389400,os:142300,crh:1543200,cro:87654300,crs:21345600,cwh:87600,cwo:312400,cws:3876500},
 ];
 
 all=RAW.map(r=>{
@@ -263,7 +315,129 @@ all=RAW.map(r=>{
 fil=[...all].sort((a,b)=>b.cost-a.cost);
 document.getElementById('badge').textContent=`${all.length}명 · 샘플 데이터`;
 
-// raw table
+function rsort(k){
+  if(rk===k){ra=!ra;}else{rk=k;ra=['name','id'].includes(k);}
+  document.querySelectorAll('th').forEach(t=>{t.classList.remove('on');const s=t.querySelector('.s');if(s)s.textContent='↕';});
+  const ks=['id','name','cost'];const i=ks.indexOf(k);const ts=document.querySelectorAll('th');
+  if(i>=0&&ts[i]){ts[i].classList.add('on');const s=ts[i].querySelector('.s');if(s)s.textContent=ra?'↑':'↓';}
+  rr();
+}
+function toggleRow(id){
+  const isMobile=window.innerWidth<=600;
+  if(openRow===id){
+    document.querySelectorAll('.detail-row').forEach(r=>r.classList.remove('open'));
+    document.querySelectorAll('.main-row').forEach(r=>r.classList.remove('open'));
+    document.querySelectorAll('.exp-btn').forEach(b=>b.classList.remove('open'));
+    if(isMobile&&document.getElementById('tblDetail'))document.getElementById('tblDetail').innerHTML='';
+    openRow=null;
+  }else{
+    document.querySelectorAll('.detail-row').forEach(r=>r.classList.remove('open'));
+    document.querySelectorAll('.main-row').forEach(r=>r.classList.remove('open'));
+    document.querySelectorAll('.exp-btn').forEach(b=>b.classList.remove('open'));
+    const drow=document.getElementById('dr-'+id),mr=document.getElementById('mr-'+id),btn=document.getElementById('btn-'+id);
+    if(drow)drow.classList.add('open');if(mr)mr.classList.add('open');if(btn)btn.classList.add('open');
+    openRow=id;
+    // 모바일에서는 테이블 아래에도 상세 표시
+    if(isMobile){
+      const x=all.find(a=>a.id===id);
+      if(x&&document.getElementById('tblDetail')){
+        const dv=(v)=>`<span class="dg-value${v===0?' z':''}">${v===0?'-':v.toLocaleString()}</span>`;
+        const dr=(label,v)=>`<div class="dg-row"><span class="dg-label">${label}</span>${dv(v)}</div>`;
+        document.getElementById('tblDetail').innerHTML=`
+          <div style="margin-top:14px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:16px;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:12px;">${x.name} 상세 데이터</div>
+            <div class="detail-grid">
+              <div class="dg-section"><div class="dg-title">Input</div>${dr('Haiku',x.ih)}${dr('Sonnet',x.is)}${dr('Opus',x.io)}</div>
+              <div class="dg-section"><div class="dg-title">Output</div>${dr('Haiku',x.oh)}${dr('Sonnet',x.os)}${dr('Opus',x.oo)}</div>
+              <div class="dg-section"><div class="dg-title">Cache Read</div>${dr('Haiku',x.crh)}${dr('Sonnet',x.crs)}${dr('Opus',x.cro)}</div>
+              <div class="dg-section"><div class="dg-title">Cache Write</div>${dr('Haiku',x.cwh)}${dr('Sonnet',x.cws)}${dr('Opus',x.cwo)}</div>
+            </div>
+          </div>`;
+      }
+    }
+  }
+}
+let tblPage=1;
+let tblData=[];
+
+function goTblPage(p){
+  const isMobile=window.innerWidth<=600;
+  const size=isMobile?5:10;
+  const total=Math.ceil(tblData.length/size);
+  if(p<1||p>total)return;
+  tblPage=p;
+  renderTblRows();
+}
+
+function renderTblPagination(){
+  const pg=document.getElementById('tblPagination');
+  if(!pg)return;
+  const isMobile=window.innerWidth<=600;
+  const size=isMobile?5:10;
+  const total=Math.ceil(tblData.length/size);
+  if(total<=1){pg.innerHTML='';return;}
+  let html=`<button class="pg-btn" onclick="goTblPage(${tblPage-1})" ${tblPage===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=total;i++){
+    html+=`<button class="pg-btn${i===tblPage?' on':''}" onclick="goTblPage(${i})">${i}</button>`;
+  }
+  html+=`<button class="pg-btn" onclick="goTblPage(${tblPage+1})" ${tblPage===total?'disabled':''}>›</button>`;
+  pg.innerHTML=html;
+}
+
+function renderTblRows(){
+  const isMobile=window.innerWidth<=600;
+  const size=isMobile?5:10;
+  const paged=tblData.slice((tblPage-1)*size,tblPage*size);
+  if(document.getElementById('rb'))document.getElementById('rb').innerHTML=paged.map(x=>`
+    <tr class="main-row${openRow===x.id?' open':''}" id="mr-${x.id}" onclick="tblSelect('${x.id}')" style="cursor:pointer;">
+      <td class="id" style="width:30%">${x.id}</td>
+      <td class="nm" style="width:40%">${x.name}</td>
+      <td class="cost" style="width:30%">$${x.cost.toLocaleString()}</td>
+    </tr>`).join('');
+  renderTblPagination();
+}
+
+function tblSelect(id){
+  const isMobile=window.innerWidth<=600;
+  // 같은 행 클릭 시 닫기
+  if(openRow===id){
+    openRow=null;
+    renderTblRows();
+    if(document.getElementById('tblDetail'))document.getElementById('tblDetail').innerHTML='<div class="ns" style="margin-top:14px"><div style="font-size:34px;opacity:.2">👤</div><div style="font-size:13px">행을 선택하면 상세 데이터가 표시됩니다</div></div>';
+    return;
+  }
+  openRow=id;
+  renderTblRows();
+  const x=all.find(a=>a.id===id);
+  if(!x)return;
+  const dv=(v)=>`<span class="dg-value${v===0?' z':''}">${v===0?'-':v.toLocaleString()}</span>`;
+  const dr=(label,v)=>`<div class="dg-row"><span class="dg-label">${label}</span>${dv(v)}</div>`;
+  const detail=`
+    <div style="margin-top:14px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:16px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--ac)">${x.name} 상세 데이터</div>
+      <div class="detail-grid">
+        <div class="dg-section"><div class="dg-title">Input</div>${dr('Haiku',x.ih)}${dr('Sonnet',x.is)}${dr('Opus',x.io)}</div>
+        <div class="dg-section"><div class="dg-title">Output</div>${dr('Haiku',x.oh)}${dr('Sonnet',x.os)}${dr('Opus',x.oo)}</div>
+        <div class="dg-section"><div class="dg-title">Cache Read</div>${dr('Haiku',x.crh)}${dr('Sonnet',x.crs)}${dr('Opus',x.cro)}</div>
+        <div class="dg-section"><div class="dg-title">Cache Write</div>${dr('Haiku',x.cwh)}${dr('Sonnet',x.cws)}${dr('Opus',x.cwo)}</div>
+      </div>
+    </div>`;
+  if(document.getElementById('tblDetail'))document.getElementById('tblDetail').innerHTML=detail;
+}
+
+function rr(){
+  const el=document.getElementById('rs');
+  const q=el?el.value.toLowerCase():'';
+  tblData=[...all].filter(x=>!q||x.name.includes(q)||x.d6.includes(q)||x.d7.includes(q)||x.id.toLowerCase().includes(q));
+  tblData.sort((a,b)=>{const av=a[rk]??0,bv=b[rk]??0;return typeof av==='string'?ra?(av>bv?1:-1):(av<bv?1:-1):ra?av-bv:bv-av;});
+  tblPage=1;
+  const tc=tblData.reduce((s,x)=>s+x.cost,0),avg=tblData.length?Math.round(tc/tblData.length):0;
+  if(document.getElementById('rc'))document.getElementById('rc').textContent=`${tblData.length}명`;
+  if(document.getElementById('rfc'))document.getElementById('rfc').textContent=`총 ${tblData.length}명`;
+  if(document.getElementById('rft'))document.getElementById('rft').textContent=`합계: $${tc.toLocaleString()}　|　평균: $${avg.toLocaleString()}`;
+  renderTblRows();
+}
+
 // kpis
 function rkpi(){
   const tc=all.reduce((s,d)=>s+d.cost,0);
@@ -278,7 +452,7 @@ function sw(t){
   document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',['ov','ind'][i]===t));
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
   document.getElementById('sec-'+t).classList.add('on');
-  if(t==='ov'){rkpi();rio();rov();}
+  if(t==='ov'){rkpi();rio();rov();rr();}
 }
 
 // overview charts
@@ -303,48 +477,146 @@ function rov(){
       <div class="io-card-desc">${c.desc}</div>
     </div>`).join('');
 
+  // 모델별 바 차트 - 카드 색상과 동일하게
+  if(ch.chartModel)ch.chartModel.destroy();
+  ch.chartModel=new Chart(document.getElementById('chartModel'),{
+    type:'bar',
+    data:{
+      labels:['Opus','Sonnet','Haiku'],
+      datasets:[{
+        data:[tO,tS,tH],
+        backgroundColor:['rgba(245,158,11,0.85)','rgba(167,139,250,0.85)','rgba(0,212,255,0.85)'],
+        borderRadius:6,
+        borderSkipped:false,
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens (${(c.raw/tM*100).toFixed(2)}%)`}}},scales:{x:{grid:gd,ticks:tk},y:{grid:gd,ticks:{...tk,callback:v=>fmt(v)}}}}
+  });
 }
 
 // employee list
+let curPage=1;
+const PAGE_SIZE=5;
+
+function renderPagination(){
+  const isMobile=window.innerWidth<=600;
+  const pg=document.getElementById('pagination');
+  if(!pg)return;
+  if(!isMobile){pg.innerHTML='';return;}
+  const total=Math.ceil(fil.length/PAGE_SIZE);
+  if(total<=1){pg.innerHTML='';return;}
+  let html=`<button class="pg-btn" onclick="goPage(${curPage-1})" ${curPage===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=total;i++){
+    html+=`<button class="pg-btn${i===curPage?' on':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html+=`<button class="pg-btn" onclick="goPage(${curPage+1})" ${curPage===total?'disabled':''}>›</button>`;
+  pg.innerHTML=html;
+}
+
+function goPage(p){
+  const total=Math.ceil(fil.length/PAGE_SIZE);
+  if(p<1||p>total)return;
+  curPage=p;
+  rl();
+}
+
 function rl(){
   document.getElementById('ec').textContent=`${fil.length}명`;
-  document.getElementById('el').innerHTML=fil.map(d=>{
+  const isMobile=window.innerWidth<=600;
+  const list=isMobile?fil.slice((curPage-1)*PAGE_SIZE,curPage*PAGE_SIZE):fil;
+  document.getElementById('el').innerHTML=list.map(d=>{
     const oi=all.indexOf(d);const[fg,bg]=AV[oi%AV.length];
     return`<div class="ei${oi===sel?' on':''}" onclick="se(${oi})"><div class="ea" style="background:${bg};color:${fg}">${d.name[0]}</div><div style="flex:1;min-width:0"><div class="en">${d.name} <span style="font-size:10px;color:var(--mt);font-weight:400">${d.id}</span></div><div class="ed">${d.d6} · ${d.d7}</div></div><div class="ec">$${d.cost}</div></div>`;
   }).join('');
+  renderPagination();
 }
 function fl(){
   const q=document.getElementById('si2').value.toLowerCase();
   fil=all.filter(d=>d.name.includes(q)||d.d6.includes(q)||d.d7.includes(q)||d.id.toLowerCase().includes(q)).sort((a,b)=>b.cost-a.cost);
+  curPage=1;
   rl();
 }
 function mr(l,v,max,c){return`<div class="mr"><span class="ml">${l}</span><div class="mb"><div class="mf" style="width:${Math.round(v/max*100)}%;background:${c}"></div></div><span class="mv">${fmt(v)}</span></div>`;}
 
 function se(idx){
-  sel=idx;rl();
+  sel=idx;
   const d=all[idx];const[fg,bg]=AV[idx%AV.length];
   if(ch.cp)ch.cp.destroy();if(ch.cb)ch.cb.destroy();
   const mI=Math.max(d.inp.h,d.inp.o,d.inp.s,1),mO=Math.max(d.out.h,d.out.o,d.out.s,1);
   const mC=Math.max(d.cac.rh+d.cac.wh,d.cac.ro+d.cac.wo,d.cac.rs+d.cac.ws,1);
-  document.getElementById('dp').innerHTML=`
+  const html=`
     <div class="dh fu"><div class="dg" style="background:radial-gradient(circle,${bg},transparent)"></div>
       <div class="da" style="background:${bg};color:${fg}">${d.name[0]}</div>
       <div><div class="dn">${d.name}</div><div class="dm">${d.id} · ${d.d6} · ${d.d7}</div></div>
       <div class="dcost"><div class="dcl">TOTAL COST</div><div class="dcv">$${d.cost.toLocaleString()}</div></div>
     </div>
     <div class="tg fu">
-      <div class="tc2"><div class="th2"><div class="td2" style="background:#34d399"></div><span style="color:#34d399">Input Tokens</span></div><div class="tt2" style="color:#34d399">${fmt(d.inp.tot)}</div>${mr('HAIKU',d.inp.h,mI,'#34d399')}${mr('SONNET',d.inp.s,mI,'#34d399')}${mr('OPUS',d.inp.o,mI,'#34d399')}</div>
-      <div class="tc2"><div class="th2"><div class="td2" style="background:#f472b6"></div><span style="color:#f472b6">Output Tokens</span></div><div class="tt2" style="color:#f472b6">${fmt(d.out.tot)}</div>${mr('HAIKU',d.out.h,mO,'#f472b6')}${mr('SONNET',d.out.s,mO,'#f472b6')}${mr('OPUS',d.out.o,mO,'#f472b6')}</div>
-      <div class="tc2"><div class="th2"><div class="td2" style="background:#60a5fa"></div><span style="color:#60a5fa">Cache Tokens</span></div><div class="tt2" style="color:#60a5fa">${fmt(d.cac.tot)}</div>${mr('HAIKU',d.cac.rh+d.cac.wh,mC,'#60a5fa')}${mr('SONNET',d.cac.rs+d.cac.ws,mC,'#60a5fa')}${mr('OPUS',d.cac.ro+d.cac.wo,mC,'#60a5fa')}</div>
+      <div class="tc2"><div class="th2"><div class="td2" style="background:#34d399"></div><span style="color:#34d399">Input</span></div><div class="tt2" style="color:#34d399">${fmt(d.inp.tot)}</div>${mr('HAIKU',d.inp.h,mI,'#34d399')}${mr('SONNET',d.inp.s,mI,'#34d399')}${mr('OPUS',d.inp.o,mI,'#34d399')}</div>
+      <div class="tc2"><div class="th2"><div class="td2" style="background:#f472b6"></div><span style="color:#f472b6">Output</span></div><div class="tt2" style="color:#f472b6">${fmt(d.out.tot)}</div>${mr('HAIKU',d.out.h,mO,'#f472b6')}${mr('SONNET',d.out.s,mO,'#f472b6')}${mr('OPUS',d.out.o,mO,'#f472b6')}</div>
+      <div class="tc2"><div class="th2"><div class="td2" style="background:#00d4ff"></div><span style="color:#00d4ff">Cache Read</span></div><div class="tt2" style="color:#00d4ff">${fmt(d.cac.rh+d.cac.ro+d.cac.rs)}</div>${mr('HAIKU',d.cac.rh,Math.max(d.cac.rh,d.cac.ro,d.cac.rs,1),'#00d4ff')}${mr('SONNET',d.cac.rs,Math.max(d.cac.rh,d.cac.ro,d.cac.rs,1),'#00d4ff')}${mr('OPUS',d.cac.ro,Math.max(d.cac.rh,d.cac.ro,d.cac.rs,1),'#00d4ff')}</div>
+      <div class="tc2"><div class="th2"><div class="td2" style="background:#a78bfa"></div><span style="color:#a78bfa">Cache Write</span></div><div class="tt2" style="color:#a78bfa">${fmt(d.cac.wh+d.cac.wo+d.cac.ws)}</div>${mr('HAIKU',d.cac.wh,Math.max(d.cac.wh,d.cac.wo,d.cac.ws,1),'#a78bfa')}${mr('SONNET',d.cac.ws,Math.max(d.cac.wh,d.cac.wo,d.cac.ws,1),'#a78bfa')}${mr('OPUS',d.cac.wo,Math.max(d.cac.wh,d.cac.wo,d.cac.ws,1),'#a78bfa')}</div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px" class="fu">
-      <div class="cc"><div class="ct">모델별 토큰 분포</div><div class="cw"><canvas id="cp"></canvas></div></div>
-      <div class="cc"><div class="ct">Input / Output / Cache</div><div class="cw"><canvas id="cb"></canvas></div></div>
+    <div class="ind-charts fu">
+      <div class="cc">
+        <div class="ct">모델별 토큰 분포</div>
+        <div id="cp" style="margin-top:8px"></div>
+      </div>
+      <div class="cc">
+        <div class="ct">Input / Output / Cache</div>
+        <div id="cb" style="margin-top:8px"></div>
+      </div>
     </div>`;
+
+  const isMobile=window.innerWidth<=600;
+  if(isMobile){
+    // 모바일: 페이지 바 아래 인라인 삽입
+    rl();
+    const inlineEl=document.getElementById('inline-detail');
+    if(inlineEl)inlineEl.remove();
+    const wrap=document.createElement('div');
+    wrap.id='inline-detail';
+    wrap.className='dp';
+    wrap.style.cssText='padding:16px 4px 16px;';
+    wrap.innerHTML=html;
+    const pg=document.getElementById('pagination');
+    pg.after(wrap);
+  } else {
+    // PC: 오른쪽 패널에 표시 (no-sel 카드 숨기고 내용 교체)
+    rl();
+    const dp=document.getElementById('dp');
+    dp.innerHTML=html;
+    dp.style.display='flex';
+  }
+
   const tip={backgroundColor:'#1a2535',titleColor:'#e2e8f0',bodyColor:'#94a3b8'};
+  const tk={color:'#64748b',font:{family:'IBM Plex Sans KR',size:11}};
   const hT=d.inp.h+d.out.h+d.cac.rh+d.cac.wh,sT=d.inp.s+d.out.s+d.cac.rs+d.cac.ws,oT=d.inp.o+d.out.o+d.cac.ro+d.cac.wo;
-  ch.cp=new Chart(document.getElementById('cp'),{type:'doughnut',data:{labels:['Haiku','Sonnet','Opus'],datasets:[{data:[hT,sT,oT],backgroundColor:['rgba(0,212,255,0.85)','rgba(167,139,250,0.85)','rgba(245,158,11,0.85)'],borderColor:'#0f1623',borderWidth:3,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'right',labels:{color:'#94a3b8',font:{family:'IBM Plex Sans KR',size:11},padding:12,boxWidth:10}},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}}}});
-  ch.cb=new Chart(document.getElementById('cb'),{type:'bar',data:{labels:['Haiku','Sonnet','Opus'],datasets:[{label:'Input',data:[d.inp.h,d.inp.s,d.inp.o],backgroundColor:'rgba(52,211,153,0.75)',borderRadius:4},{label:'Output',data:[d.out.h,d.out.s,d.out.o],backgroundColor:'rgba(244,114,182,0.75)',borderRadius:4},{label:'Cache',data:[d.cac.rh+d.cac.wh,d.cac.rs+d.cac.ws,d.cac.ro+d.cac.wo],backgroundColor:'rgba(96,165,250,0.75)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{family:'IBM Plex Sans KR',size:11},padding:10,boxWidth:10}},tooltip:{...tip,callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw)}`}}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{family:'IBM Plex Sans KR',size:11}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',font:{family:'IBM Plex Sans KR',size:11},callback:v=>fmt(v)}}}}});
+
+  // CSS 바 차트 렌더링
+  function cssBar(items){
+    const max=Math.max(...items.map(i=>i.v),1);
+    return items.map(i=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--sf2);">
+        <span style="font-size:11px;color:var(--mt);width:72px;flex-shrink:0;text-align:right">${i.l}</span>
+        <div style="flex:1;height:8px;background:var(--sf2);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(i.v/max*100)}%;background:${i.c};border-radius:4px;transition:width .5s"></div>
+        </div>
+        <span style="font-size:11px;font-weight:600;color:#94a3b8;min-width:44px;text-align:right">${fmt(i.v)}</span>
+      </div>`).join('');
+  }
+
+  document.getElementById('cp').innerHTML=cssBar([
+    {l:'Haiku', v:hT, c:'rgba(0,212,255,0.85)'},
+    {l:'Sonnet', v:sT, c:'rgba(167,139,250,0.85)'},
+    {l:'Opus',   v:oT, c:'rgba(245,158,11,0.85)'},
+  ]);
+
+  document.getElementById('cb').innerHTML=cssBar([
+    {l:'Input',       v:d.inp.tot,                               c:'rgba(52,211,153,0.85)'},
+    {l:'Output',      v:d.out.tot,                               c:'rgba(244,114,182,0.85)'},
+    {l:'Cache Read',  v:d.cac.rh+d.cac.ro+d.cac.rs,             c:'rgba(0,212,255,0.85)'},
+    {l:'Cache Write', v:d.cac.wh+d.cac.wo+d.cac.ws,             c:'rgba(167,139,250,0.85)'},
+  ]);
 }
 
 function rio(){
@@ -366,14 +638,12 @@ function rio(){
       <div class="io-card-label">입력 토큰 비율</div>
       <div class="io-card-pct" style="color:#34d399">${gp(totalInput)}%</div>
       <div class="io-card-tokens">${fmt(totalInput)} tokens</div>
-      <div class="io-card-desc">전체 토큰 대비 입력 비율</div>
     </div>
     <div class="io-card fu">
       <div class="io-card-top" style="background:#f472b6"></div>
       <div class="io-card-label">출력 토큰 비율</div>
       <div class="io-card-pct" style="color:#f472b6">${gp(output)}%</div>
       <div class="io-card-tokens">${fmt(output)} tokens</div>
-      <div class="io-card-desc">전체 토큰 대비 출력 비율</div>
     </div>`;
 
   // cache grid
@@ -390,9 +660,30 @@ function rio(){
       <div class="io-card-tokens">${fmt(c.tokens)} tokens</div>
       <div class="io-card-desc">${c.desc}</div>
     </div>`).join('');
+
+  const tip={backgroundColor:'#1a2535',titleColor:'#e2e8f0',bodyColor:'#94a3b8'};
+  const tk={color:'#64748b',font:{family:'IBM Plex Sans KR',size:11}};
+
+  // Cache 가로 바 차트
+  if(ch.chartCache)ch.chartCache.destroy();
+  ch.chartCache=new Chart(document.getElementById('chartCache'),{
+    type:'bar',
+    data:{labels:['Input (Miss)','Cache Read','Cache Write'],datasets:[{data:[input,cacheRead,cacheWrite],backgroundColor:['rgba(52,211,153,0.85)','rgba(0,212,255,0.85)','rgba(167,139,250,0.85)'],borderRadius:6,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{...tk,callback:v=>fmt(v)}},y:{grid:{display:false},ticks:tk}}}
+  });
 }
 
-rkpi();rio();rov();rl();
+rkpi();rio();rov();rl();rr();
+
+// 모바일 초기 안내 카드
+if(window.innerWidth<=600){
+  const guide=document.createElement('div');
+  guide.id='inline-detail';
+  guide.className='dp';
+  guide.style.cssText='padding:16px 4px;';
+  guide.innerHTML=`<div class="ns"><div style="font-size:34px;opacity:.2">👤</div><div style="font-size:13px">직원을 선택하면 상세 현황이 표시됩니다</div></div>`;
+  document.getElementById('pagination').after(guide);
+}
 </script>
 </body>
 </html>
