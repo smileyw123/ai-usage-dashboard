@@ -30,14 +30,14 @@ header{position:sticky;top:0;z-index:100;background:rgba(7,9,15,0.95);backdrop-f
 table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;}
 thead{position:sticky;top:0;z-index:5;}
 thead tr{background:var(--sf2);}
-th{padding:9px 13px;text-align:left;font-size:10px;color:var(--mt);letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid var(--bd);cursor:pointer;user-select:none;}
+th{padding:9px 13px;text-align:center;font-size:10px;color:var(--mt);letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid var(--bd);cursor:pointer;user-select:none;}
 th:hover,th.on{color:var(--ac);}
 th .s{margin-left:3px;opacity:.4;}th.on .s{opacity:1;}
 tbody tr{border-bottom:1px solid var(--sf2);}
 tbody tr:hover{background:rgba(0,212,255,0.04);}
-td{padding:8px 13px;}
-td.r{text-align:right;font-weight:600;color:#94a3b8;}
-td.cost{text-align:right;font-weight:700;color:var(--ac3);}
+td{padding:8px 13px;text-align:center;}
+td.r{text-align:center;font-weight:600;color:#94a3b8;}
+td.cost{text-align:center;font-weight:700;color:var(--ac3);}
 td.nm{font-weight:600;}
 td.id{color:var(--mt);font-size:10px;}
 td.z{color:var(--sf2);}
@@ -126,7 +126,7 @@ tbody tr.main-row.open{background:rgba(0,212,255,0.06);}
 tr.detail-row td{padding:0;}
 tr.detail-row .detail-inner{display:none;padding:16px 20px;background:var(--sf2);border-top:1px solid var(--bd);}
 tr.detail-row.open .detail-inner{display:block;}
-.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:4px;}
+.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px;}
 @media(max-width:600px){.detail-grid{grid-template-columns:1fr;}}
 .dg-section{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;}
 .dg-title{font-size:10px;color:var(--ac);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;font-weight:600;}
@@ -158,8 +158,6 @@ tr.detail-row.open .detail-inner{display:block;}
           <thead><tr>
             <th onclick="rsort('id')">사번<span class="s">↕</span></th>
             <th onclick="rsort('name')">이름<span class="s">↕</span></th>
-            <th onclick="rsort('d6')">본부<span class="s">↕</span></th>
-            <th onclick="rsort('d7')">팀<span class="s">↕</span></th>
             <th onclick="rsort('cost')" class="on">전체 비용<span class="s">↓</span></th>
             <th style="width:30px"></th>
           </tr></thead>
@@ -300,13 +298,11 @@ function rr(){
     <tr class="main-row${openRow===x.id?' open':''}" id="mr-${x.id}" onclick="toggleRow('${x.id}')">
       <td class="id">${x.id}</td>
       <td class="nm">${x.name}</td>
-      <td>${x.d6}</td>
-      <td>${x.d7}</td>
       <td class="cost">$${x.cost.toLocaleString()}</td>
       <td><span class="exp-btn${openRow===x.id?' open':''}" id="btn-${x.id}">▶</span></td>
     </tr>
     <tr class="detail-row${openRow===x.id?' open':''}" id="dr-${x.id}">
-      <td colspan="6">
+      <td colspan="4">
         <div class="detail-inner">
           <div class="detail-grid">
             <div class="dg-section">
