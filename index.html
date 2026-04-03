@@ -145,6 +145,10 @@ tr.detail-row.open .detail-inner{display:block;}
   .io-inner{flex-direction:column;gap:0;}
   .io-right{border-left:none;border-top:1px solid var(--bd);padding-left:0;padding-top:14px;margin-top:14px;width:100%;}
   .io-detail-row{grid-template-columns:1fr auto;}
+  #modelGrid .io-card-label{font-size:9px;}
+  #modelGrid .io-card-pct{font-size:17px;}
+  #modelGrid .io-card-tokens{font-size:11px;}
+  #modelGrid .io-card-desc{font-size:10px;}
 }
 .io-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-items:stretch;}
 @media(max-width:600px){.io-grid{grid-template-columns:1fr;}}
@@ -401,10 +405,10 @@ function rov(){
   ].map(c=>`
     <div class="io-card fu">
       <div class="io-card-top" style="background:${c.color}"></div>
-      <div class="io-card-label" style="font-size:9px">${c.label}</div>
-      <div class="io-card-pct" style="color:${c.color};font-size:17px">${c.pct}%</div>
-      <div class="io-card-tokens" style="font-size:11px">${fmt(c.tokens)} tokens</div>
-      <div class="io-card-desc" style="font-size:10px">${c.desc}</div>
+      <div class="io-card-label">${c.label}</div>
+      <div class="io-card-pct" style="color:${c.color}">${c.pct}%</div>
+      <div class="io-card-tokens">${fmt(c.tokens)} tokens</div>
+      <div class="io-card-desc">${c.desc}</div>
     </div>`).join('');
 
   const t10=[...all].sort((a,b)=>b.cost-a.cost).slice(0,10);
