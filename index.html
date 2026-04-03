@@ -675,6 +675,28 @@ function rio(){
 
 rkpi();rio();rov();rl();rr();
 
+// 화면 회전/리사이즈 대응
+window.addEventListener('resize', ()=>{
+  const isMobile=window.innerWidth<=600;
+  // 인라인 상세 정리
+  const inlineEl=document.getElementById('inline-detail');
+  if(!isMobile&&inlineEl){
+    inlineEl.remove();
+    // PC로 전환 시 dp에 복원
+    const dp=document.getElementById('dp');
+    if(dp&&sel!==null){
+      // 선택된 사람이 있으면 PC 패널에 표시
+      se(sel);
+    }
+  }
+  // 테이블 재렌더 (페이지 크기 변경)
+  tblPage=1;
+  renderTblRows();
+  // 사용자 목록 재렌더
+  curPage=1;
+  rl();
+});
+
 // 모바일 초기 안내 카드
 if(window.innerWidth<=600){
   const guide=document.createElement('div');
