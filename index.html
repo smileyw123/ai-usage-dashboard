@@ -96,7 +96,7 @@ td.id{color:var(--mt);font-size:10px;}
 .tt2{font-size:17px;font-weight:800;margin-bottom:10px;}
 .mr{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--sf2);}
 .mr:last-child{border-bottom:none;}
-.ml{font-size:10px;color:var(--mt);width:48px;}
+.ml{font-size:10px;color:var(--mt);width:48px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mb{flex:1;height:4px;background:var(--sf2);border-radius:2px;}
 .mf{height:100%;border-radius:2px;transition:width .5s;}
 .mv{font-size:11px;font-weight:600;min-width:44px;text-align:right;}
@@ -307,7 +307,7 @@ function rov(){
     {label:'Haiku',tokens:tH,pct:mp(tH),color:'#00d4ff',desc:'경량 고속 모델'},
   ].map(c=>`<div class="io-card fu"><div class="io-card-top" style="background:${c.color}"></div><div class="io-card-label">${c.label}</div><div class="io-card-pct" style="color:${c.color}">${c.pct}%</div><div class="io-card-tokens">${fmt(c.tokens)} tokens</div><div class="io-card-desc">${c.desc}</div></div>`).join('');
   if(ch.chartModel)ch.chartModel.destroy();
-  ch.chartModel=new Chart(document.getElementById('chartModel'),{type:'bar',data:{labels:['Opus','Sonnet','Haiku'],datasets:[{data:[tO,tS,tH],backgroundColor:['rgba(245,158,11,0.85)','rgba(167,139,250,0.85)','rgba(0,212,255,0.85)'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens (${(c.raw/tM*100).toFixed(2)}%)`}}},scales:{x:{grid:gd,ticks:tk},y:{grid:gd,ticks:{...tk,callback:v=>fmt(v)}}}}});
+  ch.chartModel=new Chart(document.getElementById('chartModel'),{type:'bar',data:{labels:['Opus','Sonnet','Haiku'],datasets:[{data:[tO,tS,tH],backgroundColor:['rgba(245,158,11,0.85)','rgba(167,139,250,0.85)','rgba(0,212,255,0.85)'],borderRadius:6,borderSkipped:false,barPercentage:0.42,categoryPercentage:0.7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens (${(c.raw/tM*100).toFixed(2)}%)`}}},scales:{x:{grid:gd,ticks:tk},y:{grid:gd,ticks:{...tk,callback:v=>fmt(v)}}}}});
 }
 
 function rio(){
@@ -330,7 +330,7 @@ function rio(){
   const tip={backgroundColor:'#1a2535',titleColor:'#e2e8f0',bodyColor:'#94a3b8'};
   const tk={color:'#64748b',font:{family:'IBM Plex Sans KR',size:11}};
   if(ch.chartCache)ch.chartCache.destroy();
-  ch.chartCache=new Chart(document.getElementById('chartCache'),{type:'bar',data:{labels:['Input (Miss)','Cache Read','Cache Write'],datasets:[{data:[input,cacheRead,cacheWrite],backgroundColor:['rgba(52,211,153,0.85)','rgba(0,212,255,0.85)','rgba(167,139,250,0.85)'],borderRadius:6,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}},scales:{x:{display:false},y:{grid:{display:false},ticks:tk}}}});
+  ch.chartCache=new Chart(document.getElementById('chartCache'),{type:'bar',data:{labels:['Input (Miss)','Cache Read','Cache Write'],datasets:[{data:[input,cacheRead,cacheWrite],backgroundColor:['rgba(52,211,153,0.85)','rgba(0,212,255,0.85)','rgba(167,139,250,0.85)'],borderRadius:6,borderSkipped:false,barPercentage:0.42,categoryPercentage:0.7}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}},scales:{x:{display:false},y:{grid:{display:false},ticks:tk}}}});
 }
 
 function goInd(p){const t=Math.ceil(fil.length/PAGE);if(p<1||p>t)return;curPage=p;rl();}
@@ -388,7 +388,7 @@ function se(idx){
   const hT=d.inp.h+d.out.h+d.cac.rh+d.cac.wh,sT=d.inp.s+d.out.s+d.cac.rs+d.cac.ws,oT=d.inp.o+d.out.o+d.cac.ro+d.cac.wo;
   function cssBar(items){const max=Math.max(...items.map(i=>i.v),1);return items.map(i=>mr(i.l.toUpperCase(),i.v,max,i.c)).join('');}
   document.getElementById('cp').innerHTML=cssBar([{l:'Haiku',v:hT,c:'rgba(0,212,255,0.85)'},{l:'Sonnet',v:sT,c:'rgba(167,139,250,0.85)'},{l:'Opus',v:oT,c:'rgba(245,158,11,0.85)'}]);
-  document.getElementById('cb').innerHTML=cssBar([{l:'Input',v:d.inp.tot,c:'rgba(52,211,153,0.85)'},{l:'Output',v:d.out.tot,c:'rgba(244,114,182,0.85)'},{l:'Cache Read',v:d.cac.rh+d.cac.ro+d.cac.rs,c:'rgba(0,212,255,0.85)'},{l:'Cache Write',v:d.cac.wh+d.cac.wo+d.cac.ws,c:'rgba(167,139,250,0.85)'}]);
+  document.getElementById('cb').innerHTML=cssBar([{l:'Input',v:d.inp.tot,c:'rgba(52,211,153,0.85)'},{l:'Output',v:d.out.tot,c:'rgba(244,114,182,0.85)'},{l:'C.Read',v:d.cac.rh+d.cac.ro+d.cac.rs,c:'rgba(0,212,255,0.85)'},{l:'C.Write',v:d.cac.wh+d.cac.wo+d.cac.ws,c:'rgba(167,139,250,0.85)'}]);
 }
 
 window.addEventListener('resize',()=>{
