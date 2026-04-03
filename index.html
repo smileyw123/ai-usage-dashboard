@@ -140,21 +140,15 @@ tr.detail-row.open .detail-inner{display:block;}
 .io-inner{display:flex;gap:20px;align-items:center;}
 .io-left{flex:1.5;text-align:center;}
 .io-right{flex:1;border-left:1px solid var(--bd);padding-left:20px;display:flex;flex-direction:column;gap:10px;margin-top:4px;}
-.io-mini-card{background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;}
-.io-mini-label{font-size:10px;color:var(--mt);letter-spacing:1px;text-transform:uppercase;}
-.io-mini-pct{font-size:18px;font-weight:800;margin:2px 0;}
-.io-mini-tokens{font-size:11px;color:var(--mt);}
+.io-detail-row{display:grid;grid-template-columns:1fr auto;align-items:center;width:100%;}
 @media(max-width:600px){
   .io-inner{flex-direction:column;gap:0;}
   .io-right{border-left:none;border-top:1px solid var(--bd);padding-left:0;padding-top:14px;margin-top:14px;width:100%;}
-  .io-mini-card{background:transparent;border:none;border-bottom:1px solid var(--sf2);border-radius:0;padding:8px 0;display:flex;align-items:center;justify-content:space-between;flex-direction:row;}
-  .io-mini-card:last-child{border-bottom:none;}
-  .io-mini-pct{font-size:13px;font-weight:700;margin:0;}
-  .io-mini-tokens{font-size:10px;margin-left:6px;}
-  #modelGrid .io-card-label{font-size:9px;}
-  #modelGrid .io-card-pct{font-size:17px;}
-  #modelGrid .io-card-tokens{font-size:11px;}
-  #modelGrid .io-card-desc{font-size:10px;}
+  .io-detail-row{grid-template-columns:1fr auto;}
+  #modelGrid .io-card-label,#cacheGrid .io-card-label{font-size:9px;}
+  #modelGrid .io-card-pct,#cacheGrid .io-card-pct{font-size:17px;}
+  #modelGrid .io-card-tokens,#cacheGrid .io-card-tokens{font-size:11px;}
+  #modelGrid .io-card-desc,#cacheGrid .io-card-desc{font-size:10px;}
 }
 .io-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-items:stretch;}
 @media(max-width:600px){.io-grid{grid-template-columns:1fr;}}
@@ -176,54 +170,45 @@ tr.detail-row.open .detail-inner{display:block;}
   <div class="badge" id="badge">샘플 데이터</div>
 </header>
 <div id="app">
-  <!-- KPI 2개 - 테이블 위 -->
-  <div class="kg" style="margin-bottom:20px">
-    <div class="kc fu"><div class="kt" style="background:linear-gradient(90deg,#00d4ff,transparent)"></div><div class="kl">TOTAL COST</div><div class="kv" style="color:#00d4ff" id="kv-total"></div><div class="ks" id="ks-total"></div></div>
-    <div class="kc fu"><div class="kt" style="background:linear-gradient(90deg,#a78bfa,transparent)"></div><div class="kl">인당 평균 비용</div><div class="kv" style="color:#a78bfa" id="kv-avg"></div><div class="ks" id="ks-avg"></div></div>
-  </div>
 
-  <!-- Raw Table -->
-  <div style="margin-bottom:28px">
-    <div class="sec-head">
-      <div><div class="sec-title">📋 원본 데이터 <span>테이블</span></div><div class="sec-desc">행을 탭하면 상세 데이터가 표시됩니다</div></div>
-      <div class="tbl-ctrl"><input class="si" id="rs" placeholder="이름, 부서, 사번 검색..." oninput="rr()"><span style="font-size:11px;color:var(--mt)" id="rc"></span></div>
-    </div>
-    <div class="tw">
-      <div class="ts">
-        <table>
-          <thead><tr>
-            <th onclick="rsort('id')">사번<span class="s">↕</span></th>
-            <th onclick="rsort('name')">이름<span class="s">↕</span></th>
-            <th onclick="rsort('cost')" class="on">전체 비용<span class="s">↓</span></th>
-            <th style="width:30px"></th>
-          </tr></thead>
-          <tbody id="rb"></tbody>
-        </table>
-      </div>
-      <div class="tf"><span id="rfc"></span><span id="rft"></span></div>
-    </div>
-  </div>
-
-  <!-- Input / Output 비율 그리드 -->
-  <div style="margin-bottom:28px">
-    <div class="sec-head" style="margin-bottom:14px">
-      <div>
-        <div class="sec-title">📊 Input · Output <span>토큰 비율</span></div>
-        <div class="sec-desc">전체 토큰 대비 각 유형별 사용 비중</div>
-      </div>
-    </div>
-    <div class="io-grid" id="ioGrid"></div>
-  </div>
-
-  <div class="div"></div>
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab on" onclick="sw('ov')">📊 전체 현황</button>
     <button class="tab" onclick="sw('ind')">👤 개인별 현황</button>
   </div>
-  <!-- Overview -->
+
+  <!-- 전체 현황 -->
   <div class="sec on" id="sec-ov">
-    <!-- 모델별 토큰 사용 비율 그리드 -->
+
+    <!-- 1. KPI -->
+    <div class="kg" style="margin-bottom:24px">
+      <div class="kc fu"><div class="kt" style="background:linear-gradient(90deg,#00d4ff,transparent)"></div><div class="kl">TOTAL COST</div><div class="kv" style="color:#00d4ff" id="kv-total"></div><div class="ks" id="ks-total"></div></div>
+      <div class="kc fu"><div class="kt" style="background:linear-gradient(90deg,#a78bfa,transparent)"></div><div class="kl">인당 평균 비용</div><div class="kv" style="color:#a78bfa" id="kv-avg"></div><div class="ks" id="ks-avg"></div></div>
+    </div>
+
+    <!-- 2. 입력 / 출력 토큰 비율 -->
+    <div style="margin-bottom:24px">
+      <div class="sec-head" style="margin-bottom:14px">
+        <div>
+          <div class="sec-title" style="font-size:14px">입력 / 출력 토큰 비율</div>
+          <div class="sec-desc">전체 토큰 대비 입력 · 출력 비중</div>
+        </div>
+      </div>
+      <div class="io-grid" id="ioGrid"></div>
+    </div>
+
+    <!-- 3. Input / Cache Read / Cache Write 비율 -->
+    <div style="margin-bottom:24px">
+      <div class="sec-head" style="margin-bottom:14px">
+        <div>
+          <div class="sec-title" style="font-size:14px">Input / Cache Read / Cache Write 비율</div>
+          <div class="sec-desc">입력 토큰 내 유형별 비중</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;" id="cacheGrid"></div>
+    </div>
+
+    <!-- 4. 모델별 토큰 사용 비율 -->
     <div style="margin-bottom:16px">
       <div class="sec-head" style="margin-bottom:14px">
         <div>
@@ -233,8 +218,10 @@ tr.detail-row.open .detail-inner{display:block;}
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;" id="modelGrid"></div>
     </div>
+
   </div>
-  <!-- Individual -->
+
+  <!-- 개인별 현황 -->
   <div class="sec" id="sec-ind">
     <div class="ig">
       <div class="panel">
@@ -277,81 +264,6 @@ fil=[...all].sort((a,b)=>b.cost-a.cost);
 document.getElementById('badge').textContent=`${all.length}명 · 샘플 데이터`;
 
 // raw table
-function rsort(k){
-  if(rk===k){ra=!ra;}else{rk=k;ra=['name','id','d6','d7'].includes(k);}
-  document.querySelectorAll('th').forEach(t=>{t.classList.remove('on');const s=t.querySelector('.s');if(s)s.textContent='↕';});
-  const ks=['id','name','d6','d7','cost'];
-  const i=ks.indexOf(k);const ts=document.querySelectorAll('th');
-  if(i>=0&&ts[i]){ts[i].classList.add('on');const s=ts[i].querySelector('.s');if(s)s.textContent=ra?'↑':'↓';}
-  rr();
-}
-
-let openRow=null;
-function toggleRow(id){
-  if(openRow===id){
-    document.querySelectorAll('.detail-row').forEach(r=>r.classList.remove('open'));
-    document.querySelectorAll('.main-row').forEach(r=>r.classList.remove('open'));
-    document.querySelectorAll('.exp-btn').forEach(b=>b.classList.remove('open'));
-    openRow=null;
-  } else {
-    document.querySelectorAll('.detail-row').forEach(r=>r.classList.remove('open'));
-    document.querySelectorAll('.main-row').forEach(r=>r.classList.remove('open'));
-    document.querySelectorAll('.exp-btn').forEach(b=>b.classList.remove('open'));
-    const dr=document.getElementById('dr-'+id);
-    const mr=document.getElementById('mr-'+id);
-    const btn=document.getElementById('btn-'+id);
-    if(dr){dr.classList.add('open');}
-    if(mr){mr.classList.add('open');}
-    if(btn){btn.classList.add('open');}
-    openRow=id;
-  }
-}
-
-function rr(){
-  const q=document.getElementById('rs').value.toLowerCase();
-  let d=[...all].filter(x=>!q||x.name.includes(q)||x.d6.includes(q)||x.d7.includes(q)||x.id.toLowerCase().includes(q));
-  d.sort((a,b)=>{const av=a[rk]??0,bv=b[rk]??0;return typeof av==='string'?ra?(av>bv?1:-1):(av<bv?1:-1):ra?av-bv:bv-av;});
-  const tc=d.reduce((s,x)=>s+x.cost,0),avg=d.length?Math.round(tc/d.length):0;
-  document.getElementById('rc').textContent=`${d.length}명`;
-  document.getElementById('rfc').textContent=`총 ${d.length}명`;
-  document.getElementById('rft').textContent=`합계: $${tc.toLocaleString()}　|　평균: $${avg.toLocaleString()}`;
-
-  const dv=(v)=>`<span class="dg-value${v===0?' z':''}">${v===0?'-':v.toLocaleString()}</span>`;
-  const dr=(label,v)=>`<div class="dg-row"><span class="dg-label">${label}</span>${dv(v)}</div>`;
-
-  document.getElementById('rb').innerHTML=d.map(x=>`
-    <tr class="main-row${openRow===x.id?' open':''}" id="mr-${x.id}" onclick="toggleRow('${x.id}')">
-      <td class="id">${x.id}</td>
-      <td class="nm">${x.name}</td>
-      <td class="cost">$${x.cost.toLocaleString()}</td>
-      <td><span class="exp-btn${openRow===x.id?' open':''}" id="btn-${x.id}">▶</span></td>
-    </tr>
-    <tr class="detail-row${openRow===x.id?' open':''}" id="dr-${x.id}">
-      <td colspan="4">
-        <div class="detail-inner">
-          <div class="detail-grid">
-            <div class="dg-section">
-              <div class="dg-title">Input</div>
-              ${dr('Haiku',x.ih)}${dr('Sonnet',x.is)}${dr('Opus',x.io)}
-            </div>
-            <div class="dg-section">
-              <div class="dg-title">Output</div>
-              ${dr('Haiku',x.oh)}${dr('Sonnet',x.os)}${dr('Opus',x.oo)}
-            </div>
-            <div class="dg-section">
-              <div class="dg-title">Cache Read</div>
-              ${dr('Haiku',x.crh)}${dr('Sonnet',x.crs)}${dr('Opus',x.cro)}
-            </div>
-            <div class="dg-section">
-              <div class="dg-title">Cache Write</div>
-              ${dr('Haiku',x.cwh)}${dr('Sonnet',x.cws)}${dr('Opus',x.cwo)}
-            </div>
-          </div>
-        </div>
-      </td>
-    </tr>`).join('');
-}
-
 // kpis
 function rkpi(){
   const tc=all.reduce((s,d)=>s+d.cost,0);
@@ -366,6 +278,7 @@ function sw(t){
   document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',['ov','ind'][i]===t));
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
   document.getElementById('sec-'+t).classList.add('on');
+  if(t==='ov'){rkpi();rio();rov();}
 }
 
 // overview charts
@@ -445,48 +358,41 @@ function rio(){
   const output=oh+oo+os_;
   const totalInput=input+cacheRead+cacheWrite;
   const grand=totalInput+output;
-  const gp=(v)=>grand>0?(v/grand*100).toFixed(2):0;
-  const ip=(v)=>totalInput>0?(v/totalInput*100).toFixed(2):0;
+  const gp=(v)=>grand>0?(v/grand*100).toFixed(2):'0.00';
 
   document.getElementById('ioGrid').innerHTML=`
     <div class="io-card fu">
       <div class="io-card-top" style="background:linear-gradient(90deg,#34d399,#00d4ff)"></div>
-      <div class="io-inner">
-        <div class="io-left">
-          <div class="io-card-label">입력 (Input)</div>
-          <div class="io-card-pct" style="color:#34d399">${gp(totalInput)}%</div>
-          <div class="io-card-tokens">${fmt(totalInput)} tokens</div>
-          <div class="io-card-desc">전체 토큰 대비 입력 비율</div>
-        </div>
-        <div class="io-right">
-          <div class="io-mini-card">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><div style="width:7px;height:7px;border-radius:50%;background:#34d399"></div><span class="io-mini-label">Input</span></div>
-            <div class="io-mini-pct" style="color:#34d399">${ip(input)}%</div>
-            <div class="io-mini-tokens">${fmt(input)}</div>
-          </div>
-          <div class="io-mini-card">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><div style="width:7px;height:7px;border-radius:50%;background:#00d4ff"></div><span class="io-mini-label">Cache Read</span></div>
-            <div class="io-mini-pct" style="color:#00d4ff">${ip(cacheRead)}%</div>
-            <div class="io-mini-tokens">${fmt(cacheRead)}</div>
-          </div>
-          <div class="io-mini-card">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><div style="width:7px;height:7px;border-radius:50%;background:#a78bfa"></div><span class="io-mini-label">Cache Write</span></div>
-            <div class="io-mini-pct" style="color:#a78bfa">${ip(cacheWrite)}%</div>
-            <div class="io-mini-tokens">${fmt(cacheWrite)}</div>
-          </div>
-        </div>
-      </div>
+      <div class="io-card-label">입력 토큰 비율</div>
+      <div class="io-card-pct" style="color:#34d399">${gp(totalInput)}%</div>
+      <div class="io-card-tokens">${fmt(totalInput)} tokens</div>
+      <div class="io-card-desc">전체 토큰 대비 입력 비율</div>
     </div>
     <div class="io-card fu">
       <div class="io-card-top" style="background:#f472b6"></div>
-      <div class="io-card-label">출력 (Output)</div>
+      <div class="io-card-label">출력 토큰 비율</div>
       <div class="io-card-pct" style="color:#f472b6">${gp(output)}%</div>
       <div class="io-card-tokens">${fmt(output)} tokens</div>
       <div class="io-card-desc">전체 토큰 대비 출력 비율</div>
     </div>`;
+
+  // cache grid
+  const ip=(v)=>totalInput>0?(v/totalInput*100).toFixed(2):'0.00';
+  document.getElementById('cacheGrid').innerHTML=[
+    {label:'Input (Miss)',tokens:input,pct:ip(input),color:'#34d399',desc:'Cache 미히트 입력'},
+    {label:'Cache Read',tokens:cacheRead,pct:ip(cacheRead),color:'#00d4ff',desc:'Cache 히트 읽기'},
+    {label:'Cache Write',tokens:cacheWrite,pct:ip(cacheWrite),color:'#a78bfa',desc:'Cache 히트 쓰기'},
+  ].map(c=>`
+    <div class="io-card fu" id="cacheGridCard">
+      <div class="io-card-top" style="background:${c.color}"></div>
+      <div class="io-card-label">${c.label}</div>
+      <div class="io-card-pct" style="color:${c.color}">${c.pct}%</div>
+      <div class="io-card-tokens">${fmt(c.tokens)} tokens</div>
+      <div class="io-card-desc">${c.desc}</div>
+    </div>`).join('');
 }
 
-rr();rkpi();rio();rov();rl();
+rkpi();rio();rov();rl();
 </script>
 </body>
 </html>
