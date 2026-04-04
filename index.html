@@ -950,6 +950,24 @@ function parseDeptFull(d6){
 }
 
 function initFilters(){
+  // 데이터 없을 때 필터 초기화 - 미선택 + 비활성화
+  if(all.length===0){
+    fBiz=new Set();fUpper=new Set();fDept=new Set();
+    buildDropdown('biz',[],fBiz);
+    buildDropdown('upper',[],fUpper);
+    buildDropdown('dept',[],fDept);
+    document.getElementById('fs-biz').textContent='미선택';
+    document.getElementById('fs-upper').textContent='미선택';
+    document.getElementById('fs-dept').textContent='미선택';
+    document.getElementById('fd-biz').classList.add('filter-disabled');
+    document.getElementById('fd-upper').classList.add('filter-disabled');
+    document.getElementById('fd-dept').classList.add('filter-disabled');
+    rkpi();rio();rov();rr();
+    fil=[];curPage=1;rl();
+    return;
+  }
+  // 데이터 있을 때 필터 활성화
+  document.getElementById('fd-biz').classList.remove('filter-disabled');
   const bizAll=new Set(),upperAll=new Set(),deptAll=new Set();
   all.forEach(d=>{
     const {biz,upper}=parseDeptFull(d.d6);
@@ -1316,14 +1334,13 @@ fil=[];
     await loadConfig();
     const loaded=await loadFromGitHub();
     loadingEl.remove();
-    if(loaded && allDates.length>0){
-      document.getElementById('modalOverlay').classList.remove('open');
-    } else {
-      openModal();
+    if(!loaded || allDates.length===0){
+      // 데이터 없으면 빈 대시보드 상태로 표시 (모달 자동 열지 않음)
+      initFilters();
     }
   }catch(e){
     loadingEl.remove();
-    openModal();
+    initFilters();
   }
 })();
 
