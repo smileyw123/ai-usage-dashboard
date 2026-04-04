@@ -710,7 +710,7 @@ function rio(){
   const tip={backgroundColor:'#1a2535',titleColor:'#e2e8f0',bodyColor:'#94a3b8'};
   const tk={color:'#64748b',font:{family:'IBM Plex Sans KR',size:11}};
   if(ch.chartCache)ch.chartCache.destroy();
-  ch.chartCache=new Chart(document.getElementById('chartCache'),{type:'bar',data:{labels:['Input','Cache Read','Cache Write'],datasets:[{data:[input,cacheRead,cacheWrite],backgroundColor:['rgba(52,211,153,0.85)','rgba(0,212,255,0.85)','rgba(167,139,250,0.85)'],borderRadius:6,borderSkipped:false,barPercentage:0.42,categoryPercentage:0.7}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}},scales:{x:{display:false},y:{grid:{display:false},ticks:tk}}}});
+  ch.chartCache=new Chart(document.getElementById('chartCache'),{type:'bar',data:{labels:['Input','Cache Read','Cache Write'],datasets:[{data:[input,cacheRead,cacheWrite],backgroundColor:['rgba(52,211,153,0.85)','rgba(0,212,255,0.85)','rgba(167,139,250,0.85)'],borderRadius:6,borderSkipped:false,barPercentage:0.42,categoryPercentage:0.7}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{...tk,callback:v=>fmt(v)}},y:{grid:{display:false},ticks:tk}}}});
 }
 
 function goInd(p){const t=Math.ceil(fil.length/PAGE);if(p<1||p>t)return;curPage=p;rl();}
