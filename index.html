@@ -492,7 +492,10 @@ async function loadFromGitHub(){
       ?`https://raw.githubusercontent.com/${cfg.repo}/main/data.json?t=${t}`
       :`${cfg.api}/repos/${cfg.repo}/contents/data.json`;
     try{
-      const headers=token?{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github+json'}:{};
+      // raw URL은 인증 헤더 불필요 (public), API URL은 인증 필요
+      const headers=env==='in'&&token
+        ?{'Authorization':`token ${token}`,'Accept':'application/vnd.github+json'}
+        :{};
       const res=await fetch(rawUrl,{headers,cache:'no-store'});
       if(!res.ok)continue;
       let json;
