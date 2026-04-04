@@ -127,6 +127,8 @@ td.id{color:var(--mt);font-size:10px;}
 .io-kpi-left{flex:1;min-width:0;}
 .io-kpi-right{flex-shrink:0;text-align:right;}
 .io-mobile-only{display:none;}
+.pc-only{display:table-cell;}
+@media(max-width:600px){.pc-only{display:none;}}
 .viz-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;}
 .viz-title{font-size:12px;font-weight:600;color:var(--mt);margin-bottom:14px;letter-spacing:.5px;}
 @media(max-width:600px){
@@ -229,9 +231,10 @@ td.id{color:var(--mt);font-size:10px;}
       </div>
       <div class="tw">
         <div class="ts"><table><thead><tr>
-          <th onclick="rsort('id')">사번<span class="s">↕</span></th>
           <th onclick="rsort('name')">이름<span class="s">↕</span></th>
-          <th onclick="rsort('cost')" class="on">전체 비용<span class="s">↓</span></th>
+          <th onclick="rsort('id')">Knox ID<span class="s">↕</span></th>
+          <th class="pc-only" onclick="rsort('d6')">부서<span class="s">↕</span></th>
+          <th onclick="rsort('cost')" class="on">사용 비용<span class="s">↓</span></th>
         </tr></thead><tbody id="rb"></tbody></table></div>
         <div class="tf"><span id="rfc"></span><span id="rft"></span></div>
         <div class="pgwrap" id="tblPg"></div>
@@ -298,9 +301,10 @@ function renderTbl(){
   const size=window.innerWidth<=600?5:10,paged=tblData.slice((tblPage-1)*size,tblPage*size);
   document.getElementById('rb').innerHTML=paged.map(x=>`
     <tr onclick="tblSel('${x.id}')" style="cursor:pointer;background:${openRow===x.id?'rgba(0,212,255,0.06)':''}">
-      <td class="id" style="width:30%">${x.id}</td>
-      <td class="nm" style="width:40%">${x.name}</td>
-      <td class="cost" style="width:30%">$${x.cost.toLocaleString()}</td>
+      <td class="nm">${x.name}</td>
+      <td class="id">${x.id}</td>
+      <td class="pc-only" style="font-size:11px;color:var(--mt)">${x.d6}<br><span style="color:#94a3b8;font-size:10px">${x.d7}</span></td>
+      <td class="cost">$${x.cost.toLocaleString()}</td>
     </tr>`).join('');
   document.getElementById('tblPg').innerHTML=mkPg(tblPage,Math.ceil(tblData.length/size),'goTbl');
 }
