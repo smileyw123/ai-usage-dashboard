@@ -216,7 +216,7 @@ td.id{color:var(--mt);font-size:10px;}
 <body>
 <header>
   <a href="#" class="logo-link" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;"><div class="logo">ClaudeCode<span>.</span>Usage</div></a>
-  <div class="badge" id="badge" onclick="openModal()">샘플 데이터</div>
+  <div class="badge" id="badge" onclick="openModal()" style="display:none">데이터 없음</div>
 </header>
 
 <!-- 데이터 업로드 모달 -->
@@ -463,9 +463,15 @@ function handleFile(file){
         'input_haiku','input_opus','input_sonnet','output_haiku','output_opus','output_sonnet',
         'cache_read_haiku','cache_read_opus','cache_read_sonnet','cache_write_haiku','cache_write_opus','cache_write_sonnet'];
 
+      // 합계/빈 행 제거 (employee_id 또는 employee_namekor가 없는 행)
+      const validRows=rows.filter(r=>
+        String(r['employee_id']||'').trim() &&
+        String(r['employee_namekor']||'').trim()
+      );
+
       // 1. 데이터 없음 체크
-      if(rows.length===0){
-        showValidationError('데이터 없음', '파일에 데이터가 없습니다. 최소 1행 이상의 데이터가 필요합니다.');
+      if(validRows.length===0){
+        showValidationError('데이터 없음', '파일에 유효한 데이터가 없습니다. 최소 1행 이상의 데이터가 필요합니다.');
         return;
       }
 
@@ -479,18 +485,10 @@ function handleFile(file){
 
       // 3. 각 행 데이터 검증
       const errors=[];
-      rows.forEach((r,i)=>{
-        const rowNum=i+2; // 헤더가 1행이므로
-        // 이름 필수
-        if(!String(r['employee_namekor']||'').trim())
-          errors.push(`${rowNum}행: employee_namekor(이름)이 비어있습니다`);
-        // employee_id 필수
-        if(!String(r['employee_id']||'').trim())
-          errors.push(`${rowNum}행: employee_id가 비어있습니다`);
-        // total_cost 숫자 체크
+      validRows.forEach((r,i)=>{
+        const rowNum=i+2;
         if(r['total_cost']!==''&&isNaN(Number(r['total_cost'])))
           errors.push(`${rowNum}행: total_cost 값이 숫자가 아닙니다 (${r['total_cost']})`);
-        // 토큰 필드 숫자 체크
         ['input_haiku','input_opus','input_sonnet','output_haiku','output_opus','output_sonnet',
          'cache_read_haiku','cache_read_opus','cache_read_sonnet','cache_write_haiku','cache_write_opus','cache_write_sonnet']
         .forEach(f=>{
@@ -506,7 +504,7 @@ function handleFile(file){
       }
 
       // 4. 중복 employee_id 체크
-      const ids=rows.map(r=>String(r['employee_id']||'').trim()).filter(Boolean);
+      const ids=validRows.map(r=>String(r['employee_id']||'').trim());
       const dupIds=[...new Set(ids.filter((id,i)=>ids.indexOf(id)!==i))];
       if(dupIds.length>0){
         showValidationError('중복 ID', `중복된 employee_id가 있습니다:\n${dupIds.join(', ')}`);
@@ -514,7 +512,7 @@ function handleFile(file){
       }
 
       // 검증 통과
-      uploadedData=rows;
+      uploadedData=validRows;
       document.getElementById('dzFile').textContent=`✓ ${file.name} (${rows.length}명)`;
       document.getElementById('dzFile').style.color='#34d399';
       document.getElementById('applyBtn').disabled=false;
@@ -575,6 +573,7 @@ function applyUpload(){
   badge.textContent=`${all.length}명 · ${dateStr}`;
   badge.style.color='';
   badge.style.borderColor='';
+  badge.style.display='';
   const ov=document.getElementById('empty-overlay');
   if(ov)ov.remove();
   closeModal();
@@ -1051,10 +1050,6 @@ filteredAll=[];
 fil=[];
 
 // 빈 상태로 시작
-document.getElementById('badge').textContent='데이터 없음 · 클릭하여 업로드';
-document.getElementById('badge').style.color='var(--ac3)';
-document.getElementById('badge').style.borderColor='var(--ac3)';
-
 // 빈 상태 안내 오버레이
 const emptyEl=document.createElement('div');
 emptyEl.id='empty-overlay';
