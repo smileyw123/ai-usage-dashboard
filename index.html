@@ -269,12 +269,12 @@ const PAGE=5;
 const fmt=n=>n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':n.toLocaleString();
 
 const RAW=[
-  {id:'EMP1001',name:'홍길동',d6:'Solution개발실(메모리)',d7:'SW개발팀',cost:125,ih:6916,io:181881,is:0,oh:17404,oo:646480,os:0,crh:2827527,cro:145498844,crs:0,cwh:0,cwo:278595,cws:5481863},
-  {id:'EMP1002',name:'김민준',d6:'SW Engineering팀(AI센터)',d7:'',cost:87,ih:470,io:676,is:24,oh:36817,oo:78008,os:1405,crh:1555954,cro:107491310,crs:1291674,cwh:124890,cwo:3820273,cws:1673806},
-  {id:'EMP1003',name:'이서연',d6:'Solution개발실(메모리)',d7:'SW개발팀',cost:78,ih:37847,io:89803,is:20474,oh:6751,oo:279678,os:204259,crh:721170,cro:20740812,crs:33105337,cwh:132325,cwo:4534186,cws:5035746},
-  {id:'EMP1004',name:'박준혁',d6:'SW Engineering팀(AI센터)',d7:'',cost:104,ih:12340,io:156200,is:3200,oh:24100,oo:512300,os:8700,crh:1923400,cro:98234100,crs:2341200,cwh:0,cwo:198400,cws:4123500},
-  {id:'EMP1005',name:'최지영',d6:'Solution개발실(메모리)',d7:'SW개발팀',cost:63,ih:890,io:1240,is:580,oh:18900,oo:54300,os:3200,crh:987600,cro:62341800,crs:1876500,cwh:98300,cwo:2341500,cws:1234700},
-  {id:'EMP1006',name:'정다은',d6:'SW Engineering팀(AI센터)',d7:'',cost:91,ih:24300,io:134500,is:8900,oh:11200,oo:389400,os:142300,crh:1543200,cro:87654300,crs:21345600,cwh:87600,cwo:312400,cws:3876500},
+  {id:'gd218.hong',name:'홍길동',d6:'Solution개발실(메모리)',d7:'SW개발팀',cost:125,ih:6916,io:181881,is:0,oh:17404,oo:646480,os:0,crh:2827527,cro:145498844,crs:0,cwh:0,cwo:278595,cws:5481863},
+  {id:'mj074.kim',name:'김민준',d6:'SW Engineering팀(AI센터)',d7:'',cost:87,ih:470,io:676,is:24,oh:36817,oo:78008,os:1405,crh:1555954,cro:107491310,crs:1291674,cwh:124890,cwo:3820273,cws:1673806},
+  {id:'sy531.lee',name:'이서연',d6:'Solution개발실(메모리)',d7:'SW개발팀',cost:78,ih:37847,io:89803,is:20474,oh:6751,oo:279678,os:204259,crh:721170,cro:20740812,crs:33105337,cwh:132325,cwo:4534186,cws:5035746},
+  {id:'jh392.park',name:'박준혁',d6:'SW Engineering팀(AI센터)',d7:'',cost:104,ih:12340,io:156200,is:3200,oh:24100,oo:512300,os:8700,crh:1923400,cro:98234100,crs:2341200,cwh:0,cwo:198400,cws:4123500},
+  {id:'jy857.choi',name:'최지영',d6:'Solution개발실(메모리)',d7:'SW개발팀',cost:63,ih:890,io:1240,is:580,oh:18900,oo:54300,os:3200,crh:987600,cro:62341800,crs:1876500,cwh:98300,cwo:2341500,cws:1234700},
+  {id:'da163.jung',name:'정다은',d6:'SW Engineering팀(AI센터)',d7:'',cost:91,ih:24300,io:134500,is:8900,oh:11200,oo:389400,os:142300,crh:1543200,cro:87654300,crs:21345600,cwh:87600,cwo:312400,cws:3876500},
 ];
 all=RAW.map(r=>{
   const ti=r.ih+r.io+r.is,to=r.oh+r.oo+r.os,tc=r.crh+r.cro+r.crs+r.cwh+r.cwo+r.cws;
