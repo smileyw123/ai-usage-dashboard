@@ -233,7 +233,9 @@ td.id{color:var(--mt);font-size:10px;}
         <div class="ts"><table><thead><tr>
           <th onclick="rsort('name')">이름<span class="s">↕</span></th>
           <th onclick="rsort('id')">Knox ID<span class="s">↕</span></th>
-          <th class="pc-only" onclick="rsort('d6')">부서<span class="s">↕</span></th>
+          <th class="pc-only" onclick="rsort('d6')">사업부<span class="s">↕</span></th>
+          <th class="pc-only" onclick="rsort('d6')">상위 부서<span class="s">↕</span></th>
+          <th class="pc-only" onclick="rsort('d7')">부서<span class="s">↕</span></th>
           <th onclick="rsort('cost')" class="on">사용 비용<span class="s">↓</span></th>
         </tr></thead><tbody id="rb"></tbody></table></div>
         <div class="tf"><span id="rfc"></span><span id="rft"></span></div>
@@ -299,13 +301,22 @@ function rsort(k){
 function goTbl(p){const size=window.innerWidth<=600?5:10,t=Math.ceil(tblData.length/size);if(p<1||p>t)return;tblPage=p;renderTbl();}
 function renderTbl(){
   const size=window.innerWidth<=600?5:10,paged=tblData.slice((tblPage-1)*size,tblPage*size);
-  document.getElementById('rb').innerHTML=paged.map(x=>`
-    <tr onclick="tblSel('${x.id}')" style="cursor:pointer;background:${openRow===x.id?'rgba(0,212,255,0.06)':''}">
+  function parseDept(d6){
+    const m=d6.match(/^(.*?)\((.+?)\)(.*)$/);
+    if(m){return{biz:m[2].trim(), upper:(m[1]+m[3]).trim()};}
+    return{biz:'',upper:d6};
+  }
+  document.getElementById('rb').innerHTML=paged.map(x=>{
+    const {biz,upper}=parseDept(x.d6);
+    return`<tr onclick="tblSel('${x.id}')" style="cursor:pointer;background:${openRow===x.id?'rgba(0,212,255,0.06)':''}">
       <td class="nm">${x.name}</td>
       <td class="id">${x.id}</td>
-      <td class="pc-only" style="font-size:11px;color:var(--mt)">${x.d6}<br><span style="color:#94a3b8;font-size:10px">${x.d7}</span></td>
+      <td class="pc-only" style="font-size:11px;color:#94a3b8">${biz}</td>
+      <td class="pc-only" style="font-size:11px;color:var(--mt)">${upper}</td>
+      <td class="pc-only" style="font-size:11px;color:var(--mt)">${x.d7}</td>
       <td class="cost">$${x.cost.toLocaleString()}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   document.getElementById('tblPg').innerHTML=mkPg(tblPage,Math.ceil(tblData.length/size),'goTbl');
 }
 function tblSel(id){
