@@ -238,6 +238,13 @@ td.id{color:var(--mt);font-size:10px;}
       </div>
     </div>
 
+    <!-- GitHub Token -->
+    <div class="modal-section">
+      <div class="modal-label">GitHub Token</div>
+      <input type="password" id="githubToken" class="modal-select" style="width:100%;font-size:12px;" placeholder="ghp_xxxxxxxxxxxx 입력">
+      <div style="font-size:10px;color:var(--mt);margin-top:4px;">토큰은 저장되지 않으며 이번 세션에서만 사용됩니다</div>
+    </div>
+
     <!-- 기준 날짜 -->
     <div class="modal-section">
       <div class="modal-label">기준 날짜</div>
@@ -429,14 +436,21 @@ function setEnv(env){
   currentEnv=env;
   document.getElementById('envBtnOut').classList.toggle('on',env==='out');
   document.getElementById('envBtnIn').classList.toggle('on',env==='in');
+  // 해당 환경의 저장된 토큰 불러오기
+  const saved=localStorage.getItem(`gh_token_${env}`)||'';
+  document.getElementById('githubToken').value=saved;
 }
 
 async function saveToGitHub(jsonData){
   const cfg=GITHUB[currentEnv];
+  const inputToken=document.getElementById('githubToken').value.trim();
+  if(!inputToken){throw new Error('GitHub Token을 입력해주세요');}
+  // 토큰 저장
+  localStorage.setItem(`gh_token_${currentEnv}`,inputToken);
   const url=`${cfg.api}/repos/${cfg.repo}/contents/data.json`;
   const content=btoa(unescape(encodeURIComponent(JSON.stringify(jsonData,null,2))));
   const headers={
-    'Authorization':`Bearer ${cfg.token}`,
+    'Authorization':`Bearer ${inputToken}`,
     'Content-Type':'application/json',
     'Accept':'application/vnd.github+json',
     'X-GitHub-Api-Version':'2022-11-28'
@@ -462,16 +476,21 @@ async function saveToGitHub(jsonData){
 async function loadFromGitHub(){
   for(const env of['out','in']){
     const cfg=GITHUB[env];
-    const url=`${cfg.api}/repos/${cfg.repo}/contents/data.json`;
+    // raw content URL로 직접 접근 (public 저장소는 인증 불필요)
+    const rawUrl=env==='out'
+      ?`https://raw.githubusercontent.com/${cfg.repo}/main/data.json`
+      :`${cfg.api}/repos/${cfg.repo}/contents/data.json`;
     try{
-      const res=await fetch(url,{headers:{
-        'Authorization':`Bearer ${cfg.token}`,
-        'Accept':'application/vnd.github+json',
-        'X-GitHub-Api-Version':'2022-11-28'
-      }});
+      const headers=env==='in'?{'Authorization':`Bearer ${cfg.token}`,'Accept':'application/vnd.github+json'}:{};
+      const res=await fetch(rawUrl,{headers});
       if(!res.ok)continue;
-      const d=await res.json();
-      const json=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
+      let json;
+      if(env==='out'){
+        json=await res.json();
+      } else {
+        const d=await res.json();
+        json=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
+      }
       if(json&&json.rows&&json.rows.length>0){
         applyJsonData(json);
         return true;
@@ -500,6 +519,9 @@ function openModal(){
   updateDayOptions();
   ySel.onchange=mSel.onchange=updateDayOptions;
   document.getElementById('modalOverlay').classList.add('open');
+  // 저장된 토큰 자동 로드
+  const saved=localStorage.getItem(`gh_token_${currentEnv}`)||'';
+  document.getElementById('githubToken').value=saved;
 }
 
 function updateDayOptions(){
