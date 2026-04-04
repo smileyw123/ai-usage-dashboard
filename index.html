@@ -190,6 +190,41 @@ td.id{color:var(--mt);font-size:10px;}
   <div class="badge" id="badge">샘플 데이터</div>
 </header>
 <div id="app">
+  <!-- 서치 필터 -->
+  <div class="filter-bar fu">
+    <div class="filter-item">
+      <div class="filter-label">사업부</div>
+      <div class="filter-dropdown" id="fd-biz">
+        <div class="filter-selected" onclick="toggleDrop('biz')">
+          <span id="fs-biz">전체</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="filter-options" id="fo-biz"></div>
+      </div>
+    </div>
+    <div class="filter-item">
+      <div class="filter-label">상위 부서</div>
+      <div class="filter-dropdown" id="fd-upper">
+        <div class="filter-selected" onclick="toggleDrop('upper')">
+          <span id="fs-upper">전체</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="filter-options" id="fo-upper"></div>
+      </div>
+    </div>
+    <div class="filter-item">
+      <div class="filter-label">부서</div>
+      <div class="filter-dropdown" id="fd-dept">
+        <div class="filter-selected" onclick="toggleDrop('dept')">
+          <span id="fs-dept">전체</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="filter-options" id="fo-dept"></div>
+      </div>
+    </div>
+    <button class="filter-reset" onclick="resetFilter()">초기화</button>
+  </div>
+
   <div class="tabs">
     <button class="tab on" onclick="sw('ov')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>전체 현황</button>
     <button class="tab" onclick="sw('ind')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>개인별 현황</button>
@@ -197,41 +232,6 @@ td.id{color:var(--mt);font-size:10px;}
 
   <!-- 전체 현황 -->
   <div class="sec on" id="sec-ov">
-
-    <!-- 서치 필터 -->
-    <div class="filter-bar fu">
-      <div class="filter-item">
-        <div class="filter-label">사업부</div>
-        <div class="filter-dropdown" id="fd-biz">
-          <div class="filter-selected" onclick="toggleDrop('biz')">
-            <span id="fs-biz">전체</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div class="filter-options" id="fo-biz"></div>
-        </div>
-      </div>
-      <div class="filter-item">
-        <div class="filter-label">상위 부서</div>
-        <div class="filter-dropdown" id="fd-upper">
-          <div class="filter-selected" onclick="toggleDrop('upper')">
-            <span id="fs-upper">전체</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div class="filter-options" id="fo-upper"></div>
-        </div>
-      </div>
-      <div class="filter-item">
-        <div class="filter-label">부서</div>
-        <div class="filter-dropdown" id="fd-dept">
-          <div class="filter-selected" onclick="toggleDrop('dept')">
-            <span id="fs-dept">전체</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div class="filter-options" id="fo-dept"></div>
-        </div>
-      </div>
-      <button class="filter-reset" onclick="resetFilter()">초기화</button>
-    </div>
 
     <div class="kg">
       <div class="kc fu" style="position:relative;overflow:hidden;">
