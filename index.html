@@ -136,10 +136,16 @@ td.id{color:var(--mt);font-size:10px;}
 .kpi-icon:first-child{background:rgba(0,212,255,0.15);}
 .kpi-text{flex:1;min-width:0;}
 .kpi-amount{text-align:right;flex-shrink:0;}
+.kl-large{font-size:20px;font-weight:800;color:var(--tx);letter-spacing:0;text-transform:none;margin-bottom:6px;}
+.kpi-right-amount{margin-left:auto;flex-shrink:0;text-align:right;}
+.kpi-right-amount .kv{font-size:32px;}
 @media(max-width:600px){
   .kpi-inner{flex-direction:column;align-items:flex-start;gap:4px;}
   .kpi-icon{display:none;}
   .kpi-amount{text-align:left;}
+  .kpi-right-amount{margin-left:0;text-align:left;}
+  .kpi-right-amount .kv{font-size:26px;}
+  .kl-large{font-size:14px;font-weight:700;}
 }
 .fu{animation:fu .3s ease forwards;}
 </style>
@@ -164,9 +170,11 @@ td.id{color:var(--mt);font-size:10px;}
         <div class="kpi-inner">
           <div class="kpi-icon">💰</div>
           <div style="flex:1;min-width:0;">
-            <div class="kl" id="kl-total">4월 사용 비용</div>
-            <div class="kv" style="color:#00d4ff;margin:4px 0;" id="kv-total"></div>
+            <div class="kl kl-large" id="kl-total">4월 사용 비용</div>
             <div class="ks" id="ks-total"></div>
+          </div>
+          <div class="kpi-right-amount">
+            <div class="kv" style="color:#00d4ff;" id="kv-total"></div>
           </div>
         </div>
       </div>
