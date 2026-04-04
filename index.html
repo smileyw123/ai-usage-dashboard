@@ -219,6 +219,10 @@ td.id{color:var(--mt);font-size:10px;}
 <body>
 <header>
   <a href="#" class="logo-link" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;"><div class="logo">ClaudeCode<span>.</span>Usage</div></a>
+  <div id="dateSelectorWrap" style="display:none;align-items:center;gap:8px;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--mt);flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    <select id="dateSelector" onchange="onDateChange()" style="background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:4px 10px;font-family:'IBM Plex Sans KR',sans-serif;font-size:11px;color:var(--tx);outline:none;cursor:pointer;"></select>
+  </div>
   <div class="badge" id="badge" onclick="openModal()" style="display:none">데이터 없음</div>
 </header>
 
@@ -437,17 +441,13 @@ function setEnv(env){
   document.getElementById('envBtnIn').classList.toggle('on',env==='in');
 }
 
-async function saveToGitHub(jsonData){
+async function saveToGitHub(fullData){
   const cfg=GITHUB[currentEnv];
   const token=ghTokens[currentEnv];
-
-  // 케이스1: 토큰 없음
-  if(!token){
-    throw new Error('토큰 정보가 없습니다. config.json을 확인해주세요.');
-  }
+  if(!token)throw new Error('토큰 정보가 없습니다.');
 
   const url=`${cfg.api}/repos/${cfg.repo}/contents/data.json`;
-  const content=btoa(unescape(encodeURIComponent(JSON.stringify(jsonData,null,2))));
+  const content=btoa(unescape(encodeURIComponent(JSON.stringify(fullData,null,2))));
   const headers={
     'Authorization':`token ${token}`,
     'Content-Type':'application/json',
@@ -455,15 +455,12 @@ async function saveToGitHub(jsonData){
     'X-GitHub-Api-Version':'2022-11-28'
   };
 
-  // 기존 파일 SHA 조회 (없으면 신규 생성)
   let sha='';
   try{
     const shaRes=await fetch(url,{headers});
     if(shaRes.ok){const d=await shaRes.json();sha=d.sha;}
-    // 404는 신규파일, 그 외 오류는 무시하고 진행
   }catch(e){}
 
-  // 파일 저장
   const body={message:`Update data.json - ${new Date().toISOString()}`,content,branch:'main'};
   if(sha)body.sha=sha;
 
@@ -477,7 +474,7 @@ async function saveToGitHub(jsonData){
   if(!res.ok){
     const errBody=await res.json().catch(()=>({}));
     if(res.status===401)throw new Error('토큰이 만료되었거나 올바르지 않습니다.');
-    if(res.status===403)throw new Error('저장소 쓰기 권한이 없습니다. 토큰 권한을 확인해주세요.');
+    if(res.status===403)throw new Error('저장소 쓰기 권한이 없습니다.');
     if(res.status===409)throw new Error('파일 충돌이 발생했습니다. 잠시 후 다시 시도해주세요.');
     throw new Error(`저장 실패 (${res.status}): ${errBody.message||'알 수 없는 오류'}`);
   }
@@ -492,10 +489,8 @@ async function loadFromGitHub(){
       ?`https://raw.githubusercontent.com/${cfg.repo}/main/data.json?t=${t}`
       :`${cfg.api}/repos/${cfg.repo}/contents/data.json`;
     try{
-      // raw URL은 인증 헤더 불필요 (public), API URL은 인증 필요
       const headers=env==='in'&&token
-        ?{'Authorization':`token ${token}`,'Accept':'application/vnd.github+json'}
-        :{};
+        ?{'Authorization':`token ${token}`,'Accept':'application/vnd.github+json'}:{};
       const res=await fetch(rawUrl,{headers,cache:'no-store'});
       if(!res.ok)continue;
       let json;
@@ -505,8 +500,20 @@ async function loadFromGitHub(){
         const d=await res.json();
         json=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
       }
+      // 신규 다중날짜 구조
+      if(json&&json.dates&&json.dates.length>0){
+        allDates=json.dates;
+        // 가장 최근 날짜 자동 선택
+        const latest=allDates[allDates.length-1];
+        applyJsonData(latest);
+        renderDateSelector();
+        return true;
+      }
+      // 구형 단일 구조 호환
       if(json&&json.rows&&json.rows.length>0){
-        applyJsonData(json);
+        allDates=[{year:json.year,month:json.month,day:json.day,updated:json.updated||'',rows:json.rows}];
+        applyJsonData(allDates[0]);
+        renderDateSelector();
         return true;
       }
     }catch(e){continue;}
@@ -668,10 +675,10 @@ function showValidationError(title, msg){
   document.getElementById('applyBtn').disabled=true;
 }
 
-function applyJsonData(json){
-  const y=json.year,m=json.month,d=json.day;
+function applyJsonData(entry){
+  const y=entry.year,m=entry.month,d=entry.day;
   dataDate=new Date(y,m-1,d);
-  all=json.rows.map(r=>{
+  all=entry.rows.map(r=>{
     const ti=r.ih+r.io+r.is,to=r.oh+r.oo+r.os,tc=r.crh+r.cro+r.crs+r.cwh+r.cwo+r.cws;
     return{...r,inp:{h:r.ih,o:r.io,s:r.is,tot:ti},out:{h:r.oh,o:r.oo,s:r.os,tot:to},
       cac:{rh:r.crh,ro:r.cro,rs:r.crs,wh:r.cwh,wo:r.cwo,ws:r.cws,tot:tc},
@@ -686,6 +693,27 @@ function applyJsonData(json){
   filteredAll=[...all];
   fil=[...all].sort((a,b)=>b.cost-a.cost);
   initFilters();
+}
+
+function renderDateSelector(){
+  if(!allDates||allDates.length<=1){
+    document.getElementById('dateSelectorWrap').style.display='none';
+    return;
+  }
+  document.getElementById('dateSelectorWrap').style.display='flex';
+  const sel=document.getElementById('dateSelector');
+  sel.innerHTML=allDates.slice().reverse().map(e=>{
+    const ds=`${e.year}.${String(e.month).padStart(2,'0')}.${String(e.day).padStart(2,'0')}`;
+    const selected=e.year===dataDate.getFullYear()&&e.month===dataDate.getMonth()+1&&e.day===dataDate.getDate();
+    return`<option value="${e.year}-${e.month}-${e.day}"${selected?' selected':''}>${ds} (${e.rows.length}명)</option>`;
+  }).join('');
+}
+
+function onDateChange(){
+  const val=document.getElementById('dateSelector').value;
+  const [y,m,d]=val.split('-').map(Number);
+  const entry=allDates.find(e=>e.year===y&&e.month===m&&e.day===d);
+  if(entry)applyJsonData(entry);
 }
 
 async function applyUpload(){
@@ -706,9 +734,24 @@ async function applyUpload(){
     cwh:Number(r['cache_write_haiku']||0),cwo:Number(r['cache_write_opus']||0),cws:Number(r['cache_write_sonnet']||0),
   })).filter(r=>r.name);
 
-  const jsonData={year:y,month:m,day:d,rows:mapped};
+  const newEntry={year:y,month:m,day:d,updated:new Date().toISOString(),rows:mapped};
 
-  // GitHub 저장
+  // 같은 날짜면 덮어쓰기, 다른 날짜면 추가
+  const existIdx=allDates.findIndex(e=>e.year===y&&e.month===m&&e.day===d);
+  if(existIdx>=0){
+    allDates[existIdx]=newEntry;
+  } else {
+    allDates.push(newEntry);
+    // 날짜 오름차순 정렬
+    allDates.sort((a,b)=>{
+      const da=new Date(a.year,a.month-1,a.day);
+      const db=new Date(b.year,b.month-1,b.day);
+      return da-db;
+    });
+  }
+
+  const fullData={dates:allDates};
+
   const btn=document.getElementById('applyBtn');
   const msg=document.getElementById('githubMsg');
   btn.disabled=true;
@@ -718,11 +761,12 @@ async function applyUpload(){
   msg.textContent='GitHub에 데이터를 저장하고 있습니다...';
 
   try{
-    await saveToGitHub(jsonData);
+    await saveToGitHub(fullData);
     msg.style.color='#34d399';
     msg.textContent='✓ GitHub 저장 완료!';
     setTimeout(()=>{
-      applyJsonData(jsonData);
+      applyJsonData(newEntry);
+      renderDateSelector();
       closeModal();
     },800);
   }catch(e){
@@ -749,6 +793,7 @@ function downloadTemplate(){
 
 const AV=[["#00d4ff","rgba(0,212,255,0.15)"],["#a78bfa","rgba(167,139,250,0.15)"],["#f59e0b","rgba(245,158,11,0.15)"],["#f472b6","rgba(244,114,182,0.15)"],["#34d399","rgba(52,211,153,0.15)"],["#fb923c","rgba(251,146,60,0.15)"]];
 let all=[],fil=[],rk='cost',ra=false,sel=null,ch={},openRow=null,tblPage=1,tblData=[],curPage=1;
+let allDates=[];
 // 필터 상태
 let fBiz=new Set(),fUpper=new Set(),fDept=new Set();
 let filteredAll=[];
