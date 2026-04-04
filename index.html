@@ -235,7 +235,7 @@ td.id{color:var(--mt);font-size:10px;}
 </header>
 
 <!-- 데이터 업로드 모달 -->
-<div class="modal-overlay open" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-title">데이터 업로드</div>
@@ -499,7 +499,10 @@ async function loadFromGitHub(){
     try{
       const headers=env==='in'&&token
         ?{'Authorization':`token ${token}`,'Accept':'application/vnd.github+json'}:{};
-      const res=await fetch(rawUrl,{headers,cache:'no-store'});
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),5000);
+      const res=await fetch(rawUrl,{headers,cache:'no-store',signal:controller.signal});
+      clearTimeout(timer);
       if(!res.ok)continue;
       let json;
       if(env==='out'){
@@ -508,16 +511,13 @@ async function loadFromGitHub(){
         const d=await res.json();
         json=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
       }
-      // 신규 다중날짜 구조
       if(json&&json.dates&&json.dates.length>0){
         allDates=json.dates;
-        // 가장 최근 날짜 자동 선택
         const latest=allDates[allDates.length-1];
         applyJsonData(latest);
         renderDateSelector();
         return true;
       }
-      // 구형 단일 구조 호환
       if(json&&json.rows&&json.rows.length>0){
         allDates=[{year:json.year,month:json.month,day:json.day,updated:json.updated||'',rows:json.rows}];
         applyJsonData(allDates[0]);
@@ -861,9 +861,7 @@ const fmt=n=>n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?
 
 const RAW=[];
 all=[];
-
-fil=[...all].sort((a,b)=>b.cost-a.cost);
-document.getElementById('badge').textContent=`${all.length}명 · 샘플 데이터`;
+fil=[];
 
 function mkPg(cur,total,cb){
   if(total<=1)return'';
@@ -1303,49 +1301,30 @@ window.addEventListener('resize',()=>{
 filteredAll=[];
 fil=[];
 
-// 모달 날짜 초기화 (모달이 기본으로 열려있으므로)
-(function initModalDates(){
-  const now=new Date();
-  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-  const ySel=document.getElementById('sel-year');
-  const mSel=document.getElementById('sel-month');
-  const dSel=document.getElementById('sel-day');
-  const years=new Set();
-  for(let i=0;i<=60;i++){const d=new Date(today);d.setDate(d.getDate()-i);years.add(d.getFullYear());}
-  ySel.innerHTML='';
-  [...years].sort().forEach(y=>{ySel.innerHTML+=`<option value="${y}">${y}년</option>`;});
-  updateMonthOptions();
-  ySel.onchange=()=>{updateMonthOptions();checkExistingDate();};
-  mSel.onchange=()=>{updateDayOptions();checkExistingDate();};
-  dSel.onchange=()=>checkExistingDate();
-})();
-
 // 초기화: config → data 순서로 로드
 (async()=>{
-  // 로딩 표시
   const loadingEl=document.createElement('div');
   loadingEl.id='loading-overlay';
-  loadingEl.style.cssText='position:fixed;inset:0;background:rgba(7,9,15,0.9);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;';
+  loadingEl.style.cssText='position:fixed;inset:0;background:rgba(7,9,15,0.9);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;';
   loadingEl.innerHTML=`<div style="width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin 0.8s linear infinite;"></div><div style="font-size:13px;color:var(--mt)">데이터 로딩 중...</div>`;
   const style=document.createElement('style');
   style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
   document.head.appendChild(style);
   document.body.appendChild(loadingEl);
 
-  // 1. config.json 로드 (토큰 획득)
-  await loadConfig();
-
-  // 2. data.json 로드
-  const loaded=await loadFromGitHub();
-
-  // 로딩 제거
-  loadingEl.remove();
-
-  if(loaded && allDates.length>0){
-    // 데이터 있으면 모달 닫기
-    document.getElementById('modalOverlay').classList.remove('open');
+  try{
+    await loadConfig();
+    const loaded=await loadFromGitHub();
+    loadingEl.remove();
+    if(loaded && allDates.length>0){
+      document.getElementById('modalOverlay').classList.remove('open');
+    } else {
+      openModal();
+    }
+  }catch(e){
+    loadingEl.remove();
+    openModal();
   }
-  // 데이터 없으면 모달이 기본으로 열려있음
 })();
 
 if(window.innerWidth<=600){
