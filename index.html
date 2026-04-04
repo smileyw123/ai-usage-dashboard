@@ -760,7 +760,7 @@ function renderDateSelector(){
   }
   document.getElementById('dateSelectorWrap').style.display='flex';
   const sel=document.getElementById('dateSelector');
-  sel.innerHTML=allDates.slice().reverse().map(e=>{
+  sel.innerHTML=allDates.map(e=>{
     const ds=`${e.year}.${String(e.month).padStart(2,'0')}.${String(e.day).padStart(2,'0')}`;
     const selected=e.year===dataDate.getFullYear()&&e.month===dataDate.getMonth()+1&&e.day===dataDate.getDate();
     return`<option value="${e.year}-${e.month}-${e.day}"${selected?' selected':''}>${ds} (${e.rows.length}명)</option>`;
