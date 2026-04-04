@@ -403,9 +403,11 @@ function rio(){
   const gp=v=>grand>0?(v/grand*100).toFixed(2):'0.00';
   const ip=v=>totalInput>0?(v/totalInput*100).toFixed(2):'0.00';
   document.getElementById('ioGrid').innerHTML=`
-    <div class="io-card fu">
+    <div class="io-card fu" style="position:relative;overflow:hidden;">
       <div class="io-card-top" style="background:linear-gradient(90deg,#34d399,#00d4ff)"></div>
+      <div class="dglow" style="background:radial-gradient(circle,rgba(52,211,153,0.15),transparent);position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;pointer-events:none;"></div>
       <div class="kpi-inner" style="padding:0">
+        <div class="kpi-icon" style="background:rgba(52,211,153,0.15)">📥</div>
         <div style="flex:1;min-width:0;">
           <div class="kl kl-large">입력 토큰 비율</div>
           <div class="ks kpi-sub-mobile-hide">${fmt(totalInput)} tokens</div>
@@ -416,9 +418,11 @@ function rio(){
         </div>
       </div>
     </div>
-    <div class="io-card fu">
+    <div class="io-card fu" style="position:relative;overflow:hidden;">
       <div class="io-card-top" style="background:#f472b6"></div>
+      <div class="dglow" style="background:radial-gradient(circle,rgba(244,114,182,0.15),transparent);position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;pointer-events:none;"></div>
       <div class="kpi-inner" style="padding:0">
+        <div class="kpi-icon" style="background:rgba(244,114,182,0.15)">📤</div>
         <div style="flex:1;min-width:0;">
           <div class="kl kl-large">출력 토큰 비율</div>
           <div class="ks kpi-sub-mobile-hide">${fmt(output)} tokens</div>
