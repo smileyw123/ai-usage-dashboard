@@ -1324,8 +1324,7 @@ fil=[];
   // 로딩 제거
   loadingEl.remove();
 
-  if(!loaded){
-    // 데이터 없으면 바로 업로드 모달 열기
+  if(!loaded || allDates.length===0){
     setTimeout(()=>{
       try{ openModal(); }
       catch(e){ document.getElementById('modalOverlay').classList.add('open'); }
