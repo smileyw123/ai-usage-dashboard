@@ -447,19 +447,99 @@ function handleDrop(e){
 }
 
 function handleFile(file){
-  if(!file||!file.name.endsWith('.xlsx'))return alert('.xlsx 파일만 업로드 가능합니다.');
-  document.getElementById('dzFile').textContent=`✓ ${file.name}`;
+  if(!file||!file.name.endsWith('.xlsx')){
+    showValidationError('파일 형식 오류', '.xlsx 파일만 업로드 가능합니다.');
+    return;
+  }
   const reader=new FileReader();
   reader.onload=e=>{
     try{
       const wb=XLSX.read(e.target.result,{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+
+      // 필수 컬럼 정의
+      const REQUIRED=['employee_id','employee_namekor','dept_level_6_name','dept_level_7_name','total_cost',
+        'input_haiku','input_opus','input_sonnet','output_haiku','output_opus','output_sonnet',
+        'cache_read_haiku','cache_read_opus','cache_read_sonnet','cache_write_haiku','cache_write_opus','cache_write_sonnet'];
+
+      // 1. 데이터 없음 체크
+      if(rows.length===0){
+        showValidationError('데이터 없음', '파일에 데이터가 없습니다. 최소 1행 이상의 데이터가 필요합니다.');
+        return;
+      }
+
+      // 2. 필드명 체크
+      const fileFields=Object.keys(rows[0]);
+      const missingFields=REQUIRED.filter(f=>!fileFields.includes(f));
+      if(missingFields.length>0){
+        showValidationError('필드 오류', `다음 필드가 누락되었습니다:\n${missingFields.join('\n')}`);
+        return;
+      }
+
+      // 3. 각 행 데이터 검증
+      const errors=[];
+      rows.forEach((r,i)=>{
+        const rowNum=i+2; // 헤더가 1행이므로
+        // 이름 필수
+        if(!String(r['employee_namekor']||'').trim())
+          errors.push(`${rowNum}행: employee_namekor(이름)이 비어있습니다`);
+        // employee_id 필수
+        if(!String(r['employee_id']||'').trim())
+          errors.push(`${rowNum}행: employee_id가 비어있습니다`);
+        // total_cost 숫자 체크
+        if(r['total_cost']!==''&&isNaN(Number(r['total_cost'])))
+          errors.push(`${rowNum}행: total_cost 값이 숫자가 아닙니다 (${r['total_cost']})`);
+        // 토큰 필드 숫자 체크
+        ['input_haiku','input_opus','input_sonnet','output_haiku','output_opus','output_sonnet',
+         'cache_read_haiku','cache_read_opus','cache_read_sonnet','cache_write_haiku','cache_write_opus','cache_write_sonnet']
+        .forEach(f=>{
+          if(r[f]!==''&&isNaN(Number(r[f])))
+            errors.push(`${rowNum}행: ${f} 값이 숫자가 아닙니다`);
+        });
+      });
+
+      if(errors.length>0){
+        const preview=errors.slice(0,5).join('\n')+(errors.length>5?`\n...외 ${errors.length-5}개 오류`:'');
+        showValidationError(`데이터 오류 (총 ${errors.length}건)`, preview);
+        return;
+      }
+
+      // 4. 중복 employee_id 체크
+      const ids=rows.map(r=>String(r['employee_id']||'').trim()).filter(Boolean);
+      const dupIds=[...new Set(ids.filter((id,i)=>ids.indexOf(id)!==i))];
+      if(dupIds.length>0){
+        showValidationError('중복 ID', `중복된 employee_id가 있습니다:\n${dupIds.join(', ')}`);
+        return;
+      }
+
+      // 검증 통과
       uploadedData=rows;
+      document.getElementById('dzFile').textContent=`✓ ${file.name} (${rows.length}명)`;
+      document.getElementById('dzFile').style.color='#34d399';
       document.getElementById('applyBtn').disabled=false;
-    } catch(err){alert('파일을 읽는 중 오류가 발생했습니다.');}
+      // 에러 메시지 초기화
+      const errEl=document.getElementById('validationMsg');
+      if(errEl)errEl.remove();
+
+    } catch(err){
+      showValidationError('파일 읽기 오류', '파일을 읽는 중 오류가 발생했습니다. 파일이 손상되지 않았는지 확인해주세요.');
+    }
   };
   reader.readAsArrayBuffer(file);
+}
+
+function showValidationError(title, msg){
+  let el=document.getElementById('validationMsg');
+  if(!el){
+    el=document.createElement('div');
+    el.id='validationMsg';
+    el.style.cssText='margin-top:10px;background:rgba(244,114,182,0.1);border:1px solid rgba(244,114,182,0.3);border-radius:10px;padding:12px 14px;font-size:12px;color:#f472b6;white-space:pre-line;';
+    document.getElementById('dropZone').after(el);
+  }
+  el.innerHTML=`<strong>${title}</strong><br>${msg}`;
+  document.getElementById('dzFile').textContent='';
+  document.getElementById('applyBtn').disabled=true;
 }
 
 function applyUpload(){
