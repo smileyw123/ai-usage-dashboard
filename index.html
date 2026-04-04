@@ -179,6 +179,8 @@ td.id{color:var(--mt);font-size:10px;}
 .filter-option.checked .chk{background:var(--ac);border-color:var(--ac);color:#000;}
 .filter-reset{background:transparent;border:1px solid var(--bd);color:var(--mt);font-family:'IBM Plex Sans KR',sans-serif;font-size:11px;padding:8px 14px;border-radius:10px;cursor:pointer;transition:all .2s;white-space:nowrap;align-self:flex-end;margin-bottom:1px;}
 .filter-reset:hover{border-color:var(--ac);color:var(--ac);}
+.filter-disabled .filter-selected{opacity:.4;cursor:not-allowed;pointer-events:none;}
+.filter-disabled .filter-selected:hover{border-color:var(--bd);}
 @media(max-width:600px){.filter-item{min-width:calc(50% - 6px);}.filter-reset{width:100%;}}
 </style>
 </head>
@@ -396,7 +398,7 @@ function tblSel(id){
     </div>`;
 }
 function rr(){
-  const base=filteredAll.length?filteredAll:all;
+  const base=filteredAll;
   const q=(document.getElementById('rs')||{value:''}).value.toLowerCase();
   tblData=[...base].filter(x=>!q||x.name.includes(q)||x.d6.includes(q)||x.d7.includes(q)||x.id.toLowerCase().includes(q));
   tblData.sort((a,b)=>{const av=a[rk]??0,bv=b[rk]??0;return typeof av==='string'?ra?(av>bv?1:-1):(av<bv?1:-1):ra?av-bv:bv-av;});
@@ -429,19 +431,20 @@ function parseDeptFull(d6){
 }
 
 function initFilters(){
-  const bizSet=new Set(),upperSet=new Set(),deptSet=new Set();
+  const bizAll=new Set(),upperAll=new Set(),deptAll=new Set();
   all.forEach(d=>{
     const {biz,upper}=parseDeptFull(d.d6);
-    if(biz)bizSet.add(biz);
-    if(upper)upperSet.add(upper);
-    if(d.d7)deptSet.add(d.d7);
+    if(biz)bizAll.add(biz);
+    if(upper)upperAll.add(upper);
+    if(d.d7)deptAll.add(d.d7);
   });
-  fBiz=new Set([...bizSet]);
-  fUpper=new Set([...upperSet]);
-  fDept=new Set([...deptSet]);
-  buildDropdown('biz',[...bizSet],fBiz);
-  buildDropdown('upper',[...upperSet],fUpper);
-  buildDropdown('dept',[...deptSet],fDept);
+  fBiz=new Set([...bizAll]);
+  fUpper=new Set([...upperAll]);
+  fDept=new Set([...deptAll]);
+  const opts=getFilteredOptions();
+  buildDropdown('biz',[...bizAll],fBiz);
+  buildDropdown('upper',opts.upper,fUpper);
+  buildDropdown('dept',opts.dept,fDept);
   updateFilterLabels();
   applyFilter();
 }
@@ -463,10 +466,26 @@ function getAvailableOptions(key){
   return{biz:[...bizAll],upper:[...upperAll],dept:[...deptAll]};
 }
 
+function getFilteredOptions(){
+  // 사업부 기준으로 상위부서 옵션 계산
+  const upperOpts=new Set(),deptOpts=new Set();
+  const bizAll=new Set();
+  all.forEach(d=>{
+    const {biz,upper}=parseDeptFull(d.d6);
+    bizAll.add(biz);
+    if(fBiz.has(biz)){
+      upperOpts.add(upper);
+      if(fUpper.has(upper)&&d.d7)deptOpts.add(d.d7);
+    }
+  });
+  return{biz:[...bizAll],upper:[...upperOpts],dept:[...deptOpts]};
+}
+
 function toggleOpt(key,val){
   const maps={biz:fBiz,upper:fUpper,dept:fDept};
   const sel=maps[key];
-  const opts=getAvailableOptions(key)[key];
+  const opts=getFilteredOptions()[key];
+
   if(val==='__all__'){
     if(opts.every(o=>sel.has(o)))sel.clear();
     else opts.forEach(o=>sel.add(o));
@@ -474,48 +493,94 @@ function toggleOpt(key,val){
     if(sel.has(val))sel.delete(val);
     else sel.add(val);
   }
-  // 사업부 변경 시 상위부서/부서 재계산
+
+  // 사업부 변경 시 하위 옵션 재계산
   if(key==='biz'){
-    const validUppers=new Set(),validDepts=new Set();
-    all.forEach(d=>{
-      const {biz,upper}=parseDeptFull(d.d6);
-      if(fBiz.has(biz)){validUppers.add(upper);if(d.d7)validDepts.add(d.d7);}
-    });
-    fUpper=new Set([...validUppers]);
-    fDept=new Set([...validDepts]);
-    buildDropdown('upper',[...validUppers],fUpper);
-    buildDropdown('dept',[...validDepts],fDept);
+    if(fBiz.size===0){
+      fUpper=new Set();
+      fDept=new Set();
+    } else {
+      const validUppers=new Set(),validDepts=new Set();
+      all.forEach(d=>{
+        const {biz,upper}=parseDeptFull(d.d6);
+        if(fBiz.has(biz)){
+          validUppers.add(upper);
+          if(d.d7)validDepts.add(d.d7);
+        }
+      });
+      fUpper=new Set([...validUppers]);
+      fDept=new Set([...validDepts]);
+    }
   }
+
+  // 상위부서 변경 시 부서 재계산 (사업부 필터 유지)
   if(key==='upper'){
-    const validDepts=new Set();
-    all.forEach(d=>{
-      const {biz,upper}=parseDeptFull(d.d6);
-      if(fBiz.has(biz)&&fUpper.has(upper)&&d.d7)validDepts.add(d.d7);
-    });
-    fDept=new Set([...validDepts]);
-    buildDropdown('dept',[...validDepts],fDept);
+    if(fUpper.size===0){
+      fDept=new Set();
+    } else {
+      const validDepts=new Set();
+      all.forEach(d=>{
+        const {biz,upper}=parseDeptFull(d.d6);
+        if(fBiz.has(biz)&&fUpper.has(upper)&&d.d7)validDepts.add(d.d7);
+      });
+      fDept=new Set([...validDepts]);
+    }
   }
-  buildDropdown(key,getAvailableOptions(key)[key],sel);
+
+  // 변경된 옵션으로 드롭다운 재빌드 (항상 부모 기준 옵션 유지)
+  const opts2=getFilteredOptions();
+  buildDropdown('biz',opts2.biz,fBiz);
+  buildDropdown('upper',opts2.upper,fUpper);
+  buildDropdown('dept',opts2.dept,fDept);
   updateFilterLabels();
   applyFilter();
 }
 
 function updateFilterLabels(){
-  const bizOpts=getAvailableOptions('biz').biz;
-  const upperOpts=getAvailableOptions('upper').upper;
-  const deptOpts=getAvailableOptions('dept').dept;
-  const lbl=(sel,opts)=>opts.length===0?'전체':opts.every(o=>sel.has(o))?'전체':[...sel].length===0?'전체':[...sel].join(', ');
-  document.getElementById('fs-biz').textContent=lbl(fBiz,bizOpts);
-  document.getElementById('fs-upper').textContent=lbl(fUpper,upperOpts);
-  document.getElementById('fs-dept').textContent=lbl(fDept,deptOpts);
+  const opts=getFilteredOptions();
+  const bizAll=[...new Set(all.map(d=>parseDeptFull(d.d6).biz))];
+  const bizNone=fBiz.size===0;
+  const upperNone=fUpper.size===0;
+
+  // 라벨 업데이트
+  const lbl=(sel,optsArr,none)=>{
+    if(none)return'미선택';
+    return optsArr.every(o=>sel.has(o))?'전체':[...sel].filter(v=>optsArr.includes(v)).join(', ')||'미선택';
+  };
+  document.getElementById('fs-biz').textContent=lbl(fBiz,bizAll,bizNone);
+  document.getElementById('fs-upper').textContent=lbl(fUpper,opts.upper,upperNone);
+  document.getElementById('fs-dept').textContent=fDept.size===0?'미선택':opts.dept.every(o=>fDept.has(o))?'전체':[...fDept].join(', ')||'미선택';
+
+  // 비활성화 처리
+  const upperSel=document.getElementById('fd-upper');
+  const deptSel=document.getElementById('fd-dept');
+  const deptFS=document.getElementById('fs-dept');
+  const noDeptOpts=opts.dept.length===0&&fBiz.size>0&&fUpper.size>0;
+
+  if(bizNone){
+    upperSel.classList.add('filter-disabled');
+    deptSel.classList.add('filter-disabled');
+    deptFS.textContent='미선택';
+  } else {
+    upperSel.classList.remove('filter-disabled');
+    if(upperNone){
+      deptSel.classList.add('filter-disabled');
+      deptFS.textContent='미선택';
+    } else if(noDeptOpts){
+      deptSel.classList.add('filter-disabled');
+      deptFS.textContent='해당 부서 없음';
+    } else {
+      deptSel.classList.remove('filter-disabled');
+    }
+  }
 }
 
 function applyFilter(){
   filteredAll=all.filter(d=>{
     const {biz,upper}=parseDeptFull(d.d6);
-    const bizOk=fBiz.size===0||fBiz.has(biz);
-    const upperOk=fUpper.size===0||fUpper.has(upper);
-    const deptOk=fDept.size===0||!d.d7||fDept.has(d.d7);
+    const bizOk=fBiz.has(biz);
+    const upperOk=fUpper.has(upper);
+    const deptOk=!d.d7||fDept.has(d.d7);
     return bizOk&&upperOk&&deptOk;
   });
   rkpi();rio();rov();rr();
@@ -549,7 +614,7 @@ document.addEventListener('click',e=>{
 });
 
 function rkpi(){
-  const data=filteredAll.length?filteredAll:all;
+  const data=filteredAll;
   const tc=data.reduce((s,d)=>s+d.cost,0),avg=data.length?Math.round(tc/data.length):0;
   const now=new Date();
   const monthLabel=`${now.getMonth()+1}월 사용 비용`;
@@ -580,7 +645,7 @@ function sw(t){
 }
 
 function rov(){
-  const data=filteredAll.length?filteredAll:all;
+  const data=filteredAll;
   const tip={backgroundColor:'#1a2535',titleColor:'#e2e8f0',bodyColor:'#94a3b8'};
   const tk={color:'#64748b',font:{family:'IBM Plex Sans KR',size:11}};
   const gd={color:'rgba(255,255,255,0.04)'};
@@ -597,7 +662,7 @@ function rov(){
 }
 
 function rio(){
-  const data=filteredAll.length?filteredAll:all;
+  const data=filteredAll;
   const ih=data.reduce((s,d)=>s+d.ih,0),io=data.reduce((s,d)=>s+d.io,0),is_=data.reduce((s,d)=>s+d.is,0);
   const oh=data.reduce((s,d)=>s+d.oh,0),oo=data.reduce((s,d)=>s+d.oo,0),os_=data.reduce((s,d)=>s+d.os,0);
   const crh=data.reduce((s,d)=>s+d.crh,0),cro=data.reduce((s,d)=>s+d.cro,0),crs=data.reduce((s,d)=>s+d.crs,0);
