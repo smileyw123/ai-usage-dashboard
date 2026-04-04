@@ -157,7 +157,7 @@ td.id{color:var(--mt);font-size:10px;}
     </div>
     <div class="side-grid">
       <div>
-        <div class="sec-head" style="margin-bottom:14px"><div><div class="sec-title" style="font-size:14px">Input / Cache Read / Cache Write 비율</div><div class="sec-desc">입력 토큰 내 유형별 비중</div></div></div>
+        <div class="sec-head" style="margin-bottom:14px"><div><div class="sec-title" style="font-size:14px">입력 토큰 비율</div><div class="sec-desc">입력 토큰 내 유형별 비중</div></div></div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;" id="cacheGrid"></div>
         <div class="viz-card"><div class="viz-title">입력 유형별 토큰 분포</div><div style="position:relative;height:120px;"><canvas id="chartCache"></canvas></div></div>
       </div>
@@ -365,7 +365,7 @@ function se(idx){
     </div>
     <div class="ind-charts fu">
       <div class="cc"><div class="ct">모델별 토큰 분포</div><div id="cp" style="margin-top:8px"></div></div>
-      <div class="cc"><div class="ct">Input / Output / Cache</div><div id="cb" style="margin-top:8px"></div></div>
+      <div class="cc"><div class="ct">입력 토큰 타입</div><div id="cb" style="margin-top:8px"></div></div>
     </div>
     <div class="tg fu">
       <div class="tc2"><div class="th2"><div class="td2" style="background:#34d399"></div><span style="color:#34d399">Input</span></div><div class="tt2" style="color:#34d399">${fmt(d.inp.tot)}</div>${mr('HAIKU',d.inp.h,mI,'#34d399')}${mr('SONNET',d.inp.s,mI,'#34d399')}${mr('OPUS',d.inp.o,mI,'#34d399')}</div>
