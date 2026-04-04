@@ -556,7 +556,15 @@ function closeModal(){
   document.getElementById('modalOverlay').classList.remove('open');
   uploadedData=null;
   document.getElementById('dzFile').textContent='';
-  document.getElementById('applyBtn').disabled=true;
+  document.getElementById('dzFile').style.color='';
+  const btn=document.getElementById('applyBtn');
+  btn.disabled=true;
+  btn.textContent='적용 및 저장';
+  const msg=document.getElementById('githubMsg');
+  msg.style.display='none';
+  msg.textContent='';
+  const errEl=document.getElementById('validationMsg');
+  if(errEl)errEl.remove();
 }
 
 function handleDrop(e){
