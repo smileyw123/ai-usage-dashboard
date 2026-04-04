@@ -546,6 +546,13 @@ function openModal(){
   }
   updateDayOptions();
   ySel.onchange=mSel.onchange=updateDayOptions;
+  // 디버그: 토큰 로드 상태 표시
+  const dbg=document.getElementById('githubMsg');
+  if(dbg){
+    dbg.style.display='block';
+    dbg.style.color='var(--mt)';
+    dbg.textContent=`토큰 상태 - 사외: ${ghTokens.out?ghTokens.out.substring(0,12)+'...':'없음'} / 사내: ${ghTokens.in?ghTokens.in.substring(0,12)+'...':'없음'}`;
+  }
   document.getElementById('modalOverlay').classList.add('open');
 }
 
