@@ -471,11 +471,11 @@ function applyUpload(){
 
   // 데이터 매핑
   const mapped=uploadedData.map(r=>({
-    id:String(r['Knox ID']||r['knox_id']||r['employee_id']||'').trim(),
-    name:String(r['이름']||r['name']||'').trim(),
-    d6:String(r['dept_level_6_name']||r['상위부서']||'').trim(),
-    d7:String(r['dept_level_7_name']||r['부서']||'').trim(),
-    cost:Number(r['total_cost($)']||r['total_cost']||r['사용 비용']*1||0),
+    id:String(r['employee_id']||'').trim(),
+    name:String(r['employee_namekor']||'').trim(),
+    d6:String(r['dept_level_6_name']||'').trim(),
+    d7:String(r['dept_level_7_name']||'').trim(),
+    cost:Number(r['total_cost']||0),
     ih:Number(r['input_haiku']||0),io:Number(r['input_opus']||0),is:Number(r['input_sonnet']||0),
     oh:Number(r['output_haiku']||0),oo:Number(r['output_opus']||0),os:Number(r['output_sonnet']||0),
     crh:Number(r['cache_read_haiku']||0),cro:Number(r['cache_read_opus']||0),crs:Number(r['cache_read_sonnet']||0),
@@ -500,8 +500,8 @@ function applyUpload(){
 
 function downloadTemplate(){
   // SheetJS로 템플릿 생성
-  const headers=['Knox ID','이름','dept_level_6_name','dept_level_7_name',
-    'total_cost($)','input_haiku','input_opus','input_sonnet',
+  const headers=['employee_id','employee_namekor','dept_level_6_name','dept_level_7_name','total_cost',
+    'input_haiku','input_opus','input_sonnet',
     'output_haiku','output_opus','output_sonnet',
     'cache_read_haiku','cache_read_opus','cache_read_sonnet',
     'cache_write_haiku','cache_write_opus','cache_write_sonnet'];
