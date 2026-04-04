@@ -171,8 +171,8 @@ td.id{color:var(--mt);font-size:10px;}
 </header>
 <div id="app">
   <div class="tabs">
-    <button class="tab on" onclick="sw('ov')">📊 전체 현황</button>
-    <button class="tab" onclick="sw('ind')">👤 개인별 현황</button>
+    <button class="tab on" onclick="sw('ov')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>전체 현황</button>
+    <button class="tab" onclick="sw('ind')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>개인별 현황</button>
   </div>
 
   <!-- 전체 현황 -->
@@ -182,7 +182,7 @@ td.id{color:var(--mt);font-size:10px;}
         <div class="kt" style="background:linear-gradient(90deg,#00d4ff,transparent)"></div>
         <div class="dglow" style="background:radial-gradient(circle,rgba(0,212,255,0.15),transparent);position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;pointer-events:none;"></div>
         <div class="kpi-inner">
-          <div class="kpi-icon">💰</div>
+          <div class="kpi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v1m0 8v1M9.5 9.5C9.5 8.4 10.6 8 12 8s2.5.4 2.5 1.5c0 2-5 2-5 4 0 1.1 1.1 1.5 2.5 1.5s2.5-.4 2.5-1.5"/></svg></div>
           <div style="flex:1;min-width:0;">
             <div class="kl kl-large" id="kl-total">4월 사용 비용</div>
             <div class="ks kpi-sub-mobile-hide" id="ks-total"></div>
@@ -197,7 +197,7 @@ td.id{color:var(--mt);font-size:10px;}
         <div class="kt" style="background:linear-gradient(90deg,#a78bfa,transparent)"></div>
         <div class="dglow" style="background:radial-gradient(circle,rgba(167,139,250,0.15),transparent);position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;pointer-events:none;"></div>
         <div class="kpi-inner">
-          <div class="kpi-icon" style="background:rgba(167,139,250,0.15)">👤</div>
+          <div class="kpi-icon" style="background:rgba(167,139,250,0.15)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
           <div style="flex:1;min-width:0;">
             <div class="kl kl-large">인당 평균 비용</div>
             <div class="ks kpi-sub-mobile-hide" id="ks-avg"></div>
@@ -329,7 +329,7 @@ function tblSel(id){
   const dr=(l,v)=>`<div class="dg-row"><span class="dg-label">${l}</span>${dv(v)}</div>`;
   document.getElementById('tblDetail').innerHTML=`
     <div style="margin-top:14px;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:16px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--ac)">${x.name} 상세 데이터</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--ac)">${x.name} 상세 데이터 (단위 : Tokens)</div>
       <div class="detail-grid">
         <div class="dg-section"><div class="dg-title">Input</div>${dr('Haiku',x.ih)}${dr('Sonnet',x.is)}${dr('Opus',x.io)}</div>
         <div class="dg-section"><div class="dg-title">Output</div>${dr('Haiku',x.oh)}${dr('Sonnet',x.os)}${dr('Opus',x.oo)}</div>
@@ -423,7 +423,7 @@ function rio(){
       <div class="io-card-top" style="background:linear-gradient(90deg,#34d399,#00d4ff)"></div>
       <div class="dglow" style="background:radial-gradient(circle,rgba(52,211,153,0.15),transparent);position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;pointer-events:none;"></div>
       <div class="kpi-inner" style="padding:0">
-        <div class="kpi-icon" style="background:rgba(52,211,153,0.15)">📥</div>
+        <div class="kpi-icon" style="background:rgba(52,211,153,0.15)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v13"/><path d="M6 9l6 6 6-6"/><path d="M3 20h18"/></svg></div>
         <div style="flex:1;min-width:0;">
           <div class="kl kl-large">입력 토큰 비율</div>
           <div class="ks kpi-sub-mobile-hide">${fmt(totalInput)} tokens</div>
@@ -438,7 +438,7 @@ function rio(){
       <div class="io-card-top" style="background:#f472b6"></div>
       <div class="dglow" style="background:radial-gradient(circle,rgba(244,114,182,0.15),transparent);position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;pointer-events:none;"></div>
       <div class="kpi-inner" style="padding:0">
-        <div class="kpi-icon" style="background:rgba(244,114,182,0.15)">📤</div>
+        <div class="kpi-icon" style="background:rgba(244,114,182,0.15)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V9"/><path d="M6 15l6-6 6 6"/><path d="M3 4h18"/></svg></div>
         <div style="flex:1;min-width:0;">
           <div class="kl kl-large">출력 토큰 비율</div>
           <div class="ks kpi-sub-mobile-hide">${fmt(output)} tokens</div>
@@ -450,14 +450,14 @@ function rio(){
       </div>
     </div>`;
   document.getElementById('cacheGrid').innerHTML=[
-    {label:'Input (Miss)',tokens:input,pct:ip(input),color:'#34d399',desc:'Cache Miss'},
+    {label:'Input',tokens:input,pct:ip(input),color:'#34d399',desc:'Cache Miss'},
     {label:'Cache Read',tokens:cacheRead,pct:ip(cacheRead),color:'#00d4ff',desc:'Cache Read Hit'},
     {label:'Cache Write',tokens:cacheWrite,pct:ip(cacheWrite),color:'#a78bfa',desc:'Cache Write Hit'},
   ].map(c=>`<div class="io-card fu"><div class="io-card-top" style="background:${c.color}"></div><div class="io-card-label">${c.label}</div><div class="io-card-pct" style="color:${c.color}">${c.pct}%</div><div class="io-card-tokens">${fmt(c.tokens)} tokens</div><div class="io-card-desc">${c.desc}</div></div>`).join('');
   const tip={backgroundColor:'#1a2535',titleColor:'#e2e8f0',bodyColor:'#94a3b8'};
   const tk={color:'#64748b',font:{family:'IBM Plex Sans KR',size:11}};
   if(ch.chartCache)ch.chartCache.destroy();
-  ch.chartCache=new Chart(document.getElementById('chartCache'),{type:'bar',data:{labels:['Input (Miss)','Cache Read','Cache Write'],datasets:[{data:[input,cacheRead,cacheWrite],backgroundColor:['rgba(52,211,153,0.85)','rgba(0,212,255,0.85)','rgba(167,139,250,0.85)'],borderRadius:6,borderSkipped:false,barPercentage:0.42,categoryPercentage:0.7}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}},scales:{x:{display:false},y:{grid:{display:false},ticks:tk}}}});
+  ch.chartCache=new Chart(document.getElementById('chartCache'),{type:'bar',data:{labels:['Input','Cache Read','Cache Write'],datasets:[{data:[input,cacheRead,cacheWrite],backgroundColor:['rgba(52,211,153,0.85)','rgba(0,212,255,0.85)','rgba(167,139,250,0.85)'],borderRadius:6,borderSkipped:false,barPercentage:0.42,categoryPercentage:0.7}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}},scales:{x:{display:false},y:{grid:{display:false},ticks:tk}}}});
 }
 
 function goInd(p){const t=Math.ceil(fil.length/PAGE);if(p<1||p>t)return;curPage=p;rl();}
