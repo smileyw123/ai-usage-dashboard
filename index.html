@@ -235,7 +235,7 @@ td.id{color:var(--mt);font-size:10px;}
 </header>
 
 <!-- 데이터 업로드 모달 -->
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+<div class="modal-overlay open" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-title">데이터 업로드</div>
@@ -1324,12 +1324,11 @@ fil=[];
   // 로딩 제거
   loadingEl.remove();
 
-  if(!loaded || allDates.length===0){
-    setTimeout(()=>{
-      try{ openModal(); }
-      catch(e){ document.getElementById('modalOverlay').classList.add('open'); }
-    },400);
+  if(loaded && allDates.length>0){
+    // 데이터 있으면 모달 닫기
+    document.getElementById('modalOverlay').classList.remove('open');
   }
+  // 데이터 없으면 모달이 기본으로 열려있음
 })();
 
 if(window.innerWidth<=600){
