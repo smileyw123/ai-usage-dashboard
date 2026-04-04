@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Usage Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#07090f;--sf:#0f1623;--sf2:#1a2535;--bd:#1e2d45;--ac:#00d4ff;--ac2:#a78bfa;--ac3:#f59e0b;--tx:#e2e8f0;--mt:#64748b;}
@@ -183,13 +184,89 @@ td.id{color:var(--mt);font-size:10px;}
 .filter-disabled .filter-selected{opacity:.4;cursor:not-allowed;pointer-events:none;}
 .filter-disabled .filter-selected:hover{border-color:var(--bd);}
 @media(max-width:600px){.filter-item{min-width:calc(50% - 6px);}.filter-reset{width:100%;}}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--sf);border:1px solid var(--bd);border-radius:18px;padding:28px;width:100%;max-width:480px;margin:16px;position:relative;}
+.modal-title{font-size:16px;font-weight:800;margin-bottom:4px;}
+.modal-desc{font-size:12px;color:var(--mt);margin-bottom:24px;}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--mt);cursor:pointer;font-size:18px;line-height:1;padding:4px;}
+.modal-close:hover{color:var(--tx);}
+.modal-section{margin-bottom:20px;}
+.modal-label{font-size:11px;color:var(--mt);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.modal-date-row{display:flex;gap:8px;}
+.modal-select{flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;font-family:'IBM Plex Sans KR',sans-serif;font-size:13px;color:var(--tx);outline:none;cursor:pointer;}
+.modal-select:focus{border-color:var(--ac);}
+.modal-btn-row{display:flex;gap:10px;margin-top:8px;}
+.modal-btn{flex:1;padding:11px;border-radius:10px;font-family:'IBM Plex Sans KR',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:none;}
+.modal-btn.secondary{background:var(--sf2);color:var(--mt);border:1px solid var(--bd);}
+.modal-btn.secondary:hover{border-color:var(--ac);color:var(--ac);}
+.modal-btn.primary{background:var(--ac);color:#000;}
+.modal-btn.primary:hover{opacity:.85;}
+.modal-btn.primary:disabled{opacity:.4;cursor:not-allowed;}
+.drop-zone{border:2px dashed var(--bd);border-radius:12px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;color:var(--mt);font-size:13px;}
+.drop-zone:hover,.drop-zone.over{border-color:var(--ac);color:var(--ac);background:rgba(0,212,255,0.04);}
+.drop-zone .dz-icon{font-size:28px;margin-bottom:8px;opacity:.5;}
+.drop-zone .dz-file{font-size:12px;color:var(--ac);margin-top:6px;font-weight:600;}
+.modal-divider{height:1px;background:var(--bd);margin:20px 0;}
+.badge{cursor:pointer;transition:border-color .2s;}
+.badge:hover{border-color:var(--ac);color:var(--tx);}
 </style>
 </head>
 <body>
 <header>
   <a href="#" class="logo-link" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;"><div class="logo">ClaudeCode<span>.</span>Usage</div></a>
-  <div class="badge" id="badge">샘플 데이터</div>
+  <div class="badge" id="badge" onclick="openModal()">샘플 데이터</div>
 </header>
+
+<!-- 데이터 업로드 모달 -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">데이터 업로드</div>
+    <div class="modal-desc">엑셀 파일을 업로드하여 대시보드 데이터를 업데이트하세요</div>
+
+    <!-- 기준 날짜 -->
+    <div class="modal-section">
+      <div class="modal-label">기준 날짜</div>
+      <div class="modal-date-row">
+        <select class="modal-select" id="sel-year"></select>
+        <select class="modal-select" id="sel-month"></select>
+        <select class="modal-select" id="sel-day"></select>
+      </div>
+    </div>
+
+    <!-- 템플릿 다운로드 -->
+    <div class="modal-section">
+      <div class="modal-label">템플릿</div>
+      <button class="modal-btn secondary" style="width:100%" onclick="downloadTemplate()">
+        ↓ 템플릿 엑셀 다운로드
+      </button>
+    </div>
+
+    <div class="modal-divider"></div>
+
+    <!-- 파일 업로드 -->
+    <div class="modal-section">
+      <div class="modal-label">파일 업로드</div>
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
+        ondragover="event.preventDefault();this.classList.add('over')"
+        ondragleave="this.classList.remove('over')"
+        ondrop="handleDrop(event)">
+        <div class="dz-icon">📂</div>
+        <div>클릭하거나 파일을 드래그하세요</div>
+        <div style="font-size:11px;margin-top:4px">.xlsx 파일만 지원</div>
+        <div class="dz-file" id="dzFile"></div>
+      </div>
+      <input type="file" id="fileInput" accept=".xlsx" style="display:none" onchange="handleFile(this.files[0])">
+    </div>
+
+    <div class="modal-btn-row">
+      <button class="modal-btn secondary" onclick="closeModal()">취소</button>
+      <button class="modal-btn primary" id="applyBtn" onclick="applyUpload()" disabled>적용</button>
+    </div>
+  </div>
+</div>
 <div id="app">
   <!-- 서치 필터 -->
   <div class="filter-bar fu">
@@ -320,6 +397,121 @@ td.id{color:var(--mt);font-size:10px;}
 </div>
 
 <script>
+// ── 모달 ──
+let uploadedData=null;
+let dataDate=new Date();
+
+function openModal(){
+  // 날짜 셀렉트 초기화
+  const now=new Date();
+  const ySel=document.getElementById('sel-year');
+  const mSel=document.getElementById('sel-month');
+  const dSel=document.getElementById('sel-day');
+  ySel.innerHTML='';
+  for(let y=now.getFullYear()-1;y<=now.getFullYear()+1;y++){
+    ySel.innerHTML+=`<option value="${y}"${y===dataDate.getFullYear()?' selected':''}>${y}년</option>`;
+  }
+  mSel.innerHTML='';
+  for(let m=1;m<=12;m++){
+    mSel.innerHTML+=`<option value="${m}"${m===dataDate.getMonth()+1?' selected':''}>${m}월</option>`;
+  }
+  updateDayOptions();
+  ySel.onchange=mSel.onchange=updateDayOptions;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function updateDayOptions(){
+  const y=+document.getElementById('sel-year').value;
+  const m=+document.getElementById('sel-month').value;
+  const maxDay=new Date(y,m,0).getDate();
+  const dSel=document.getElementById('sel-day');
+  const cur=+dSel.value||dataDate.getDate();
+  dSel.innerHTML='';
+  for(let d=1;d<=maxDay;d++){
+    dSel.innerHTML+=`<option value="${d}"${d===Math.min(cur,maxDay)?' selected':''}>${d}일</option>`;
+  }
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  uploadedData=null;
+  document.getElementById('dzFile').textContent='';
+  document.getElementById('applyBtn').disabled=true;
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('over');
+  const file=e.dataTransfer.files[0];
+  if(file)handleFile(file);
+}
+
+function handleFile(file){
+  if(!file||!file.name.endsWith('.xlsx'))return alert('.xlsx 파일만 업로드 가능합니다.');
+  document.getElementById('dzFile').textContent=`✓ ${file.name}`;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      uploadedData=rows;
+      document.getElementById('applyBtn').disabled=false;
+    } catch(err){alert('파일을 읽는 중 오류가 발생했습니다.');}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function applyUpload(){
+  if(!uploadedData)return;
+  const y=+document.getElementById('sel-year').value;
+  const m=+document.getElementById('sel-month').value;
+  const d=+document.getElementById('sel-day').value;
+  dataDate=new Date(y,m-1,d);
+
+  // 데이터 매핑
+  const mapped=uploadedData.map(r=>({
+    id:String(r['Knox ID']||r['knox_id']||r['employee_id']||'').trim(),
+    name:String(r['이름']||r['name']||'').trim(),
+    d6:String(r['dept_level_6_name']||r['상위부서']||'').trim(),
+    d7:String(r['dept_level_7_name']||r['부서']||'').trim(),
+    cost:Number(r['total_cost($)']||r['total_cost']||r['사용 비용']*1||0),
+    ih:Number(r['input_haiku']||0),io:Number(r['input_opus']||0),is:Number(r['input_sonnet']||0),
+    oh:Number(r['output_haiku']||0),oo:Number(r['output_opus']||0),os:Number(r['output_sonnet']||0),
+    crh:Number(r['cache_read_haiku']||0),cro:Number(r['cache_read_opus']||0),crs:Number(r['cache_read_sonnet']||0),
+    cwh:Number(r['cache_write_haiku']||0),cwo:Number(r['cache_write_opus']||0),cws:Number(r['cache_write_sonnet']||0),
+  })).filter(r=>r.name);
+
+  // all 재구성
+  all=mapped.map(r=>{
+    const ti=r.ih+r.io+r.is,to=r.oh+r.oo+r.os,tc=r.crh+r.cro+r.crs+r.cwh+r.cwo+r.cws;
+    return{...r,inp:{h:r.ih,o:r.io,s:r.is,tot:ti},out:{h:r.oh,o:r.oo,s:r.os,tot:to},
+      cac:{rh:r.crh,ro:r.cro,rs:r.crs,wh:r.cwh,wo:r.cwo,ws:r.cws,tot:tc},
+      haiku:r.ih+r.oh+r.crh+r.cwh,sonnet:r.is+r.os+r.crs+r.cws,opus:r.io+r.oo+r.cro+r.cwo,total:ti+to+tc};
+  });
+
+  const dateStr=`${y}.${String(m).padStart(2,'0')}.${String(d).padStart(2,'0')}`;
+  document.getElementById('badge').textContent=`${all.length}명 · ${dateStr}`;
+  closeModal();
+  filteredAll=[...all];
+  fil=[...all].sort((a,b)=>b.cost-a.cost);
+  initFilters();
+}
+
+function downloadTemplate(){
+  // SheetJS로 템플릿 생성
+  const headers=['Knox ID','이름','dept_level_6_name','dept_level_7_name',
+    'total_cost($)','input_haiku','input_opus','input_sonnet',
+    'output_haiku','output_opus','output_sonnet',
+    'cache_read_haiku','cache_read_opus','cache_read_sonnet',
+    'cache_write_haiku','cache_write_opus','cache_write_sonnet'];
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([headers]);
+  ws['!cols']=headers.map((h,i)=>({wch:i<4?20:14}));
+  XLSX.utils.book_append_sheet(wb,ws,'AI Usage Data');
+  XLSX.writeFile(wb,'claudecode_usage_template.xlsx');
+}
+
 const AV=[["#00d4ff","rgba(0,212,255,0.15)"],["#a78bfa","rgba(167,139,250,0.15)"],["#f59e0b","rgba(245,158,11,0.15)"],["#f472b6","rgba(244,114,182,0.15)"],["#34d399","rgba(52,211,153,0.15)"],["#fb923c","rgba(251,146,60,0.15)"]];
 let all=[],fil=[],rk='cost',ra=false,sel=null,ch={},openRow=null,tblPage=1,tblData=[],curPage=1;
 // 필터 상태
@@ -623,7 +815,7 @@ document.addEventListener('click',e=>{
 function rkpi(){
   const data=filteredAll;
   const tc=data.reduce((s,d)=>s+d.cost,0),avg=data.length?Math.round(tc/data.length):0;
-  const now=new Date();
+  const now=dataDate;
   const monthLabel=`${now.getMonth()+1}월 사용 비용`;
   document.getElementById('kl-total').textContent=monthLabel;
   document.getElementById('kv-total').textContent=`$${tc.toLocaleString()}`;
