@@ -420,13 +420,15 @@ let ghTokens={out:'',in:''};  // config.json에서 로드됨
 
 // config.json 로드 (토큰 획득)
 async function loadConfig(){
+  const t=Date.now();
   for(const env of['out','in']){
     const cfg=GITHUB[env];
     const rawUrl=env==='out'
-      ?`https://raw.githubusercontent.com/${cfg.repo}/main/config.json`
+      ?`https://raw.githubusercontent.com/${cfg.repo}/main/config.json?t=${t}`
       :`${cfg.api}/repos/${cfg.repo}/contents/config.json`;
     try{
-      const res=await fetch(rawUrl,{cache:'no-store'});
+      const headers=env==='in'?{'Accept':'application/vnd.github+json'}:{};
+      const res=await fetch(rawUrl,{headers,cache:'no-store'});
       if(!res.ok)continue;
       let json;
       if(env==='out'){
@@ -501,11 +503,12 @@ async function saveToGitHub(jsonData){
 }
 
 async function loadFromGitHub(){
+  const t=Date.now();
   for(const env of['out','in']){
     const cfg=GITHUB[env];
     const token=ghTokens[env];
     const rawUrl=env==='out'
-      ?`https://raw.githubusercontent.com/${cfg.repo}/main/data.json`
+      ?`https://raw.githubusercontent.com/${cfg.repo}/main/data.json?t=${t}`
       :`${cfg.api}/repos/${cfg.repo}/contents/data.json`;
     try{
       const headers=token?{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github+json'}:{};
