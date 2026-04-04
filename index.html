@@ -12,7 +12,8 @@
 body{font-family:'IBM Plex Sans KR',sans-serif;background:var(--bg);color:var(--tx);}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
 header{position:sticky;top:0;z-index:100;background:rgba(7,9,15,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;}
-.logo{font-weight:800;font-size:18px;}.logo span{color:var(--ac);}
+.logo{font-weight:800;font-size:18px;color:var(--tx);}.logo span{color:var(--ac);}
+.logo-link{text-decoration:none;color:inherit;}
 .badge{font-size:11px;color:var(--mt);background:var(--sf2);border:1px solid var(--bd);padding:4px 10px;border-radius:20px;}
 #app{position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:28px 24px 80px;}
 .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
@@ -186,7 +187,7 @@ td.id{color:var(--mt);font-size:10px;}
 </head>
 <body>
 <header>
-  <div class="logo">AI<span>.</span>USAGE</div>
+  <a href="#" class="logo-link" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;"><div class="logo">ClaudeCode<span>.</span>Usage</div></a>
   <div class="badge" id="badge">샘플 데이터</div>
 </header>
 <div id="app">
