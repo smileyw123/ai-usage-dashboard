@@ -46,9 +46,9 @@ td.id{color:var(--mt);font-size:10px;}
 .kl{font-size:10px;color:var(--mt);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
 .kv{font-size:26px;font-weight:800;line-height:1;margin-bottom:4px;}
 .ks{font-size:11px;color:var(--mt);}
-.tabs{display:flex;gap:4px;margin-bottom:22px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:4px;width:100%;}
-.tab{flex:1;padding:8px 18px;border:none;background:none;color:var(--mt);font-family:'IBM Plex Sans KR',sans-serif;font-size:12px;cursor:pointer;border-radius:8px;transition:all .2s;text-align:center;}
-.tab.on{background:var(--sf2);color:var(--tx);border:1px solid var(--bd);}
+.tabs{display:flex;gap:6px;margin-bottom:22px;margin-top:6px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:5px;width:100%;border-top:2px solid var(--bd);}
+.tab{flex:1;padding:12px 20px;border:none;background:none;color:var(--mt);font-family:'IBM Plex Sans KR',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border-radius:10px;transition:all .2s;text-align:center;letter-spacing:.3px;}
+.tab.on{background:var(--sf2);color:var(--tx);border:1px solid var(--bd);box-shadow:0 2px 8px rgba(0,0,0,.3);}
 .sec{display:none;}.sec.on{display:block;}
 .cc{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:20px;}
 .ct{font-weight:700;font-size:13px;margin-bottom:4px;}
@@ -163,7 +163,7 @@ td.id{color:var(--mt);font-size:10px;}
 }
 .fu{animation:fu .3s ease forwards;}
 /* Filter bar */
-.filter-bar{display:flex;gap:12px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;}
+.filter-bar{display:flex;gap:12px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--bd);}
 .filter-item{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px;}
 .filter-label{font-size:10px;color:var(--mt);letter-spacing:1px;text-transform:uppercase;}
 .filter-dropdown{position:relative;}
@@ -325,6 +325,7 @@ let all=[],fil=[],rk='cost',ra=false,sel=null,ch={},openRow=null,tblPage=1,tblDa
 let fBiz=new Set(),fUpper=new Set(),fDept=new Set();
 let filteredAll=[];
 const PAGE=5;
+const indPageSize=()=>window.innerWidth<=600?5:10;
 const fmt=n=>n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':n.toLocaleString();
 
 const RAW=[
@@ -718,18 +719,19 @@ function rio(){
   ch.chartCache=new Chart(document.getElementById('chartCache'),{type:'bar',data:{labels:['Input','Cache Read','Cache Write'],datasets:[{data:[input,cacheRead,cacheWrite],backgroundColor:['rgba(52,211,153,0.85)','rgba(0,212,255,0.85)','rgba(167,139,250,0.85)'],borderRadius:6,borderSkipped:false,barPercentage:0.42,categoryPercentage:0.7}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...tip,callbacks:{label:c=>` ${fmt(c.raw)} tokens`}}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{...tk,callback:v=>fmt(v)}},y:{grid:{display:false},ticks:tk}}}});
 }
 
-function goInd(p){const t=Math.ceil(fil.length/PAGE);if(p<1||p>t)return;curPage=p;rl();}
+function goInd(p){const t=Math.ceil(fil.length/indPageSize());if(p<1||p>t)return;curPage=p;rl();}
 function rl(){
   document.getElementById('ec').textContent=`${fil.length}명`;
-  const isMobile=window.innerWidth<=600;
-  const list=isMobile?fil.slice((curPage-1)*PAGE,curPage*PAGE):fil;
+  const ps=indPageSize();
+  const total=Math.ceil(fil.length/ps);
+  const list=fil.slice((curPage-1)*ps,curPage*ps);
   document.getElementById('el').innerHTML=list.map(d=>{
     const oi=all.indexOf(d);const[fg,bg]=AV[oi%AV.length];
     return`<div class="ei${oi===sel?' on':''}" onclick="se(${oi})"><div class="ea" style="background:${bg};color:${fg}">${d.name[0]}</div><div style="flex:1;min-width:0"><div class="en">${d.name} <span style="font-size:10px;color:var(--mt);font-weight:400">${d.id}</span></div><div class="ed">${d.d6} · ${d.d7}</div></div><div class="ec">$${d.cost}</div></div>`;
   }).join('');
   const pg=document.getElementById('indPg');
-  if(isMobile){pg.style.display='flex';pg.innerHTML=mkPg(curPage,Math.ceil(fil.length/PAGE),'goInd');}
-  else{pg.style.display='none';pg.innerHTML='';}
+  pg.style.display='flex';
+  pg.innerHTML=mkPg(curPage,total,'goInd');
 }
 function fl(){
   const q=document.getElementById('si2').value.toLowerCase();
