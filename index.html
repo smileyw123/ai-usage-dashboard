@@ -182,7 +182,7 @@ td.id{color:var(--mt);font-size:10px;}
         <div class="kt" style="background:linear-gradient(90deg,#00d4ff,transparent)"></div>
         <div class="dglow" style="background:radial-gradient(circle,rgba(0,212,255,0.15),transparent);position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;pointer-events:none;"></div>
         <div class="kpi-inner">
-          <div class="kpi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v1m0 8v1M9.5 9.5C9.5 8.4 10.6 8 12 8s2.5.4 2.5 1.5c0 2-5 2-5 4 0 1.1 1.1 1.5 2.5 1.5s2.5-.4 2.5-1.5"/></svg></div>
+          <div class="kpi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
           <div style="flex:1;min-width:0;">
             <div class="kl kl-large" id="kl-total">4월 사용 비용</div>
             <div class="ks kpi-sub-mobile-hide" id="ks-total"></div>
@@ -269,12 +269,12 @@ const PAGE=5;
 const fmt=n=>n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':n.toLocaleString();
 
 const RAW=[
-  {id:'EMP1001',name:'홍길동',d6:'개발본부',d7:'AI팀',cost:125,ih:6916,io:181881,is:0,oh:17404,oo:646480,os:0,crh:2827527,cro:145498844,crs:0,cwh:0,cwo:278595,cws:5481863},
-  {id:'EMP1002',name:'김민준',d6:'마케팅본부',d7:'디지털마케팅팀',cost:87,ih:470,io:676,is:24,oh:36817,oo:78008,os:1405,crh:1555954,cro:107491310,crs:1291674,cwh:124890,cwo:3820273,cws:1673806},
-  {id:'EMP1003',name:'이서연',d6:'인사본부',d7:'교육팀',cost:78,ih:37847,io:89803,is:20474,oh:6751,oo:279678,os:204259,crh:721170,cro:20740812,crs:33105337,cwh:132325,cwo:4534186,cws:5035746},
-  {id:'EMP1004',name:'박준혁',d6:'개발본부',d7:'백엔드팀',cost:104,ih:12340,io:156200,is:3200,oh:24100,oo:512300,os:8700,crh:1923400,cro:98234100,crs:2341200,cwh:0,cwo:198400,cws:4123500},
-  {id:'EMP1005',name:'최지영',d6:'마케팅본부',d7:'콘텐츠팀',cost:63,ih:890,io:1240,is:580,oh:18900,oo:54300,os:3200,crh:987600,cro:62341800,crs:1876500,cwh:98300,cwo:2341500,cws:1234700},
-  {id:'EMP1006',name:'정다은',d6:'개발본부',d7:'AI팀',cost:91,ih:24300,io:134500,is:8900,oh:11200,oo:389400,os:142300,crh:1543200,cro:87654300,crs:21345600,cwh:87600,cwo:312400,cws:3876500},
+  {id:'EMP1001',name:'홍길동',d6:'Solution개발실(메모리)',d7:'SW개발팀',cost:125,ih:6916,io:181881,is:0,oh:17404,oo:646480,os:0,crh:2827527,cro:145498844,crs:0,cwh:0,cwo:278595,cws:5481863},
+  {id:'EMP1002',name:'김민준',d6:'SW Engineering팀(AI센터)',d7:'',cost:87,ih:470,io:676,is:24,oh:36817,oo:78008,os:1405,crh:1555954,cro:107491310,crs:1291674,cwh:124890,cwo:3820273,cws:1673806},
+  {id:'EMP1003',name:'이서연',d6:'Solution개발실(메모리)',d7:'SW개발팀',cost:78,ih:37847,io:89803,is:20474,oh:6751,oo:279678,os:204259,crh:721170,cro:20740812,crs:33105337,cwh:132325,cwo:4534186,cws:5035746},
+  {id:'EMP1004',name:'박준혁',d6:'SW Engineering팀(AI센터)',d7:'SW개발팀',cost:104,ih:12340,io:156200,is:3200,oh:24100,oo:512300,os:8700,crh:1923400,cro:98234100,crs:2341200,cwh:0,cwo:198400,cws:4123500},
+  {id:'EMP1005',name:'최지영',d6:'Solution개발실(메모리)',d7:'',cost:63,ih:890,io:1240,is:580,oh:18900,oo:54300,os:3200,crh:987600,cro:62341800,crs:1876500,cwh:98300,cwo:2341500,cws:1234700},
+  {id:'EMP1006',name:'정다은',d6:'SW Engineering팀(AI센터)',d7:'SW개발팀',cost:91,ih:24300,io:134500,is:8900,oh:11200,oo:389400,os:142300,crh:1543200,cro:87654300,crs:21345600,cwh:87600,cwo:312400,cws:3876500},
 ];
 all=RAW.map(r=>{
   const ti=r.ih+r.io+r.is,to=r.oh+r.oo+r.os,tc=r.crh+r.cro+r.crs+r.cwh+r.cwo+r.cws;
