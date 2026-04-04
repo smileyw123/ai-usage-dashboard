@@ -122,7 +122,17 @@ td.id{color:var(--mt);font-size:10px;}
   .side-grid>div{margin-bottom:24px;}
   .side-grid>div:last-child{margin-bottom:16px;}
 }
+.io-card-label-large{font-size:16px;font-weight:800;color:var(--tx);margin-bottom:6px;}
+.io-kpi-inner{display:flex;align-items:center;justify-content:space-between;width:100%;}
+.io-kpi-left{flex:1;min-width:0;}
+.io-kpi-right{flex-shrink:0;text-align:right;}
+.io-mobile-only{display:none;}
 .viz-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;}
+.viz-title{font-size:12px;font-weight:600;color:var(--mt);margin-bottom:14px;letter-spacing:.5px;}
+@media(max-width:600px){
+  .io-kpi-inner{display:none;}
+  .io-mobile-only{display:block;}
+}
 .viz-title{font-size:12px;font-weight:600;color:var(--mt);margin-bottom:14px;letter-spacing:.5px;}
 @media(max-width:600px){
   #modelGrid .io-card-label,#cacheGrid .io-card-label{font-size:9px;}
@@ -393,12 +403,36 @@ function rio(){
   const gp=v=>grand>0?(v/grand*100).toFixed(2):'0.00';
   const ip=v=>totalInput>0?(v/totalInput*100).toFixed(2):'0.00';
   document.getElementById('ioGrid').innerHTML=`
-    <div class="io-card fu"><div class="io-card-top" style="background:linear-gradient(90deg,#34d399,#00d4ff)"></div><div class="io-card-label">입력 토큰 비율</div><div class="io-card-pct" style="color:#34d399">${gp(totalInput)}%</div><div class="io-card-tokens">${fmt(totalInput)} tokens</div></div>
-    <div class="io-card fu"><div class="io-card-top" style="background:#f472b6"></div><div class="io-card-label">출력 토큰 비율</div><div class="io-card-pct" style="color:#f472b6">${gp(output)}%</div><div class="io-card-tokens">${fmt(output)} tokens</div></div>`;
+    <div class="io-card fu">
+      <div class="io-card-top" style="background:linear-gradient(90deg,#34d399,#00d4ff)"></div>
+      <div class="kpi-inner" style="padding:0">
+        <div style="flex:1;min-width:0;">
+          <div class="kl kl-large">입력 토큰 비율</div>
+          <div class="ks kpi-sub-mobile-hide">${fmt(totalInput)} tokens</div>
+        </div>
+        <div class="kpi-right-amount">
+          <div class="kv" style="color:#34d399;font-size:28px">${gp(totalInput)}%</div>
+          <div class="ks kpi-sub-mobile-only">${fmt(totalInput)} tokens</div>
+        </div>
+      </div>
+    </div>
+    <div class="io-card fu">
+      <div class="io-card-top" style="background:#f472b6"></div>
+      <div class="kpi-inner" style="padding:0">
+        <div style="flex:1;min-width:0;">
+          <div class="kl kl-large">출력 토큰 비율</div>
+          <div class="ks kpi-sub-mobile-hide">${fmt(output)} tokens</div>
+        </div>
+        <div class="kpi-right-amount">
+          <div class="kv" style="color:#f472b6;font-size:28px">${gp(output)}%</div>
+          <div class="ks kpi-sub-mobile-only">${fmt(output)} tokens</div>
+        </div>
+      </div>
+    </div>`;
   document.getElementById('cacheGrid').innerHTML=[
-    {label:'Input (Miss)',tokens:input,pct:ip(input),color:'#34d399',desc:'Cache 미히트 입력'},
-    {label:'Cache Read',tokens:cacheRead,pct:ip(cacheRead),color:'#00d4ff',desc:'Cache 히트 읽기'},
-    {label:'Cache Write',tokens:cacheWrite,pct:ip(cacheWrite),color:'#a78bfa',desc:'Cache 히트 쓰기'},
+    {label:'Input (Miss)',tokens:input,pct:ip(input),color:'#34d399',desc:'Cache Miss'},
+    {label:'Cache Read',tokens:cacheRead,pct:ip(cacheRead),color:'#00d4ff',desc:'Cache Read Hit'},
+    {label:'Cache Write',tokens:cacheWrite,pct:ip(cacheWrite),color:'#a78bfa',desc:'Cache Write Hit'},
   ].map(c=>`<div class="io-card fu"><div class="io-card-top" style="background:${c.color}"></div><div class="io-card-label">${c.label}</div><div class="io-card-pct" style="color:${c.color}">${c.pct}%</div><div class="io-card-tokens">${fmt(c.tokens)} tokens</div><div class="io-card-desc">${c.desc}</div></div>`).join('');
   const tip={backgroundColor:'#1a2535',titleColor:'#e2e8f0',bodyColor:'#94a3b8'};
   const tk={color:'#64748b',font:{family:'IBM Plex Sans KR',size:11}};
