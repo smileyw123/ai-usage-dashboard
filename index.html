@@ -525,19 +525,30 @@ let dataDate=new Date();
 
 function openModal(){
   const now=new Date();
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const minDate=new Date(today);
+  minDate.setDate(minDate.getDate()-60);
+
   const ySel=document.getElementById('sel-year');
   const mSel=document.getElementById('sel-month');
+  const dSel=document.getElementById('sel-day');
+
+  // 년도: 60일 범위 내 년도만
+  const years=new Set();
+  for(let i=0;i<=60;i++){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    years.add(d.getFullYear());
+  }
   ySel.innerHTML='';
-  for(let y=now.getFullYear()-1;y<=now.getFullYear()+1;y++){
+  [...years].sort().forEach(y=>{
     ySel.innerHTML+=`<option value="${y}"${y===dataDate.getFullYear()?' selected':''}>${y}년</option>`;
-  }
-  mSel.innerHTML='';
-  for(let m=1;m<=12;m++){
-    mSel.innerHTML+=`<option value="${m}"${m===dataDate.getMonth()+1?' selected':''}>${m}월</option>`;
-  }
-  updateDayOptions();
-  ySel.onchange=mSel.onchange=updateDayOptions;
-  // 디버그: 토큰 로드 상태 표시
+  });
+
+  updateMonthOptions();
+  ySel.onchange=()=>{updateMonthOptions();checkExistingDate();};
+  mSel.onchange=()=>{updateDayOptions();checkExistingDate();};
+  dSel.onchange=()=>checkExistingDate();
+
   const dbg=document.getElementById('githubMsg');
   if(dbg){
     dbg.style.display='block';
@@ -545,9 +556,30 @@ function openModal(){
     dbg.textContent=`토큰 상태 - 사외: ${ghTokens.out?ghTokens.out.substring(0,12)+'...':'없음'} / 사내: ${ghTokens.in?ghTokens.in.substring(0,12)+'...':'없음'}`;
   }
   document.getElementById('modalOverlay').classList.add('open');
+  checkExistingDate();
+}
+
+function updateMonthOptions(){
+  const today=new Date();
+  const minDate=new Date(today);minDate.setDate(minDate.getDate()-60);
+  const y=+document.getElementById('sel-year').value;
+  const mSel=document.getElementById('sel-month');
+  const prevM=+mSel.value||dataDate.getMonth()+1;
+  mSel.innerHTML='';
+  for(let m=1;m<=12;m++){
+    const firstDay=new Date(y,m-1,1);
+    const lastDay=new Date(y,m,0);
+    if(lastDay<minDate||firstDay>today)continue;
+    mSel.innerHTML+=`<option value="${m}"${m===prevM?' selected':''}>${m}월</option>`;
+  }
+  if(!mSel.value)mSel.selectedIndex=mSel.options.length-1;
+  updateDayOptions();
 }
 
 function updateDayOptions(){
+  const today=new Date();
+  today.setHours(23,59,59,999);
+  const minDate=new Date();minDate.setDate(minDate.getDate()-60);minDate.setHours(0,0,0,0);
   const y=+document.getElementById('sel-year').value;
   const m=+document.getElementById('sel-month').value;
   const maxDay=new Date(y,m,0).getDate();
@@ -555,7 +587,30 @@ function updateDayOptions(){
   const cur=+dSel.value||dataDate.getDate();
   dSel.innerHTML='';
   for(let d=1;d<=maxDay;d++){
-    dSel.innerHTML+=`<option value="${d}"${d===Math.min(cur,maxDay)?' selected':''}>${d}일</option>`;
+    const dt=new Date(y,m-1,d);
+    if(dt<minDate||dt>today)continue;
+    dSel.innerHTML+=`<option value="${d}"${d===cur?' selected':''}>${d}일</option>`;
+  }
+  if(!dSel.value)dSel.selectedIndex=dSel.options.length-1;
+}
+
+function checkExistingDate(){
+  const y=+document.getElementById('sel-year').value;
+  const m=+document.getElementById('sel-month').value;
+  const d=+document.getElementById('sel-day').value;
+  const exists=allDates.find(e=>e.year===y&&e.month===m&&e.day===d);
+  let warn=document.getElementById('dateWarnMsg');
+  if(!warn){
+    warn=document.createElement('div');
+    warn.id='dateWarnMsg';
+    warn.style.cssText='margin-top:8px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:10px 14px;font-size:12px;color:#f59e0b;line-height:1.6;display:none;';
+    document.getElementById('sel-day').closest('.modal-section').appendChild(warn);
+  }
+  if(exists){
+    warn.style.display='block';
+    warn.textContent='⚠️ 해당 날짜에 이미 업로드된 데이터가 있습니다. 새로 업로드하면 기존 데이터는 삭제됩니다.';
+  } else {
+    warn.style.display='none';
   }
 }
 
