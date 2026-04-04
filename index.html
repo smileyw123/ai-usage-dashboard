@@ -412,37 +412,23 @@ td.id{color:var(--mt);font-size:10px;}
 <script>
 // ── GitHub 설정 ──
 const GITHUB={
-  out:{api:'https://api.github.com',repo:'smileyw123/ai-usage-dashboard'},
-  in:{api:'https://github.samsungds.net/api/v3',repo:'yw123-jung/ai-usage-dashboard'}
+  out:{
+    api:'https://api.github.com',
+    repo:'smileyw123/ai-usage-dashboard',
+    token:'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'
+  },
+  in:{
+    api:'https://github.samsungds.net/api/v3',
+    repo:'yw123-jung/ai-usage-dashboard',
+    token:'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'
+  }
 };
 let currentEnv='out';
-let ghTokens={out:'',in:''};  // config.json에서 로드됨
+let ghTokens={out:GITHUB.out.token, in:GITHUB.in.token};
 
-// config.json 로드 (토큰 획득)
 async function loadConfig(){
-  const t=Date.now();
-  for(const env of['out','in']){
-    const cfg=GITHUB[env];
-    const rawUrl=env==='out'
-      ?`https://raw.githubusercontent.com/${cfg.repo}/main/config.json?t=${t}`
-      :`${cfg.api}/repos/${cfg.repo}/contents/config.json`;
-    try{
-      const headers=env==='in'?{'Accept':'application/vnd.github+json'}:{};
-      const res=await fetch(rawUrl,{headers,cache:'no-store'});
-      if(!res.ok)continue;
-      let json;
-      if(env==='out'){
-        json=await res.json();
-      } else {
-        const d=await res.json();
-        json=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
-      }
-      if(json.out_token)ghTokens.out=json.out_token;
-      if(json.in_token)ghTokens.in=json.in_token;
-      return true;
-    }catch(e){continue;}
-  }
-  return false;
+  // 토큰이 이미 하드코딩되어 있으므로 바로 반환
+  return true;
 }
 
 function setEnv(env){
