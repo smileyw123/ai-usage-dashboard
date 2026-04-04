@@ -209,6 +209,9 @@ td.id{color:var(--mt);font-size:10px;}
 .drop-zone .dz-icon{font-size:28px;margin-bottom:8px;opacity:.5;}
 .drop-zone .dz-file{font-size:12px;color:var(--ac);margin-top:6px;font-weight:600;}
 .modal-divider{height:1px;background:var(--bd);margin:20px 0;}
+.env-toggle{display:flex;gap:6px;}
+.env-btn{flex:1;padding:9px;border-radius:10px;font-family:'IBM Plex Sans KR',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:var(--sf2);border:1px solid var(--bd);color:var(--mt);}
+.env-btn.on{background:var(--ac);border-color:var(--ac);color:#000;}
 .badge{cursor:pointer;transition:border-color .2s;}
 .badge:hover{border-color:var(--ac);color:var(--tx);}
 </style>
@@ -225,6 +228,15 @@ td.id{color:var(--mt);font-size:10px;}
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-title">데이터 업로드</div>
     <div class="modal-desc">엑셀 파일을 업로드하여 대시보드 데이터를 업데이트하세요</div>
+
+    <!-- 환경 선택 -->
+    <div class="modal-section">
+      <div class="modal-label">환경 선택</div>
+      <div class="env-toggle">
+        <button class="env-btn on" id="envBtnOut" onclick="setEnv('out')">🌐 사외</button>
+        <button class="env-btn" id="envBtnIn" onclick="setEnv('in')">🏢 사내</button>
+      </div>
+    </div>
 
     <!-- 기준 날짜 -->
     <div class="modal-section">
@@ -263,8 +275,9 @@ td.id{color:var(--mt);font-size:10px;}
 
     <div class="modal-btn-row">
       <button class="modal-btn secondary" onclick="closeModal()">취소</button>
-      <button class="modal-btn primary" id="applyBtn" onclick="applyUpload()" disabled>적용</button>
+      <button class="modal-btn primary" id="applyBtn" onclick="applyUpload()" disabled>적용 및 저장</button>
     </div>
+    <div id="githubMsg" style="display:none;margin-top:12px;font-size:12px;text-align:center;"></div>
   </div>
 </div>
 <div id="app">
@@ -397,7 +410,65 @@ td.id{color:var(--mt);font-size:10px;}
 </div>
 
 <script>
-// ── 모달 ──
+// ── GitHub 설정 ──
+const GITHUB={
+  out:{
+    api:'https://api.github.com',
+    repo:'smileyw123/ai-usage-dashboard',
+    token:'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'
+  },
+  in:{
+    api:'https://github.samsungds.net/api/v3',
+    repo:'yw123-jung/ai-usage-dashboard',
+    token:'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'
+  }
+};
+let currentEnv='out';
+
+function setEnv(env){
+  currentEnv=env;
+  document.getElementById('envBtnOut').classList.toggle('on',env==='out');
+  document.getElementById('envBtnIn').classList.toggle('on',env==='in');
+}
+
+async function saveToGitHub(jsonData){
+  const cfg=GITHUB[currentEnv];
+  const url=`${cfg.api}/repos/${cfg.repo}/contents/data.json`;
+  const content=btoa(unescape(encodeURIComponent(JSON.stringify(jsonData,null,2))));
+  const headers={'Authorization':`token ${cfg.token}`,'Content-Type':'application/json'};
+
+  // 기존 파일 SHA 조회
+  let sha='';
+  try{
+    const res=await fetch(url,{headers});
+    if(res.ok){const d=await res.json();sha=d.sha;}
+  }catch(e){}
+
+  // 파일 업데이트
+  const body={message:`Update data.json - ${new Date().toISOString()}`,content,branch:'main'};
+  if(sha)body.sha=sha;
+  const res=await fetch(url,{method:'PUT',headers,body:JSON.stringify(body)});
+  if(!res.ok)throw new Error(`GitHub 저장 실패: ${res.status}`);
+}
+
+async function loadFromGitHub(){
+  // 사외/사내 순서로 data.json 로드 시도
+  for(const env of['out','in']){
+    const cfg=GITHUB[env];
+    const url=`${cfg.api}/repos/${cfg.repo}/contents/data.json`;
+    try{
+      const res=await fetch(url,{headers:{'Authorization':`token ${cfg.token}`}});
+      if(!res.ok)continue;
+      const d=await res.json();
+      const json=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));
+      if(json&&json.rows&&json.rows.length>0){
+        applyJsonData(json);
+        return true;
+      }
+    }catch(e){}
+  }
+  return false;
+}
 let uploadedData=null;
 let dataDate=new Date();
 
@@ -540,14 +611,32 @@ function showValidationError(title, msg){
   document.getElementById('applyBtn').disabled=true;
 }
 
-function applyUpload(){
+function applyJsonData(json){
+  const y=json.year,m=json.month,d=json.day;
+  dataDate=new Date(y,m-1,d);
+  all=json.rows.map(r=>{
+    const ti=r.ih+r.io+r.is,to=r.oh+r.oo+r.os,tc=r.crh+r.cro+r.crs+r.cwh+r.cwo+r.cws;
+    return{...r,inp:{h:r.ih,o:r.io,s:r.is,tot:ti},out:{h:r.oh,o:r.oo,s:r.os,tot:to},
+      cac:{rh:r.crh,ro:r.cro,rs:r.crs,wh:r.cwh,wo:r.cwo,ws:r.cws,tot:tc},
+      haiku:r.ih+r.oh+r.crh+r.cwh,sonnet:r.is+r.os+r.crs+r.cws,opus:r.io+r.oo+r.cro+r.cwo,total:ti+to+tc};
+  });
+  const dateStr=`${y}.${String(m).padStart(2,'0')}.${String(d).padStart(2,'0')}`;
+  const badge=document.getElementById('badge');
+  badge.textContent=`${all.length}명 · ${dateStr}`;
+  badge.style.display='';
+  const ov=document.getElementById('empty-overlay');
+  if(ov)ov.remove();
+  filteredAll=[...all];
+  fil=[...all].sort((a,b)=>b.cost-a.cost);
+  initFilters();
+}
+
+async function applyUpload(){
   if(!uploadedData)return;
   const y=+document.getElementById('sel-year').value;
   const m=+document.getElementById('sel-month').value;
   const d=+document.getElementById('sel-day').value;
-  dataDate=new Date(y,m-1,d);
 
-  // 데이터 매핑
   const mapped=uploadedData.map(r=>({
     id:String(r['employee_id']||'').trim(),
     name:String(r['employee_namekor']||'').trim(),
@@ -560,26 +649,31 @@ function applyUpload(){
     cwh:Number(r['cache_write_haiku']||0),cwo:Number(r['cache_write_opus']||0),cws:Number(r['cache_write_sonnet']||0),
   })).filter(r=>r.name);
 
-  // all 재구성
-  all=mapped.map(r=>{
-    const ti=r.ih+r.io+r.is,to=r.oh+r.oo+r.os,tc=r.crh+r.cro+r.crs+r.cwh+r.cwo+r.cws;
-    return{...r,inp:{h:r.ih,o:r.io,s:r.is,tot:ti},out:{h:r.oh,o:r.oo,s:r.os,tot:to},
-      cac:{rh:r.crh,ro:r.cro,rs:r.crs,wh:r.cwh,wo:r.cwo,ws:r.cws,tot:tc},
-      haiku:r.ih+r.oh+r.crh+r.cwh,sonnet:r.is+r.os+r.crs+r.cws,opus:r.io+r.oo+r.cro+r.cwo,total:ti+to+tc};
-  });
+  const jsonData={year:y,month:m,day:d,rows:mapped};
 
-  const dateStr=`${y}.${String(m).padStart(2,'0')}.${String(d).padStart(2,'0')}`;
-  const badge=document.getElementById('badge');
-  badge.textContent=`${all.length}명 · ${dateStr}`;
-  badge.style.color='';
-  badge.style.borderColor='';
-  badge.style.display='';
-  const ov=document.getElementById('empty-overlay');
-  if(ov)ov.remove();
-  closeModal();
-  filteredAll=[...all];
-  fil=[...all].sort((a,b)=>b.cost-a.cost);
-  initFilters();
+  // GitHub 저장
+  const btn=document.getElementById('applyBtn');
+  const msg=document.getElementById('githubMsg');
+  btn.disabled=true;
+  btn.textContent='저장 중...';
+  msg.style.display='block';
+  msg.style.color='var(--mt)';
+  msg.textContent='GitHub에 데이터를 저장하고 있습니다...';
+
+  try{
+    await saveToGitHub(jsonData);
+    msg.style.color='#34d399';
+    msg.textContent='✓ GitHub 저장 완료!';
+    setTimeout(()=>{
+      applyJsonData(jsonData);
+      closeModal();
+    },800);
+  }catch(e){
+    msg.style.color='#f472b6';
+    msg.textContent=`저장 실패: ${e.message}`;
+    btn.disabled=false;
+    btn.textContent='적용 및 저장';
+  }
 }
 
 function downloadTemplate(){
@@ -1049,18 +1143,24 @@ window.addEventListener('resize',()=>{
 filteredAll=[];
 fil=[];
 
-// 빈 상태로 시작
-// 빈 상태 안내 오버레이
-const emptyEl=document.createElement('div');
-emptyEl.id='empty-overlay';
-emptyEl.style.cssText='position:fixed;inset:0;background:rgba(7,9,15,0.85);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(4px);';
-emptyEl.innerHTML=`
-  <div style="font-size:48px;opacity:.3">📂</div>
-  <div style="font-size:18px;font-weight:800;color:var(--tx)">데이터가 없습니다</div>
-  <div style="font-size:13px;color:var(--mt)">우측 상단 배지를 클릭하여 엑셀 파일을 업로드해 주세요</div>
-  <button onclick="openModal();document.getElementById('empty-overlay').remove();" style="margin-top:8px;background:var(--ac);color:#000;border:none;border-radius:10px;padding:12px 28px;font-family:'IBM Plex Sans KR',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">📤 데이터 업로드</button>
-`;
-document.body.appendChild(emptyEl);
+// GitHub에서 데이터 자동 로드
+(async()=>{
+  const loaded=await loadFromGitHub();
+  if(!loaded){
+    // 데이터 없음 화면
+    document.getElementById('badge').style.display='none';
+    const emptyEl=document.createElement('div');
+    emptyEl.id='empty-overlay';
+    emptyEl.style.cssText='position:fixed;inset:0;background:rgba(7,9,15,0.85);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(4px);';
+    emptyEl.innerHTML=`
+      <div style="font-size:48px;opacity:.3">📂</div>
+      <div style="font-size:18px;font-weight:800;color:var(--tx)">데이터가 없습니다</div>
+      <div style="font-size:13px;color:var(--mt)">우측 상단 배지를 클릭하여 엑셀 파일을 업로드해 주세요</div>
+      <button onclick="openModal();document.getElementById('empty-overlay').remove();" style="margin-top:8px;background:var(--ac);color:#000;border:none;border-radius:10px;padding:12px 28px;font-family:'IBM Plex Sans KR',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">📤 데이터 업로드</button>
+    `;
+    document.body.appendChild(emptyEl);
+  }
+})();
 
 if(window.innerWidth<=600){
   const g=document.createElement('div');g.id='inline-detail';g.className='dp';g.style.cssText='padding:16px 4px;';
