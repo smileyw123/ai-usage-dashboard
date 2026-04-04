@@ -1303,6 +1303,23 @@ window.addEventListener('resize',()=>{
 filteredAll=[];
 fil=[];
 
+// 모달 날짜 초기화 (모달이 기본으로 열려있으므로)
+(function initModalDates(){
+  const now=new Date();
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const ySel=document.getElementById('sel-year');
+  const mSel=document.getElementById('sel-month');
+  const dSel=document.getElementById('sel-day');
+  const years=new Set();
+  for(let i=0;i<=60;i++){const d=new Date(today);d.setDate(d.getDate()-i);years.add(d.getFullYear());}
+  ySel.innerHTML='';
+  [...years].sort().forEach(y=>{ySel.innerHTML+=`<option value="${y}">${y}년</option>`;});
+  updateMonthOptions();
+  ySel.onchange=()=>{updateMonthOptions();checkExistingDate();};
+  mSel.onchange=()=>{updateDayOptions();checkExistingDate();};
+  dSel.onchange=()=>checkExistingDate();
+})();
+
 // 초기화: config → data 순서로 로드
 (async()=>{
   // 로딩 표시
