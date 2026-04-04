@@ -110,7 +110,8 @@ td.id{color:var(--mt);font-size:10px;}
 .dg-value{font-size:12px;font-weight:600;color:#94a3b8;}
 .dg-value.z{color:var(--sf2);}
 .io-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-items:stretch;}
-.io-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+.io-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s;}
+.io-card:hover{transform:translateY(-2px);}
 .io-card-top{position:absolute;top:0;left:0;right:0;height:3px;}
 .io-card-label{font-size:10px;color:var(--mt);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
 .io-card-tokens{font-size:14px;font-weight:700;margin-bottom:2px;color:var(--mt);}
