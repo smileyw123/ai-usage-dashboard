@@ -163,12 +163,10 @@ td.id{color:var(--mt);font-size:10px;}
         <div class="dglow" style="background:radial-gradient(circle,rgba(0,212,255,0.15),transparent);position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;pointer-events:none;"></div>
         <div class="kpi-inner">
           <div class="kpi-icon">💰</div>
-          <div class="kpi-text">
+          <div style="flex:1;min-width:0;">
             <div class="kl" id="kl-total">4월 사용 비용</div>
+            <div class="kv" style="color:#00d4ff;margin:4px 0;" id="kv-total"></div>
             <div class="ks" id="ks-total"></div>
-          </div>
-          <div class="kpi-amount">
-            <div class="kv" style="color:#00d4ff" id="kv-total"></div>
           </div>
         </div>
       </div>
@@ -177,12 +175,10 @@ td.id{color:var(--mt);font-size:10px;}
         <div class="dglow" style="background:radial-gradient(circle,rgba(167,139,250,0.15),transparent);position:absolute;right:-20px;top:-20px;width:140px;height:140px;border-radius:50%;pointer-events:none;"></div>
         <div class="kpi-inner">
           <div class="kpi-icon">👤</div>
-          <div class="kpi-text">
+          <div style="flex:1;min-width:0;">
             <div class="kl">인당 평균 비용</div>
+            <div class="kv" style="color:#a78bfa;margin:4px 0;" id="kv-avg"></div>
             <div class="ks" id="ks-avg"></div>
-          </div>
-          <div class="kpi-amount">
-            <div class="kv" style="color:#a78bfa" id="kv-avg"></div>
           </div>
         </div>
       </div>
@@ -315,15 +311,36 @@ function rr(){
   renderTbl();
 }
 
+function getWorkingDays(year, month, untilDay){
+  let count=0;
+  for(let d=1;d<=untilDay;d++){
+    const day=new Date(year,month,d).getDay();
+    if(day!==0&&day!==6)count++;
+  }
+  return count;
+}
+function getTotalWorkingDays(year, month){
+  const lastDay=new Date(year,month+1,0).getDate();
+  return getWorkingDays(year,month,lastDay);
+}
+
 function rkpi(){
   const tc=all.reduce((s,d)=>s+d.cost,0),avg=all.length?Math.round(tc/all.length):0;
   const now=new Date();
   const monthLabel=`${now.getMonth()+1}월 사용 비용`;
   document.getElementById('kl-total').textContent=monthLabel;
   document.getElementById('kv-total').textContent=`$${tc.toLocaleString()}`;
-  document.getElementById('ks-total').textContent=`${all.length}명 합계`;
+  document.getElementById('ks-total').textContent=`사용인력 총 ${all.length}명`;
+
+  const BUDGET=180;
+  const year=now.getFullYear(), month=now.getMonth();
+  const yesterday=now.getDate()-1;
+  const totalWD=getTotalWorkingDays(year,month);
+  const elapsedWD=yesterday>0?getWorkingDays(year,month,yesterday):0;
+  const appropriate=totalWD>0?Math.round(BUDGET/totalWD*elapsedWD):0;
+
   document.getElementById('kv-avg').textContent=`$${avg.toLocaleString()}`;
-  document.getElementById('ks-avg').textContent=`1인당 평균`;
+  document.getElementById('ks-avg').textContent=`1인 적정 금액 : $${appropriate.toLocaleString()}`;
 }
 
 function sw(t){
