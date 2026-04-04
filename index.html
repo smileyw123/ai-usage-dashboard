@@ -533,7 +533,6 @@ function openModal(){
   const now=new Date();
   const ySel=document.getElementById('sel-year');
   const mSel=document.getElementById('sel-month');
-  const dSel=document.getElementById('sel-day');
   ySel.innerHTML='';
   for(let y=now.getFullYear()-1;y<=now.getFullYear()+1;y++){
     ySel.innerHTML+=`<option value="${y}"${y===dataDate.getFullYear()?' selected':''}>${y}년</option>`;
@@ -544,12 +543,6 @@ function openModal(){
   }
   updateDayOptions();
   ySel.onchange=mSel.onchange=updateDayOptions;
-  // 저장소 링크 설정
-  const cfg=GITHUB[currentEnv];
-  const repoUrl=currentEnv==='out'
-    ?`https://github.com/${cfg.repo}/upload`
-    :`https://github.samsungds.net/${cfg.repo}`;
-  document.getElementById('repoLink').href=repoUrl.replace('/upload','');
   document.getElementById('modalOverlay').classList.add('open');
 }
 
