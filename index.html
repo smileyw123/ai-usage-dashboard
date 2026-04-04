@@ -540,8 +540,12 @@ function openModal(){
   const ySel=document.getElementById('sel-year');
   const mSel=document.getElementById('sel-month');
   const dSel=document.getElementById('sel-day');
+  if(!ySel||!mSel||!dSel){
+    document.getElementById('modalOverlay').classList.add('open');
+    return;
+  }
 
-  // 년도: 60일 범위 내 년도만
+  // 년도 옵션 설정
   const years=new Set();
   for(let i=0;i<=60;i++){
     const d=new Date(today);d.setDate(d.getDate()-i);
@@ -557,12 +561,6 @@ function openModal(){
   mSel.onchange=()=>{updateDayOptions();checkExistingDate();};
   dSel.onchange=()=>checkExistingDate();
 
-  const dbg=document.getElementById('githubMsg');
-  if(dbg){
-    dbg.style.display='block';
-    dbg.style.color='var(--mt)';
-    dbg.textContent=`토큰 상태 - 사외: ${ghTokens.out?ghTokens.out.substring(0,12)+'...':'없음'} / 사내: ${ghTokens.in?ghTokens.in.substring(0,12)+'...':'없음'}`;
-  }
   document.getElementById('modalOverlay').classList.add('open');
   checkExistingDate();
 }
@@ -1328,7 +1326,10 @@ fil=[];
 
   if(!loaded){
     // 데이터 없으면 바로 업로드 모달 열기
-    setTimeout(()=>openModal(),300);
+    setTimeout(()=>{
+      try{ openModal(); }
+      catch(e){ document.getElementById('modalOverlay').classList.add('open'); }
+    },400);
   }
 })();
 
