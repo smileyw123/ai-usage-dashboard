@@ -371,24 +371,24 @@ td.id{color:var(--mt);font-size:10px;}
       </div>
     </div>
     <div style="margin-bottom:24px">
-      <div class="sec-head" style="margin-bottom:14px"><div><div class="sec-title" style="font-size:14px">입력 / 출력 토큰 비율</div><div class="sec-desc">전체 토큰 대비 입력 · 출력 비중</div></div></div>
+      <div class="sec-head" style="margin-bottom:14px"><div><div class="sec-title" style="font-size:14px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-1px;margin-right:6px;opacity:.7"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>입력 / 출력 토큰 비율</div><div class="sec-desc">전체 토큰 대비 입력 · 출력 비중</div></div></div>
       <div class="io-grid" id="ioGrid"></div>
     </div>
     <div class="side-grid">
       <div>
-        <div class="sec-head" style="margin-bottom:14px"><div><div class="sec-title" style="font-size:14px">입력 토큰 비율</div><div class="sec-desc">입력 토큰 내 유형별 비중</div></div></div>
+        <div class="sec-head" style="margin-bottom:14px"><div><div class="sec-title" style="font-size:14px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-1px;margin-right:6px;opacity:.7"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>입력 토큰 비율</div><div class="sec-desc">입력 토큰 내 유형별 비중</div></div></div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;" id="cacheGrid"></div>
         <div class="viz-card"><div class="viz-title">입력 유형별 토큰 분포</div><div style="position:relative;height:120px;"><canvas id="chartCache"></canvas></div></div>
       </div>
       <div>
-        <div class="sec-head" style="margin-bottom:14px"><div><div class="sec-title" style="font-size:14px">모델별 토큰 사용 비율</div><div class="sec-desc">전체 토큰 대비 Haiku · Sonnet · Opus 비중</div></div></div>
+        <div class="sec-head" style="margin-bottom:14px"><div><div class="sec-title" style="font-size:14px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-1px;margin-right:6px;opacity:.7"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>모델별 토큰 사용 비율</div><div class="sec-desc">전체 토큰 대비 Haiku · Sonnet · Opus 비중</div></div></div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;" id="modelGrid"></div>
         <div class="viz-card"><div class="viz-title">모델별 토큰 분포</div><div style="position:relative;height:120px;"><canvas id="chartModel"></canvas></div></div>
       </div>
     </div>
     <div style="margin-bottom:16px">
       <div class="sec-head" style="margin-bottom:14px">
-        <div><div class="sec-title" style="font-size:14px">📋 원본 데이터 <span>테이블</span></div><div class="sec-desc">행을 탭하면 상세 데이터가 표시됩니다</div></div>
+        <div><div class="sec-title" style="font-size:14px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-1px;margin-right:6px;opacity:.7"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>원본 데이터 <span>테이블</span></div><div class="sec-desc">행을 탭하면 상세 데이터가 표시됩니다</div></div>
         <div class="tbl-ctrl"><input class="si" id="rs" placeholder="이름, 부서, 사번 검색..." oninput="rr()"><span style="font-size:11px;color:var(--mt)" id="rc"></span></div>
       </div>
       <div class="tw">
