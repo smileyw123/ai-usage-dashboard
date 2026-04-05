@@ -966,8 +966,6 @@ function parseDeptFull(d6){
   return{biz:'',upper:d6};
 }
 
-const NONE_DEPT='__none__'; // 부서 없음을 나타내는 특수값
-
 function initFilters(){
   // 데이터 없을 때 필터 초기화 - 미선택 + 비활성화
   if(all.length===0){
@@ -992,7 +990,7 @@ function initFilters(){
     const {biz,upper}=parseDeptFull(d.d6);
     if(biz)bizAll.add(biz);
     if(upper)upperAll.add(upper);
-    deptAll.add(d.d7||NONE_DEPT); // 부서 없는 경우도 명시적으로 추가
+    if(d.d7)deptAll.add(d.d7);
   });
   fBiz=new Set([...bizAll]);
   fUpper=new Set([...upperAll]);
@@ -1007,10 +1005,9 @@ function initFilters(){
 
 function buildDropdown(key,items,selected){
   const el=document.getElementById('fo-'+key);
-  const allChecked=items.length>0&&items.every(i=>selected.has(i));
-  const label=i=>i===NONE_DEPT?'부서 없음':i;
+  const allChecked=items.every(i=>selected.has(i));
   el.innerHTML=`<div class="filter-option${allChecked?' checked':''}" onclick="toggleOpt('${key}','__all__')"><div class="chk">${allChecked?'✓':''}</div>전체</div>`
-    +items.map(i=>`<div class="filter-option${selected.has(i)?' checked':''}" onclick="toggleOpt('${key}','${i.replace(/'/g,"\\'")}')"><div class="chk">${selected.has(i)?'✓':''}</div>${label(i)}</div>`).join('');
+    +items.map(i=>`<div class="filter-option${selected.has(i)?' checked':''}" onclick="toggleOpt('${key}','${i.replace(/'/g,"\\'")}')"><div class="chk">${selected.has(i)?'✓':''}</div>${i||'(없음)'}</div>`).join('');
 }
 
 function getAvailableOptions(key){
@@ -1024,6 +1021,7 @@ function getAvailableOptions(key){
 }
 
 function getFilteredOptions(){
+  // 사업부 기준으로 상위부서 옵션 계산
   const upperOpts=new Set(),deptOpts=new Set();
   const bizAll=new Set();
   all.forEach(d=>{
@@ -1031,7 +1029,7 @@ function getFilteredOptions(){
     bizAll.add(biz);
     if(fBiz.has(biz)){
       upperOpts.add(upper);
-      if(fUpper.has(upper))deptOpts.add(d.d7||NONE_DEPT);
+      if(fUpper.has(upper)&&d.d7)deptOpts.add(d.d7);
     }
   });
   return{biz:[...bizAll],upper:[...upperOpts],dept:[...deptOpts]};
@@ -1061,7 +1059,7 @@ function toggleOpt(key,val){
         const {biz,upper}=parseDeptFull(d.d6);
         if(fBiz.has(biz)){
           validUppers.add(upper);
-          validDepts.add(d.d7||NONE_DEPT);
+          if(d.d7)validDepts.add(d.d7);
         }
       });
       fUpper=new Set([...validUppers]);
@@ -1077,7 +1075,7 @@ function toggleOpt(key,val){
       const validDepts=new Set();
       all.forEach(d=>{
         const {biz,upper}=parseDeptFull(d.d6);
-        if(fBiz.has(biz)&&fUpper.has(upper))validDepts.add(d.d7||NONE_DEPT);
+        if(fBiz.has(biz)&&fUpper.has(upper)&&d.d7)validDepts.add(d.d7);
       });
       fDept=new Set([...validDepts]);
     }
@@ -1105,7 +1103,7 @@ function updateFilterLabels(){
   };
   document.getElementById('fs-biz').textContent=lbl(fBiz,bizAll,bizNone);
   document.getElementById('fs-upper').textContent=lbl(fUpper,opts.upper,upperNone);
-  document.getElementById('fs-dept').textContent=fDept.size===0?'미선택':opts.dept.every(o=>fDept.has(o))?'전체':[...fDept].map(v=>v===NONE_DEPT?'부서 없음':v).join(', ')||'미선택';
+  document.getElementById('fs-dept').textContent=fDept.size===0?'미선택':opts.dept.every(o=>fDept.has(o))?'전체':[...fDept].join(', ')||'미선택';
 
   // 비활성화 처리
   const upperSel=document.getElementById('fd-upper');
@@ -1136,7 +1134,7 @@ function applyFilter(){
     const {biz,upper}=parseDeptFull(d.d6);
     const bizOk=fBiz.has(biz);
     const upperOk=fUpper.has(upper);
-    const deptOk=fDept.has(d.d7||NONE_DEPT); // 부서 없음도 명시적으로 처리
+    const deptOk=!d.d7||fDept.has(d.d7);
     return bizOk&&upperOk&&deptOk;
   });
   rkpi();rio();rov();rr();
