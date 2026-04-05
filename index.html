@@ -1123,6 +1123,18 @@ function applyFilter(){
   rkpi();rio();rov();rr();
   fil=[...filteredAll].sort((a,b)=>b.cost-a.cost);
   curPage=1;rl();
+
+  // 선택된 사용자가 필터 결과에 없으면 세부정보 초기화
+  if(sel!==null){
+    const selUser=all[sel];
+    if(!filteredAll.find(d=>d.id===selUser?.id)){
+      sel=null;
+      const dp=document.getElementById('dp');
+      if(dp)dp.innerHTML=`<div class="ns"><div style="font-size:34px;opacity:.2">👤</div><div style="font-size:13px">직원을 선택하면 상세 현황이 표시됩니다</div></div>`;
+      const old=document.getElementById('inline-detail');
+      if(old)old.remove();
+    }
+  }
 }
 
 function resetFilter(){
