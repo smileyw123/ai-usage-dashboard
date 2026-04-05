@@ -1300,13 +1300,6 @@ function renderTrend(){
     options:{...commonOpts}
   });
 }
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
-  document.getElementById('tab-'+t).classList.add('on');
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
-  document.getElementById('sec-'+t).classList.add('on');
-  if(t==='ov'){rkpi();rio();rov();rr();}
-  if(t==='trend'){renderTrend();}
-}
 
 function rov(){
   const data=filteredAll;
