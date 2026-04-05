@@ -767,7 +767,7 @@ function applyJsonData(entry){
   filteredAll=[...all];
   fil=[...all].sort((a,b)=>b.cost-a.cost);
   initFilters();
-  updateTabLabels();
+  try{updateTabLabels();}catch(e){}
 }
 
 function renderDateSelector(){
@@ -1140,8 +1140,8 @@ function applyFilter(){
   rkpi();rio();rov();rr();
   fil=[...filteredAll].sort((a,b)=>b.cost-a.cost);
   curPage=1;rl();
-  updateTabLabels();
-  if(document.getElementById('sec-trend').classList.contains('on'))renderTrend();
+  try{updateTabLabels();}catch(e){}
+  try{if(document.getElementById('sec-trend')?.classList.contains('on'))renderTrend();}catch(e){}
 
   // 선택된 사용자가 필터 결과에 없으면 세부정보 초기화
   if(sel!==null){
@@ -1206,24 +1206,28 @@ function rkpi(){
 }
 
 function updateTabLabels(){
+  if(!dataDate||!allDates)return;
+  const tabOvLabel=document.getElementById('tab-ov-label');
+  const tabIndLabel=document.getElementById('tab-ind-label');
+  const tabTrendLabel=document.getElementById('tab-trend-label');
+  const trendBtn=document.getElementById('tab-trend');
+  if(!tabOvLabel||!tabIndLabel||!tabTrendLabel||!trendBtn)return;
   const y=dataDate.getFullYear();
   const m=String(dataDate.getMonth()+1).padStart(2,'0');
   const d=String(dataDate.getDate()).padStart(2,'0');
   const dateStr=`${String(y).slice(2)}.${m}.${d}`;
-  document.getElementById('tab-ov-label').textContent=`전체 현황 (${dateStr} 기준)`;
-  document.getElementById('tab-ind-label').textContent=`개인별 현황 (${dateStr} 기준)`;
+  tabOvLabel.textContent=`전체 현황 (${dateStr} 기준)`;
+  tabIndLabel.textContent=`개인별 현황 (${dateStr} 기준)`;
 
-  // 추이 탭: 같은 월 데이터 2개 이상일 때만 활성화
   const curMonth=dataDate.getMonth()+1;
   const curYear=dataDate.getFullYear();
   const monthDates=allDates.filter(e=>e.year===curYear&&e.month===curMonth);
-  const trendBtn=document.getElementById('tab-trend');
   if(monthDates.length>=2){
     trendBtn.disabled=false;
-    document.getElementById('tab-trend-label').textContent=`${m}월 일자별 추이`;
+    tabTrendLabel.textContent=`${m}월 일자별 추이`;
   } else {
     trendBtn.disabled=true;
-    document.getElementById('tab-trend-label').textContent=`일자별 추이`;
+    tabTrendLabel.textContent=`일자별 추이`;
   }
 }
 
