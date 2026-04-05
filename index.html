@@ -1292,7 +1292,7 @@ function renderTrend(){
   // filteredAll 기준으로 그룹 종류 파악
   const allGroups=[...new Set(filteredAll.map(getGroup))];
   // 그룹이 2개 이상이고 전체와 다를 때만 표시
-  const groupDatasets=allGroups.length>=2?allGroups.map((grp,gi)=>{
+  const groupDatasets=allGroups.length>=1?allGroups.map((grp,gi)=>{
     const grpAvgs=monthDates.map(e=>{
       const filtered=e.rows.filter(r=>{
         const m2=r.d6.match(/^(.*?)\((.+?)\)(.*)$/);
