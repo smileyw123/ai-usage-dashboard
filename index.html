@@ -1280,18 +1280,17 @@ function renderTrend(){
   const gd={color:'rgba(255,255,255,0.04)'};
   const commonOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#94a3b8',font:{family:'IBM Plex Sans KR',size:11},usePointStyle:true,pointStyle:'line',boxWidth:30,padding:16}},tooltip:{...tip}},scales:{x:{grid:gd,ticks:tk},y:{grid:gd,ticks:{...tk,callback:v=>'$'+v.toLocaleString()}}}};
 
-  document.getElementById('trend-title-cost').textContent=`${curYear}년 ${curMonth}월 전체 비용 추이`;
-  document.getElementById('trend-title-avg').textContent=`${curYear}년 ${curMonth}월 인당 평균 비용 vs 1인 적정 비용`;
+  document.getElementById('trend-title-cost').textContent=`${curYear}년 ${curMonth}월 조직별 전체 비용 추이`;
+  document.getElementById('trend-title-avg').textContent=`${curYear}년 ${curMonth}월 조직별 1인 평균 비용 추이`;
 
   // 그룹별 라인 계산 (부서 or 상위부서)
   const groupColors=['#34d399','#f472b6','#00d4ff','#fb923c','#f59e0b','#a78bfa'];
   const getGroup=r=>{
     const {upper}=parseDeptFull(r.d6);
-    return r.d7||upper; // 부서 있으면 부서, 없으면 상위부서
+    return r.d7||upper;
   };
-  // filteredAll 기준으로 그룹 종류 파악
   const allGroups=[...new Set(filteredAll.map(getGroup))];
-  // 그룹이 2개 이상이고 전체와 다를 때만 표시
+
   const groupDatasets=allGroups.length>=1?allGroups.map((grp,gi)=>{
     const grpAvgs=monthDates.map(e=>{
       const filtered=e.rows.filter(r=>{
@@ -1311,10 +1310,31 @@ function renderTrend(){
     return{label:grp,data:grpAvgs,borderColor:c,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:c,borderWidth:1.5,fill:false,borderDash:[3,3]};
   }):[];
 
+  const groupCostDatasets=allGroups.length>=1?allGroups.map((grp,gi)=>{
+    const grpTotals=monthDates.map(e=>{
+      const filtered=e.rows.filter(r=>{
+        const m2=r.d6.match(/^(.*?)\((.+?)\)(.*)$/);
+        const biz=m2?m2[2].trim():'';
+        const upper=m2?(m2[1]+m2[3]).trim():r.d6;
+        const bizOk=fBiz.size===0||fBiz.has(biz);
+        const upperOk=fUpper.size===0||fUpper.has(upper);
+        const deptOk=!r.d7||fDept.size===0||fDept.has(r.d7);
+        const grpVal=r.d7||upper;
+        return bizOk&&upperOk&&deptOk&&grpVal===grp;
+      });
+      return filtered.reduce((s,r)=>s+r.cost,0)||null;
+    });
+    const c=groupColors[gi%groupColors.length];
+    return{label:grp,data:grpTotals,borderColor:c,backgroundColor:'transparent',tension:0.3,pointRadius:3,pointBackgroundColor:c,borderWidth:1.5,fill:false,borderDash:[3,3]};
+  }):[];
+
   if(ch.chartTrendCost)ch.chartTrendCost.destroy();
   ch.chartTrendCost=new Chart(document.getElementById('chartTrendCost'),{
     type:'line',
-    data:{labels,datasets:[{label:'전체 비용',data:totalCosts,borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,0.08)',tension:0.3,pointRadius:4,pointBackgroundColor:'#00d4ff',fill:true}]},
+    data:{labels,datasets:[
+      {label:'전체 비용',data:totalCosts,borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,0.08)',tension:0.3,pointRadius:4,pointBackgroundColor:'#00d4ff',borderWidth:2,fill:true},
+      ...groupCostDatasets
+    ]},
     options:{...commonOpts}
   });
 
@@ -1322,8 +1342,8 @@ function renderTrend(){
   ch.chartTrendAvg=new Chart(document.getElementById('chartTrendAvg'),{
     type:'line',
     data:{labels,datasets:[
-      {label:'인당 평균',data:avgCosts,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,0.08)',tension:0.3,pointRadius:4,pointBackgroundColor:'#a78bfa',borderWidth:2,fill:false},
-      {label:'1인 적정',data:targetCosts,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',tension:0.3,pointRadius:4,pointBackgroundColor:'#f59e0b',borderDash:[5,4],borderWidth:2,fill:false},
+      {label:'1인 평균 비용',data:avgCosts,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,0.08)',tension:0.3,pointRadius:4,pointBackgroundColor:'#a78bfa',borderWidth:2,fill:false},
+      {label:'1인 적정 비용',data:targetCosts,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',tension:0.3,pointRadius:4,pointBackgroundColor:'#f59e0b',borderDash:[5,4],borderWidth:2,fill:false},
       ...groupDatasets
     ]},
     options:{...commonOpts}
