@@ -1205,6 +1205,15 @@ function rkpi(){
   setEl('ks-avg-m',`1인 적정 금액 : $${appropriate.toLocaleString()}`);
 }
 
+function sw(t){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('tab-'+t).classList.add('on');
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.getElementById('sec-'+t).classList.add('on');
+  if(t==='ov'){rkpi();rio();rov();rr();}
+  if(t==='trend'){renderTrend();}
+}
+
 function updateTabLabels(){
   if(!dataDate||!allDates)return;
   const tabOvLabel=document.getElementById('tab-ov-label');
