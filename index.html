@@ -163,6 +163,7 @@ td.id{color:var(--mt);font-size:10px;}
   .kpi-sub-mobile-hide{display:none;}
   .kpi-sub-mobile-only{display:block;}
 }
+.tab:disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
 .fu{animation:fu .3s ease forwards;}
 /* Filter bar */
 .filter-bar{display:flex;gap:12px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid rgba(30,45,69,0.4);}
@@ -329,8 +330,9 @@ td.id{color:var(--mt);font-size:10px;}
   </div>
 
   <div class="tabs">
-    <button class="tab on" onclick="sw('ov')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>전체 현황</button>
-    <button class="tab" onclick="sw('ind')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>개인별 현황</button>
+    <button class="tab on" id="tab-ov" onclick="sw('ov')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg><span id="tab-ov-label">전체 현황</span></button>
+    <button class="tab" id="tab-ind" onclick="sw('ind')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg><span id="tab-ind-label">개인별 현황</span></button>
+    <button class="tab" id="tab-trend" onclick="sw('trend')" disabled><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span id="tab-trend-label">일자별 추이</span></button>
   </div>
 
   <!-- 전체 현황 -->
@@ -416,6 +418,20 @@ td.id{color:var(--mt);font-size:10px;}
       </div>
       <div class="dp" id="dp">
         <div class="ns"><div style="font-size:34px;opacity:.2">👤</div><div style="font-size:13px">직원을 선택하면 상세 현황이 표시됩니다</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 일자별 추이 -->
+  <div class="sec" id="sec-trend">
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <div class="viz-card">
+        <div class="viz-title" id="trend-title-cost">월 전체 비용 추이</div>
+        <div style="position:relative;height:220px;"><canvas id="chartTrendCost"></canvas></div>
+      </div>
+      <div class="viz-card">
+        <div class="viz-title" id="trend-title-avg">인당 평균 비용 vs 1인 적정 비용 추이</div>
+        <div style="position:relative;height:220px;"><canvas id="chartTrendAvg"></canvas></div>
       </div>
     </div>
   </div>
@@ -751,6 +767,7 @@ function applyJsonData(entry){
   filteredAll=[...all];
   fil=[...all].sort((a,b)=>b.cost-a.cost);
   initFilters();
+  updateTabLabels();
 }
 
 function renderDateSelector(){
@@ -1123,6 +1140,8 @@ function applyFilter(){
   rkpi();rio();rov();rr();
   fil=[...filteredAll].sort((a,b)=>b.cost-a.cost);
   curPage=1;rl();
+  updateTabLabels();
+  if(document.getElementById('sec-trend').classList.contains('on'))renderTrend();
 
   // 선택된 사용자가 필터 결과에 없으면 세부정보 초기화
   if(sel!==null){
@@ -1186,11 +1205,94 @@ function rkpi(){
   setEl('ks-avg-m',`1인 적정 금액 : $${appropriate.toLocaleString()}`);
 }
 
-function sw(t){
-  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('on',['ov','ind'][i]===t));
+function updateTabLabels(){
+  const y=dataDate.getFullYear();
+  const m=String(dataDate.getMonth()+1).padStart(2,'0');
+  const d=String(dataDate.getDate()).padStart(2,'0');
+  const dateStr=`${String(y).slice(2)}.${m}.${d}`;
+  document.getElementById('tab-ov-label').textContent=`전체 현황 (${dateStr} 기준)`;
+  document.getElementById('tab-ind-label').textContent=`개인별 현황 (${dateStr} 기준)`;
+
+  // 추이 탭: 같은 월 데이터 2개 이상일 때만 활성화
+  const curMonth=dataDate.getMonth()+1;
+  const curYear=dataDate.getFullYear();
+  const monthDates=allDates.filter(e=>e.year===curYear&&e.month===curMonth);
+  const trendBtn=document.getElementById('tab-trend');
+  if(monthDates.length>=2){
+    trendBtn.disabled=false;
+    document.getElementById('tab-trend-label').textContent=`${m}월 일자별 추이`;
+  } else {
+    trendBtn.disabled=true;
+    document.getElementById('tab-trend-label').textContent=`일자별 추이`;
+  }
+}
+
+function renderTrend(){
+  const curMonth=dataDate.getMonth()+1;
+  const curYear=dataDate.getFullYear();
+  const monthDates=allDates.filter(e=>e.year===curYear&&e.month===curMonth)
+    .sort((a,b)=>a.day-b.day);
+
+  // 필터 적용된 데이터로 각 날짜별 계산
+  const labels=monthDates.map(e=>`${e.day}일`);
+  const totalCosts=[],avgCosts=[],targetCosts=[];
+
+  monthDates.forEach(e=>{
+    // 필터 적용
+    const filtered=e.rows.filter(r=>{
+      const m2=r.d6.match(/^(.*?)\((.+?)\)(.*)$/);
+      const biz=m2?m2[2].trim():'';
+      const upper=m2?(m2[1]+m2[3]).trim():r.d6;
+      const bizOk=fBiz.size===0||fBiz.has(biz);
+      const upperOk=fUpper.size===0||fUpper.has(upper);
+      const deptOk=!r.d7||fDept.size===0||fDept.has(r.d7);
+      return bizOk&&upperOk&&deptOk;
+    });
+    const tc=filtered.reduce((s,r)=>s+r.cost,0);
+    const avg=filtered.length?Math.round(tc/filtered.length):0;
+    totalCosts.push(tc);
+    avgCosts.push(avg);
+
+    // 1인 적정 금액 계산
+    const dt=new Date(e.year,e.month-1,e.day);
+    const yesterday=dt.getDate()-1;
+    const totalWD=getTotalWorkingDays(e.year,e.month-1);
+    const elapsedWD=yesterday>0?getWorkingDays(e.year,e.month-1,yesterday):0;
+    const target=totalWD>0?Math.round(180/totalWD*elapsedWD):0;
+    targetCosts.push(target);
+  });
+
+  const tip={backgroundColor:'#1a2535',titleColor:'#e2e8f0',bodyColor:'#94a3b8'};
+  const tk={color:'#64748b',font:{family:'IBM Plex Sans KR',size:11}};
+  const gd={color:'rgba(255,255,255,0.04)'};
+  const commonOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#94a3b8',font:{family:'IBM Plex Sans KR',size:11},boxWidth:12}},tooltip:{...tip}},scales:{x:{grid:gd,ticks:tk},y:{grid:gd,ticks:{...tk,callback:v=>'$'+v.toLocaleString()}}}};
+
+  document.getElementById('trend-title-cost').textContent=`${curYear}년 ${curMonth}월 전체 비용 추이`;
+  document.getElementById('trend-title-avg').textContent=`${curYear}년 ${curMonth}월 인당 평균 비용 vs 1인 적정 비용`;
+
+  if(ch.chartTrendCost)ch.chartTrendCost.destroy();
+  ch.chartTrendCost=new Chart(document.getElementById('chartTrendCost'),{
+    type:'line',
+    data:{labels,datasets:[{label:'전체 비용',data:totalCosts,borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,0.08)',tension:0.3,pointRadius:4,pointBackgroundColor:'#00d4ff',fill:true}]},
+    options:{...commonOpts}
+  });
+
+  if(ch.chartTrendAvg)ch.chartTrendAvg.destroy();
+  ch.chartTrendAvg=new Chart(document.getElementById('chartTrendAvg'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'인당 평균 비용',data:avgCosts,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,0.08)',tension:0.3,pointRadius:4,pointBackgroundColor:'#a78bfa',fill:false},
+      {label:'1인 적정 비용',data:targetCosts,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',tension:0.3,pointRadius:4,pointBackgroundColor:'#f59e0b',borderDash:[5,4],fill:false}
+    ]},
+    options:{...commonOpts}
+  });
+}
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('tab-'+t).classList.add('on');
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
   document.getElementById('sec-'+t).classList.add('on');
   if(t==='ov'){rkpi();rio();rov();rr();}
+  if(t==='trend'){renderTrend();}
 }
 
 function rov(){
