@@ -1333,10 +1333,19 @@ function rkpi(){
     const el=document.getElementById(id);
     if(el){el.textContent=v;if(color)el.style.color=color;}
   };
-  setEl('ks-total',`사용 인력수 : ${data.length}명`,'var(--ac3)');
-  setEl('ks-total-m',`사용 인력수 : ${data.length}명`,'var(--ac3)');
-  setEl('ks-avg',`1인 적정 금액 : $${appropriate.toLocaleString()}`,'var(--ac3)');
-  setEl('ks-avg-m',`1인 적정 금액 : $${appropriate.toLocaleString()}`,'var(--ac3)');
+  setEl('ks-total',`사용 인력수 : ${data.length}명`);
+  setEl('ks-total-m',`사용 인력수 : ${data.length}명`);
+  setEl('ks-avg',`1인 적정 금액 : $${appropriate.toLocaleString()}`);
+  setEl('ks-avg-m',`1인 적정 금액 : $${appropriate.toLocaleString()}`);
+  // 숫자 부분만 노란색으로
+  const ksTotal=document.getElementById('ks-total');
+  const ksTotalM=document.getElementById('ks-total-m');
+  const ksAvg=document.getElementById('ks-avg');
+  const ksAvgM=document.getElementById('ks-avg-m');
+  if(ksTotal)ksTotal.innerHTML=`사용 인력수 : <span style="color:var(--ac3)">${data.length}명</span>`;
+  if(ksTotalM)ksTotalM.innerHTML=`사용 인력수 : <span style="color:var(--ac3)">${data.length}명</span>`;
+  if(ksAvg)ksAvg.innerHTML=`1인 적정 금액 : <span style="color:var(--ac3)">$${appropriate.toLocaleString()}</span>`;
+  if(ksAvgM)ksAvgM.innerHTML=`1인 적정 금액 : <span style="color:var(--ac3)">$${appropriate.toLocaleString()}</span>`;
   // 인당 평균 비용 옆 퍼센트 표시
   const kvAvg=document.getElementById('kv-avg');
   if(kvAvg)kvAvg.innerHTML=`$${avg.toLocaleString()} <span style="font-size:14px;font-weight:600;color:var(--ac3);opacity:.85">(${pct}%)</span>`;
