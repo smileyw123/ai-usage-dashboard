@@ -237,10 +237,10 @@ td.id{color:var(--mt);font-size:10px;}
 
 <!-- 데이터 업로드 모달 -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
+  <div class="modal" style="max-width:560px;">
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-title">데이터 업로드</div>
-    <div class="modal-desc">엑셀 파일을 업로드하여 대시보드 데이터를 업데이트하세요</div>
+    <div class="modal-title">데이터 입력</div>
+    <div class="modal-desc" id="modalDesc">엑셀 파일을 업로드하여 대시보드 데이터를 업데이트하세요</div>
 
     <!-- 환경 선택 -->
     <div class="modal-section">
@@ -261,29 +261,44 @@ td.id{color:var(--mt);font-size:10px;}
       </div>
     </div>
 
-    <!-- 템플릿 다운로드 -->
-    <div class="modal-section">
-      <div class="modal-label">템플릿</div>
-      <button class="modal-btn secondary" style="width:100%" onclick="downloadTemplate()">
-        ↓ 템플릿 엑셀 다운로드
-      </button>
+    <!-- 사외: 템플릿 + 파일 업로드 -->
+    <div id="uploadSection">
+      <div class="modal-section">
+        <div class="modal-label">템플릿</div>
+        <button class="modal-btn secondary" style="width:100%" onclick="downloadTemplate()">
+          ↓ 템플릿 엑셀 다운로드
+        </button>
+      </div>
+      <div class="modal-divider"></div>
+      <div class="modal-section">
+        <div class="modal-label">파일 업로드</div>
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
+          ondragover="event.preventDefault();this.classList.add('over')"
+          ondragleave="this.classList.remove('over')"
+          ondrop="handleDrop(event)">
+          <div class="dz-icon">📂</div>
+          <div>클릭하거나 파일을 드래그하세요</div>
+          <div style="font-size:11px;margin-top:4px">.xlsx 파일만 지원</div>
+          <div class="dz-file" id="dzFile"></div>
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx" style="display:none" onchange="handleFile(this.files[0])">
+      </div>
     </div>
 
-    <div class="modal-divider"></div>
-
-    <!-- 파일 업로드 -->
-    <div class="modal-section">
-      <div class="modal-label">파일 업로드</div>
-      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
-        ondragover="event.preventDefault();this.classList.add('over')"
-        ondragleave="this.classList.remove('over')"
-        ondrop="handleDrop(event)">
-        <div class="dz-icon">📂</div>
-        <div>클릭하거나 파일을 드래그하세요</div>
-        <div style="font-size:11px;margin-top:4px">.xlsx 파일만 지원</div>
-        <div class="dz-file" id="dzFile"></div>
+    <!-- 사내: 붙여넣기 그리드 -->
+    <div id="pasteSection" style="display:none;">
+      <div class="modal-divider"></div>
+      <div class="modal-section">
+        <div class="modal-label">데이터 붙여넣기</div>
+        <div style="font-size:12px;color:var(--mt);margin-bottom:8px;">엑셀에서 데이터를 복사(Ctrl+C) 후 아래 영역에 붙여넣기(Ctrl+V) 하세요</div>
+        <div id="pasteArea" tabindex="0"
+          style="background:var(--sf2);border:2px dashed var(--bd);border-radius:10px;padding:14px;min-height:120px;font-size:11px;color:var(--mt);cursor:text;outline:none;overflow:auto;max-height:220px;white-space:pre;"
+          onpaste="handlePaste(event)"
+          onclick="this.focus()">
+          <span id="pasteHint" style="opacity:.5;">여기를 클릭한 후 Ctrl+V로 붙여넣기 하세요</span>
+        </div>
+        <div id="pasteStatus" style="margin-top:8px;font-size:12px;display:none;"></div>
       </div>
-      <input type="file" id="fileInput" accept=".xlsx" style="display:none" onchange="handleFile(this.files[0])">
     </div>
 
     <div class="modal-btn-row">
@@ -463,6 +478,97 @@ function setEnv(env){
   currentEnv=env;
   document.getElementById('envBtnOut').classList.toggle('on',env==='out');
   document.getElementById('envBtnIn').classList.toggle('on',env==='in');
+
+  // 환경에 따라 입력 방식 전환
+  const isIn=env==='in';
+  document.getElementById('uploadSection').style.display=isIn?'none':'block';
+  document.getElementById('pasteSection').style.display=isIn?'block':'none';
+  document.getElementById('modalDesc').textContent=isIn
+    ?'엑셀 데이터를 복사해서 붙여넣기로 입력하세요'
+    :'엑셀 파일을 업로드하여 대시보드 데이터를 업데이트하세요';
+
+  // 붙여넣기 섹션 초기화
+  if(isIn){
+    uploadedData=null;
+    document.getElementById('applyBtn').disabled=true;
+    document.getElementById('pasteArea').innerHTML='<span id="pasteHint" style="opacity:.5;">여기를 클릭한 후 Ctrl+V로 붙여넣기 하세요</span>';
+    document.getElementById('pasteStatus').style.display='none';
+  }
+}
+
+function handlePaste(e){
+  e.preventDefault();
+  const text=e.clipboardData.getData('text');
+  if(!text){return;}
+
+  const rows=text.trim().split('\n').map(r=>r.split('\t'));
+  if(rows.length<2){
+    showPasteStatus('데이터가 없습니다. 헤더와 데이터를 함께 복사해주세요.','error');
+    return;
+  }
+
+  const headers=rows[0].map(h=>h.trim());
+  const REQUIRED=['employee_id','employee_namekor','dept_level_6_name','dept_level_7_name','total_cost',
+    'input_haiku','input_opus','input_sonnet','output_haiku','output_opus','output_sonnet',
+    'cache_read_haiku','cache_read_opus','cache_read_sonnet','cache_write_haiku','cache_write_opus','cache_write_sonnet'];
+
+  const missing=REQUIRED.filter(f=>!headers.includes(f));
+  if(missing.length>0){
+    showPasteStatus(`필드 누락: ${missing.join(', ')}`, 'error');
+    return;
+  }
+
+  const dataRows=rows.slice(1).filter(r=>r.some(c=>c.trim()));
+  if(dataRows.length===0){
+    showPasteStatus('데이터 행이 없습니다.','error');
+    return;
+  }
+
+  // 객체 배열로 변환
+  const parsed=dataRows.map(r=>{
+    const obj={};
+    headers.forEach((h,i)=>obj[h]=(r[i]||'').trim());
+    return obj;
+  }).filter(r=>r['employee_id']&&r['employee_namekor']);
+
+  if(parsed.length===0){
+    showPasteStatus('유효한 데이터가 없습니다.','error');
+    return;
+  }
+
+  // 숫자 검증
+  const numFields=['total_cost','input_haiku','input_opus','input_sonnet',
+    'output_haiku','output_opus','output_sonnet',
+    'cache_read_haiku','cache_read_opus','cache_read_sonnet',
+    'cache_write_haiku','cache_write_opus','cache_write_sonnet'];
+  const errors=[];
+  parsed.forEach((r,i)=>{
+    numFields.forEach(f=>{
+      if(r[f]&&isNaN(Number(r[f])))errors.push(`${i+2}행: ${f} 값이 숫자가 아닙니다`);
+    });
+  });
+  if(errors.length>0){
+    showPasteStatus(`오류 ${errors.length}건: ${errors[0]}${errors.length>1?` 외 ${errors.length-1}건`:''}`, 'error');
+    return;
+  }
+
+  uploadedData=parsed;
+  document.getElementById('applyBtn').disabled=false;
+
+  // 미리보기 표시
+  const preview=`✓ ${parsed.length}명 데이터 인식\n\n` +
+    parsed.slice(0,3).map(r=>`${r['employee_namekor']} (${r['employee_id']})`).join('\n') +
+    (parsed.length>3?`\n...외 ${parsed.length-3}명`:'');
+  document.getElementById('pasteArea').textContent=preview;
+  document.getElementById('pasteArea').style.color='#34d399';
+  showPasteStatus(`✓ ${parsed.length}명 데이터가 정상 인식되었습니다.`, 'success');
+}
+
+function showPasteStatus(msg, type){
+  const el=document.getElementById('pasteStatus');
+  el.style.display='block';
+  el.style.color=type==='error'?'#f472b6':'#34d399';
+  el.textContent=msg;
 }
 
 async function saveToGitHub(fullData){
@@ -649,6 +755,13 @@ function closeModal(){
   msg.textContent='';
   const errEl=document.getElementById('validationMsg');
   if(errEl)errEl.remove();
+  const warn=document.getElementById('dateWarnMsg');
+  if(warn)warn.style.display='none';
+  // 붙여넣기 영역 초기화
+  const pa=document.getElementById('pasteArea');
+  if(pa){pa.innerHTML='<span id="pasteHint" style="opacity:.5;">여기를 클릭한 후 Ctrl+V로 붙여넣기 하세요</span>';pa.style.color='';}
+  const ps=document.getElementById('pasteStatus');
+  if(ps)ps.style.display='none';
 }
 
 function handleDrop(e){
