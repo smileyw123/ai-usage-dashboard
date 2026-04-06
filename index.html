@@ -536,6 +536,15 @@ function handlePaste(e){
     return;
   }
 
+  // 숫자 변환 함수 (콤마 포함 문자열 처리)
+  const toNum=v=>{
+    if(v===''||v===null||v===undefined)return 0;
+    const cleaned=String(v).replace(/,/g,'').trim();
+    const n=Number(cleaned);
+    if(isNaN(n))return null; // 변환 불가
+    return n;
+  };
+
   // 숫자 검증
   const numFields=['total_cost','input_haiku','input_opus','input_sonnet',
     'output_haiku','output_opus','output_sonnet',
@@ -544,13 +553,18 @@ function handlePaste(e){
   const errors=[];
   parsed.forEach((r,i)=>{
     numFields.forEach(f=>{
-      if(r[f]&&isNaN(Number(r[f])))errors.push(`${i+2}행: ${f} 값이 숫자가 아닙니다`);
+      if(r[f]&&toNum(r[f])===null)errors.push(`${i+2}행: ${f} 값(${r[f]})이 숫자로 변환할 수 없습니다`);
     });
   });
   if(errors.length>0){
     showPasteStatus(`오류 ${errors.length}건: ${errors[0]}${errors.length>1?` 외 ${errors.length-1}건`:''}`, 'error');
     return;
   }
+
+  // 숫자 필드 변환 적용
+  parsed.forEach(r=>{
+    numFields.forEach(f=>{r[f]=String(toNum(r[f]));});
+  });
 
   uploadedData=parsed;
   document.getElementById('applyBtn').disabled=false;
