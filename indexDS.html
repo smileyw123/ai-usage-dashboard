@@ -426,6 +426,8 @@ const GITHUB={
   token:['ghp_1EMrzTzX','WeLym8wtAM','7yyOMnBlt2','pX4fhoNE'].join('')
 };
 
+async function loadConfig(){ return true; }
+
 async function saveToGitHub(fullData){
   const url=`${GITHUB.api}/repos/${GITHUB.repo}/contents/data.json`;
   const content=btoa(unescape(encodeURIComponent(JSON.stringify(fullData,null,2))));
