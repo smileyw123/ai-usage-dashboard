@@ -539,9 +539,11 @@ function handlePaste(e){
   // 숫자 변환 함수 (콤마 포함 문자열 처리)
   const toNum=v=>{
     if(v===''||v===null||v===undefined)return 0;
-    const cleaned=String(v).replace(/,/g,'').trim();
+    const trimmed=String(v).trim();
+    if(trimmed==='-')return 0; // "-"는 0으로 처리
+    const cleaned=trimmed.replace(/,/g,'');
     const n=Number(cleaned);
-    if(isNaN(n))return null; // 변환 불가
+    if(isNaN(n))return null;
     return n;
   };
 
