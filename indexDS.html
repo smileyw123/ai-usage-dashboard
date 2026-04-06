@@ -487,6 +487,44 @@ async function loadFromGitHub(){
 let uploadedData=null;
 let dataDate=new Date();
 
+function applyJsonData(entry){
+  const y=entry.year,m=entry.month,d=entry.day;
+  dataDate=new Date(y,m-1,d);
+  all=entry.rows.map(r=>{
+    const ti=r.ih+r.io+r.is,to=r.oh+r.oo+r.os,tc=r.crh+r.cro+r.crs+r.cwh+r.cwo+r.cws;
+    return{...r,inp:{h:r.ih,o:r.io,s:r.is,tot:ti},out:{h:r.oh,o:r.oo,s:r.os,tot:to},
+      cac:{rh:r.crh,ro:r.cro,rs:r.crs,wh:r.cwh,wo:r.cwo,ws:r.cws,tot:tc},
+      haiku:r.ih+r.oh+r.crh+r.cwh,sonnet:r.is+r.os+r.crs+r.cws,opus:r.io+r.oo+r.cro+r.cwo,total:ti+to+tc};
+  });
+  const ov=document.getElementById('empty-overlay');
+  if(ov)ov.remove();
+  filteredAll=[...all];
+  fil=[...all].sort((a,b)=>b.cost-a.cost);
+  initFilters();
+  try{updateTabLabels();}catch(e){}
+}
+
+function renderDateSelector(){
+  if(!allDates||allDates.length===0){
+    document.getElementById('dateSelectorWrap').style.display='none';
+    return;
+  }
+  document.getElementById('dateSelectorWrap').style.display='flex';
+  const sel=document.getElementById('dateSelector');
+  sel.innerHTML=allDates.map(e=>{
+    const ds=`${e.year}.${String(e.month).padStart(2,'0')}.${String(e.day).padStart(2,'0')}`;
+    const selected=e.year===dataDate.getFullYear()&&e.month===dataDate.getMonth()+1&&e.day===dataDate.getDate();
+    return`<option value="${e.year}-${e.month}-${e.day}"${selected?' selected':''}>${ds} (${e.rows.length}명)</option>`;
+  }).join('');
+}
+
+function onDateChange(){
+  const val=document.getElementById('dateSelector').value;
+  const [y,m,d]=val.split('-').map(Number);
+  const entry=allDates.find(e=>e.year===y&&e.month===m&&e.day===d);
+  if(entry)applyJsonData(entry);
+}
+
 function openModal(){
   const today=new Date();today.setHours(0,0,0,0);
   const ySel=document.getElementById('sel-year');
