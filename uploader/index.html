@@ -1,1 +1,451 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GH Uploader">
+  <meta name="theme-color" content="#58a6ff">
+  <link rel="manifest" href="manifest.json">
+  <title>GitHub Uploader</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --border2: #21262d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --blue: #58a6ff;
+      --green: #238636;
+      --green2: #2ea043;
+      --green3: #3fb950;
+      --red: #f85149;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, 'SF Pro Display', sans-serif;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+
+    /* NAV */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+    .nav-title { font-size: 17px; font-weight: 700; color: var(--blue); }
+    .nav-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .nav-icon { font-size: 26px; }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+    /* CONTENT */
+    .page { display: none; padding: 20px; }
+    .page.active { display: block; }
+
+    /* CARD */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    /* FORM */
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+    .field input, .field textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'SF Mono', 'Courier New', monospace;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--blue); }
+    .field textarea { resize: vertical; min-height: 120px; }
+
+    /* STATUS ROW */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border2);
+      font-size: 13px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--muted); }
+    .info-value { color: var(--text); font-weight: 600; font-family: 'SF Mono', monospace; font-size: 12px; }
+
+    /* BUTTONS */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      letter-spacing: 0.3px;
+    }
+    .btn-primary {
+      background: var(--green);
+      color: #fff;
+      border: 1px solid var(--green2);
+    }
+    .btn-primary:active { opacity: 0.8; transform: scale(0.98); }
+    .btn-primary:disabled { background: var(--border2); border-color: var(--border); color: var(--muted); cursor: not-allowed; transform: none; }
+    .btn-success { background: #0d2a0d; color: var(--green3); border: 1px solid var(--green2); cursor: default; }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      margin-top: 10px;
+    }
+    .btn-secondary:active { opacity: 0.8; }
+
+    /* ALERT */
+    .alert {
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+    .alert.show { display: block; }
+    .alert-success { background: #0d2a0d; border: 1px solid var(--green2); color: var(--green3); }
+    .alert-error { background: #2a0d0d; border: 1px solid var(--red); color: var(--red); }
+    .alert-info { background: #0d1f2a; border: 1px solid #1f6feb; color: #79c0ff; }
+
+    /* BADGE */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-green { background: #0d2a0d; color: var(--green3); border: 1px solid var(--green2); }
+    .badge-gray { background: var(--border2); color: var(--muted); }
+
+    /* HISTORY */
+    .history-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border2);
+      font-size: 13px;
+    }
+    .history-item:last-child { border-bottom: none; }
+    .history-file { font-weight: 600; font-family: 'SF Mono', monospace; font-size: 12px; }
+    .history-meta { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+    /* SAVE NOTICE */
+    .save-notice { font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <div>
+    <div class="nav-title">GitHub Uploader</div>
+    <div class="nav-sub">Claude 산출물 → GitHub</div>
+  </div>
+  <div class="nav-icon">🚀</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('upload')">📤 업로드</div>
+  <div class="tab" onclick="switchTab('settings')">⚙️ 설정</div>
+  <div class="tab" onclick="switchTab('history')">📋 기록</div>
+</div>
+
+<!-- UPLOAD TAB -->
+<div class="page active" id="tab-upload">
+  <div class="card">
+    <div class="card-title">업로드 대상</div>
+    <div class="info-row">
+      <span class="info-label">📁 레포</span>
+      <span class="info-value" id="disp-repo">-</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">🌿 브랜치</span>
+      <span class="info-value" id="disp-branch">-</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">🔑 토큰</span>
+      <span class="info-value" id="disp-token">-</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">파일 정보</div>
+    <div class="field">
+      <label>파일 경로</label>
+      <input type="text" id="filePath" placeholder="index.html" value="index.html">
+    </div>
+    <div class="field">
+      <label>커밋 메시지</label>
+      <input type="text" id="commitMsg" placeholder="Update via Claude">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">파일 내용</div>
+    <div class="field">
+      <textarea id="content" placeholder="Claude가 생성한 코드를 여기 붙여넣거나&#10;'이거 올려줘' 하면 자동으로 채워집니다."></textarea>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:right;" id="charCount">0 chars</div>
+  </div>
+
+  <button class="btn btn-primary" id="uploadBtn" onclick="doUpload()">🚀 GitHub에 올리기</button>
+  <div class="alert" id="uploadAlert"></div>
+</div>
+
+<!-- SETTINGS TAB -->
+<div class="page" id="tab-settings">
+  <div class="card">
+    <div class="card-title">GitHub 설정</div>
+    <div class="field">
+      <label>Personal Access Token</label>
+      <input type="password" id="s-token" placeholder="ghp_...">
+    </div>
+    <div class="field">
+      <label>레포지토리</label>
+      <input type="text" id="s-repo" placeholder="owner/repo">
+    </div>
+    <div class="field">
+      <label>브랜치</label>
+      <input type="text" id="s-branch" placeholder="main" value="main">
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="saveSettings()">💾 설정 저장</button>
+  <div class="alert" id="settingsAlert"></div>
+  <p class="save-notice">설정은 이 기기에 안전하게 저장됩니다</p>
+</div>
+
+<!-- HISTORY TAB -->
+<div class="page" id="tab-history">
+  <div class="card">
+    <div class="card-title">업로드 기록</div>
+    <div id="historyList">
+      <div style="color:var(--muted);font-size:13px;padding:8px 0;">아직 업로드 기록이 없어요.</div>
+    </div>
+  </div>
+  <button class="btn btn-secondary" onclick="clearHistory()">🗑 기록 지우기</button>
+</div>
+
+<script>
+// ── State ──
+let settings = { token: '', repo: '', branch: 'main' };
+let history = [];
+
+// ── Init ──
+window.addEventListener('load', () => {
+  loadSettings();
+  loadHistory();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+  document.getElementById('content').addEventListener('input', updateCharCount);
+});
+
+function updateCharCount() {
+  const len = document.getElementById('content').value.length;
+  document.getElementById('charCount').textContent = `${len.toLocaleString()} chars`;
+}
+
+// ── Tabs ──
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['upload', 'settings', 'history'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  if (name === 'upload') refreshDispSettings();
+  if (name === 'history') renderHistory();
+}
+
+// ── Settings ──
+function loadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('gh-uploader-settings') || '{}');
+    settings = { token: s.token || '', repo: s.repo || '', branch: s.branch || 'main' };
+    document.getElementById('s-token').value = settings.token;
+    document.getElementById('s-repo').value = settings.repo;
+    document.getElementById('s-branch').value = settings.branch;
+    refreshDispSettings();
+  } catch {}
+}
+
+function saveSettings() {
+  settings.token = document.getElementById('s-token').value.trim();
+  settings.repo = document.getElementById('s-repo').value.trim();
+  settings.branch = document.getElementById('s-branch').value.trim() || 'main';
+  localStorage.setItem('gh-uploader-settings', JSON.stringify(settings));
+  showAlert('settingsAlert', 'success', '✅ 설정이 저장됐어요!');
+  refreshDispSettings();
+}
+
+function refreshDispSettings() {
+  document.getElementById('disp-repo').textContent = settings.repo || '설정 필요';
+  document.getElementById('disp-branch').textContent = settings.branch || 'main';
+  document.getElementById('disp-token').textContent =
+    settings.token ? settings.token.substring(0, 10) + '...' : '설정 필요';
+}
+
+// ── Upload ──
+async function doUpload() {
+  const content = document.getElementById('content').value;
+  const filePath = document.getElementById('filePath').value.trim();
+  const commitMsg = document.getElementById('commitMsg').value.trim() || `Update ${filePath} via Claude`;
+
+  if (!settings.token) return showAlert('uploadAlert', 'error', '❌ 설정 탭에서 토큰을 먼저 입력해주세요.');
+  if (!settings.repo) return showAlert('uploadAlert', 'error', '❌ 설정 탭에서 레포를 먼저 입력해주세요.');
+  if (!filePath) return showAlert('uploadAlert', 'error', '❌ 파일 경로를 입력해주세요.');
+  if (!content.trim()) return showAlert('uploadAlert', 'error', '❌ 파일 내용을 입력해주세요.');
+
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ 업로드 중...';
+  hideAlert('uploadAlert');
+
+  try {
+    const [owner, repoName] = settings.repo.split('/');
+    const apiUrl = `https://api.github.com/repos/${owner}/${repoName}/contents/${filePath}`;
+    const headers = {
+      'Authorization': `Bearer ${settings.token}`,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    };
+
+    let sha = null;
+    try {
+      const getRes = await fetch(apiUrl, { headers });
+      if (getRes.ok) sha = (await getRes.json()).sha;
+    } catch {}
+
+    const res = await fetch(apiUrl, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({
+        message: commitMsg,
+        content: btoa(unescape(encodeURIComponent(content))),
+        branch: settings.branch,
+        ...(sha ? { sha } : {})
+      })
+    });
+
+    if (res.ok) {
+      btn.textContent = '✅ 완료!';
+      btn.className = 'btn btn-success';
+      showAlert('uploadAlert', 'success', `✅ 성공! ${settings.repo}/${filePath} 업로드 완료`);
+      addHistory(filePath, settings.repo);
+      setTimeout(() => {
+        btn.className = 'btn btn-primary';
+        btn.disabled = false;
+        btn.textContent = '🚀 GitHub에 올리기';
+      }, 3000);
+    } else {
+      const err = await res.json();
+      throw new Error(err.message);
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = '🚀 GitHub에 올리기';
+    showAlert('uploadAlert', 'error', `❌ 오류: ${e.message}`);
+  }
+}
+
+// ── History ──
+function loadHistory() {
+  try {
+    history = JSON.parse(localStorage.getItem('gh-upload-history') || '[]');
+  } catch { history = []; }
+}
+
+function addHistory(file, repo) {
+  history.unshift({ file, repo, time: new Date().toLocaleString('ko-KR') });
+  if (history.length > 20) history.pop();
+  localStorage.setItem('gh-upload-history', JSON.stringify(history));
+}
+
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (!history.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">아직 업로드 기록이 없어요.</div>';
+    return;
+  }
+  el.innerHTML = history.map(h => `
+    <div class="history-item">
+      <div class="history-file">📄 ${h.file}</div>
+      <div class="history-meta">${h.repo} · ${h.time}</div>
+    </div>
+  `).join('');
+}
+
+function clearHistory() {
+  history = [];
+  localStorage.removeItem('gh-upload-history');
+  renderHistory();
+}
+
+// ── Alert helpers ──
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = `alert alert-${type} show`;
+  el.textContent = msg;
+}
+function hideAlert(id) {
+  document.getElementById(id).className = 'alert';
+}
+</script>
+</body>
+</html>
