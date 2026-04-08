@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Developer Environment Transition</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: #050505;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .wrapper {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* ── 공통 슬라이드 ── */
+  .slide {
+    position: absolute;
+    width: 1280px;
+    height: 720px;
+    top: 50%; left: 50%;
+    background: #0a0a0a;
+    font-family: 'Noto Sans KR', sans-serif;
+    overflow: hidden;
+    display: none;
+  }
+  .slide.active { display: block; }
+
+  .slide::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: #00C8FF;
+    z-index: 10;
+  }
+
+  .eyebrow {
+    position: absolute;
+    top: 50px; left: 96px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: #666;
+    text-transform: uppercase;
+  }
+
+  .page {
+    position: absolute;
+    bottom: 26px; right: 96px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #555;
+  }
+
+  /* ════════════════════════════
+     SLIDE 01 — 3가지 핵심 변화
+  ════════════════════════════ */
+  .s1-headline {
+    position: absolute;
+    top: 88px; left: 96px; right: 96px;
+    font-size: 54px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    text-align: center;
+  }
+  .s1-headline span { color: #00C8FF; }
+
+  .s1-divider {
+    position: absolute;
+    top: 250px; left: 540px;
+    width: 200px; height: 2px;
+    background: #00C8FF;
+  }
+
+  .s1-cards {
+    position: absolute;
+    top: 278px; left: 72px; right: 72px;
+    bottom: 60px;
+    display: flex;
+    gap: 24px;
+  }
+
+  .card {
+    flex: 1;
+    background: #111;
+    border: 1px solid #555;
+    border-top: none;
+    position: relative;
+    padding: 36px 32px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: #1e1e1e;
+  }
+  .card-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #00C8FF;
+    letter-spacing: 0.1em;
+  }
+  .card-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .card-divider {
+    width: 100%; height: 1px;
+    background: #1c1c1c;
+  }
+  .card-before-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: #aaa;
+  }
+  .card-before {
+    font-size: 29px;
+    font-weight: 300;
+    color: #aaa;
+  }
+  .card-arrow {
+    font-size: 29px;
+    color: #00C8FF;
+    font-weight: 300;
+  }
+  .card-after-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: #00C8FF;
+  }
+  .card-after {
+    font-size: 31px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .card-note {
+    margin-top: auto;
+    font-size: 22px;
+    font-weight: 300;
+    color: #aaa;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .s1-tagline {
+    position: absolute;
+    bottom: 26px; left: 96px; right: 96px;
+    font-size: 14px;
+    font-weight: 300;
+    font-style: italic;
+    color: #666;
+    text-align: center;
+  }
+
+  /* ════════════════════════════
+     SLIDE 02 — Linux VM 변경
+  ════════════════════════════ */
+  .s2-headline {
+    position: absolute;
+    top: 88px; left: 96px; right: 96px;
+    font-size: 44px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    white-space: nowrap;
+  }
+  .arrow { color: #00C8FF; font-weight: 300; }
+  .cyan  { color: #00C8FF; }
+
+  .s2-divider {
+    position: absolute;
+    top: 185px; left: 96px; right: 96px;
+    height: 1px;
+    background: #1a1a1a;
+  }
+
+  .items {
+    position: absolute;
+    top: 196px; left: 96px; right: 96px;
+    bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    padding: 1px 0;
+    border-bottom: 1px solid #555;
+  }
+  .item:last-child { border-bottom: none; }
+
+  .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #00C8FF;
+    width: 52px;
+    flex-shrink: 0;
+  }
+  .lbl {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    width: 340px;
+    flex-shrink: 0;
+  }
+  .dsc {
+    font-size: 24px;
+    font-weight: 300;
+    color: #aaa;
+    white-space: nowrap;
+  }
+
+  /* ── SLIDE 03 전용 — 소제목 + 설명 세로 스택 ── */
+  #slide-3 .items { top: 200px; bottom: 52px; justify-content: space-around; }
+  #slide-3 .item { flex-direction: column; align-items: flex-start; padding: 18px 0; gap: 8px; }
+  #slide-3 .item-top { display: flex; align-items: center; }
+  #slide-3 .lbl { font-size: 28px; width: auto; }
+  #slide-3 .dsc { font-size: 22px; color: #aaa; padding-left: 52px; white-space: nowrap; }
+
+
+  /* ── SLIDE 04 / 05 — 디버깅 비교표 ── */
+  .tbl-headline {
+    position: absolute;
+    top: 88px; left: 96px; right: 96px;
+    font-size: 40px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    white-space: nowrap;
+  }
+
+  .tbl-divider {
+    position: absolute;
+    top: 175px; left: 96px; right: 96px;
+    height: 1px;
+    background: #1a1a1a;
+  }
+
+  .tbl-wrap {
+    position: absolute;
+    top: 190px; left: 96px; right: 96px;
+    bottom: 52px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 컬럼 헤더 */
+  .tbl-head {
+    display: grid;
+    grid-template-columns: 2fr 2.2fr 2.2fr;
+    gap: 0;
+    padding: 0 0 10px;
+    border-bottom: 1px solid #555;
+    margin-bottom: 2px;
+  }
+  .tbl-head span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: #777;
+    text-transform: uppercase;
+  }
+  .tbl-head span:not(:first-child) { padding-left: 16px; }
+
+  /* 각 행 */
+  .tbl-row {
+    display: grid;
+    grid-template-columns: 2fr 2.2fr 2.2fr;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid #555;
+    flex-shrink: 0;
+  }
+  .tbl-row:last-child { border-bottom: none; }
+
+  .tbl-row .col-feature {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tbl-row .col-win {
+    font-size: 18px;
+    font-weight: 300;
+    color: #aaa;
+    padding-left: 16px;
+  }
+  .tbl-row .col-linux {
+    font-size: 18px;
+    font-weight: 300;
+    color: #aaa;
+    padding-left: 16px;
+  }
+
+  /* 상태 뱃지 */
+  .badge {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .badge-green { background: #00E5A0; }
+  .badge-yellow { background: #F5A623; }
+  .badge-red    { background: #FF4D4D; }
+
+  /* 결론 박스 */
+  .conclusion {
+    position: absolute;
+    bottom: 48px; left: 96px; right: 96px;
+    display: flex;
+    gap: 16px;
+  }
+  .conclusion-item {
+    flex: 1;
+    padding: 18px 20px;
+    border: 1px solid #555;
+    background: #0f0f0f;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .conclusion-item .c-badge {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .conclusion-item .c-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .conclusion-item .c-desc {
+    font-size: 14px;
+    font-weight: 300;
+    color: #aaa;
+    line-height: 1.5;
+  }
+
+  /* ── 네비게이션 ── */
+  .nav {
+    position: fixed;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    width: 36px; height: 36px;
+    background: #111;
+    border: 1px solid #555;
+    border-radius: 50%;
+    color: #aaa;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover { background: #1a1a1a; color: #00C8FF; border-color: #00C8FF; }
+  .nav-btn:disabled { opacity: 0.2; cursor: default; }
+
+  .nav-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #aaa;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- ── SLIDE 00 — 타이틀 ── -->
+  <div class="slide active" id="slide-0">
+    <div style="
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-family: 'Noto Sans KR', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    ">
+      <div style="
+        font-size: 26px;
+        font-weight: 300;
+        color: #666;
+        letter-spacing: 0.08em;
+      ">개발환경 리눅스 전환</div>
+      <div style="
+        font-size: 72px;
+        font-weight: 700;
+        color: #00C8FF;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      "><span style="color:#00C8FF">개발자</span> <span style="color:#ffffff">관점</span></div>
+    </div>
+    <div class="page">—</div>
+  </div>
+
+  <!-- ── SLIDE 01 ── -->
+  <div class="slide" id="slide-1">
+    <div class="eyebrow">Developer Environment Transition</div>
+
+    <div class="s1-headline">
+      개발자가 경험하는 <span>3가지 핵심 변화</span>
+    </div>
+
+    <div class="s1-divider"></div>
+
+    <div class="s1-cards">
+      <div class="card">
+        <div class="card-num">01</div>
+        <div class="card-title">VM 환경</div>
+        <div class="card-divider"></div>
+        <div class="card-before-label">BEFORE</div>
+        <div class="card-before">Windows Desktop</div>
+        <div class="card-arrow">↓</div>
+        <div class="card-after-label">AFTER</div>
+        <div class="card-after">Linux Desktop</div>
+        <div class="card-note">매일 아침 켜는<br>화면이 달라진다</div>
+      </div>
+      <div class="card">
+        <div class="card-num">02</div>
+        <div class="card-title">IDE</div>
+        <div class="card-divider"></div>
+        <div class="card-before-label">BEFORE</div>
+        <div class="card-before">Visual Studio</div>
+        <div class="card-arrow">↓</div>
+        <div class="card-after-label">AFTER</div>
+        <div class="card-after">VS Code</div>
+        <div class="card-note">코드 짜는 도구가<br>바뀐다</div>
+      </div>
+      <div class="card">
+        <div class="card-num">03</div>
+        <div class="card-title">디버깅</div>
+        <div class="card-divider"></div>
+        <div class="card-before-label">BEFORE</div>
+        <div class="card-before">VS Debugger</div>
+        <div class="card-arrow">↓</div>
+        <div class="card-after-label">AFTER</div>
+        <div class="card-after">GDB + Cortex-Debug</div>
+        <div class="card-note">가장 손에 익은<br>작업 방식이 바뀐다</div>
+      </div>
+    </div>
+
+    <div class="s1-tagline">기술적 제약이 아닌 — 사용 경험의 전환</div>
+    <div class="page">01</div>
+  </div>
+
+  <!-- ── SLIDE 02 ── -->
+  <div class="slide" id="slide-2">
+    <div class="eyebrow">Linux VM 변경</div>
+
+    <div class="s2-headline">
+      <span>단기간 사용성 저하 발생</span>
+      <span class="arrow">→</span>
+      <span class="cyan">시간의 문제로 극복 가능</span>
+    </div>
+
+    <div class="s2-divider"></div>
+
+    <div class="items">
+      <div class="item">
+        <span class="num">01</span>
+        <span class="lbl">데스크탑 환경</span>
+        <span class="dsc">Windows 탐색기 → GNOME / KDE · 앱 실행·파일 탐색 방식 변경</span>
+      </div>
+      <div class="item">
+        <span class="num">02</span>
+        <span class="lbl">파일 경로 표기</span>
+        <span class="dsc">C:\Users\... → /home/... · NAS 드라이브 문자 → /mnt/nas</span>
+      </div>
+      <div class="item">
+        <span class="num">03</span>
+        <span class="lbl">터미널 중심 워크플로우</span>
+        <span class="dsc">CMD 보조 → 터미널이 주 작업 도구 · 익숙도가 생산성 결정</span>
+      </div>
+      <div class="item">
+        <span class="num">04</span>
+        <span class="lbl">한글 입력 & 폰트</span>
+        <span class="dsc">ibus / fcitx 입력기 사전 설정 필요 · 미설정 시 첫날부터 불편</span>
+      </div>
+      <div class="item">
+        <span class="num">05</span>
+        <span class="lbl">일상 유틸리티 대체</span>
+        <span class="dsc">압축·diff·에디터 등 Linux 대체 툴로 전환 · 기능 동일, 툴명 상이</span>
+      </div>
+    </div>
+
+    <div class="page">02</div>
+  </div>
+
+  <!-- ── SLIDE 03 ── -->
+  <div class="slide" id="slide-3">
+    <div class="eyebrow">IDE 전환</div>
+
+    <div class="s2-headline">
+      <span>IDE 전환 가능</span>
+      <span class="arrow">→</span>
+      <span class="cyan">적응의 문제</span>
+    </div>
+
+    <div class="s2-divider"></div>
+
+    <div class="items">
+      <div class="item">
+        <div class="item-top">
+          <span class="num">01</span>
+          <span class="lbl">빌드 설정</span>
+        </div>
+        <span class="dsc">GUI 설정 → tasks.json · 처음 한 번이지만 팀 공유·버전 관리 가능</span>
+      </div>
+      <div class="item">
+        <div class="item-top">
+          <span class="num">02</span>
+          <span class="lbl">확장 설치</span>
+        </div>
+        <span class="dsc">C/C++, clangd, CMake Tools 직접 설치 · SE 표준 목록 배포로 해결</span>
+      </div>
+      <div class="item">
+        <div class="item-top">
+          <span class="num">03</span>
+          <span class="lbl">오히려 더 가볍다</span>
+        </div>
+        <span class="dsc">VS 대비 메모리·실행 속도 향상 · 대용량 코드베이스에서 특히 유리</span>
+      </div>
+    </div>
+
+    <div class="page">03</div>
+  </div>
+
+  <!-- ── SLIDE 04 ── -->
+  <div class="slide" id="slide-4">
+    <div class="eyebrow">디버깅 환경 비교 · 1 / 2</div>
+
+    <div class="tbl-headline">
+      <span>대부분의 기능</span>
+      <span class="arrow">→</span>
+      <span class="cyan">동등하게 대체 가능</span>
+    </div>
+
+    <div class="tbl-divider"></div>
+
+    <div class="tbl-wrap">
+      <div class="tbl-head">
+        <span>기능</span>
+        <span>Windows · Visual Studio</span>
+        <span>Linux · VSCode + GDB</span>
+      </div>
+
+      <div class="tbl-row">
+        <div class="col-feature"><span class="badge badge-green"></span>Breakpoint</div>
+        <div class="col-win">GUI 클릭</div>
+        <div class="col-linux">GUI 클릭 (동일)</div>
+      </div>
+      <div class="tbl-row">
+        <div class="col-feature"><span class="badge badge-green"></span>조건부 Breakpoint</div>
+        <div class="col-win">우클릭 → 조건 입력</div>
+        <div class="col-linux">우클릭 → 조건 입력 (동일)</div>
+      </div>
+      <div class="tbl-row">
+        <div class="col-feature"><span class="badge badge-green"></span>Hardware Watchpoint</div>
+        <div class="col-win">GUI 설정</div>
+        <div class="col-linux">watch / rwatch / awatch</div>
+      </div>
+      <div class="tbl-row">
+        <div class="col-feature"><span class="badge badge-green"></span>Watch 변수</div>
+        <div class="col-win">Watch 창</div>
+        <div class="col-linux">Watch 패널 (동일)</div>
+      </div>
+      <div class="tbl-row">
+        <div class="col-feature"><span class="badge badge-green"></span>Call Stack</div>
+        <div class="col-win">Call Stack 창</div>
+        <div class="col-linux">Call Stack 패널 (동일)</div>
+      </div>
+      <div class="tbl-row">
+        <div class="col-feature"><span class="badge badge-green"></span>Register / SVD 뷰</div>
+        <div class="col-win">SVD 자동 로드</div>
+        <div class="col-linux">Cortex-Debug + SVD 경로 지정 1회</div>
+      </div>
+      <div class="tbl-row">
+        <div class="col-feature"><span class="badge badge-green"></span>UART 모니터링</div>
+        <div class="col-win">Tera Term</div>
+        <div class="col-linux">minicom / Serial Monitor</div>
+      </div>
+    </div>
+
+    <div class="page">04</div>
+  </div>
+
+  <!-- ── SLIDE 05 ── -->
+  <div class="slide" id="slide-5">
+    <div class="eyebrow">디버깅 환경 비교 · 2 / 2</div>
+
+    <div class="tbl-headline">
+      <span>일부 기능</span>
+      <span class="arrow">→</span>
+      <span class="cyan">주의가 필요한 부분</span>
+    </div>
+
+    <div class="tbl-divider"></div>
+
+    <div class="tbl-wrap" style="bottom: 180px;">
+      <div class="tbl-head">
+        <span>기능</span>
+        <span>Windows · Visual Studio</span>
+        <span>Linux 상황</span>
+      </div>
+
+      <div class="tbl-row">
+        <div class="col-feature"><span class="badge badge-yellow"></span>Memory Window 편집</div>
+        <div class="col-win">클릭으로 hex 직접 편집</div>
+        <div class="col-linux">읽기는 가능 · 편집은 GDB CLI 필요</div>
+      </div>
+      <div class="tbl-row">
+        <div class="col-feature"><span class="badge badge-yellow"></span>플래시 프로그래밍</div>
+        <div class="col-win">J-Flash GUI</div>
+        <div class="col-linux">JLinkExe CLI 스크립트 · GUI 없음</div>
+      </div>
+      <div class="tbl-row">
+        <div class="col-feature"><span class="badge badge-red"></span>멀티 코어 디버그</div>
+        <div class="col-win">단일 솔루션 내 코어 전환 GUI</div>
+        <div class="col-linux">GDB 세션 복수 구성 · 설정 복잡도 증가</div>
+      </div>
+    </div>
+
+    <div class="conclusion">
+      <div class="conclusion-item">
+        <div class="c-title"><span class="c-badge badge-green"></span>대부분 기능</div>
+        <div class="c-desc">동등하게 대체 가능<br>개발 생산성 영향 없음</div>
+      </div>
+      <div class="conclusion-item">
+        <div class="c-title"><span class="c-badge badge-yellow"></span>실질적 갭</div>
+        <div class="c-desc">Memory 직접 편집<br>가장 빈번한 작업에서 마찰 발생</div>
+      </div>
+      <div class="conclusion-item">
+        <div class="c-title"><span class="c-badge badge-red"></span>선행 준비 필요</div>
+        <div class="c-desc">멀티 코어 디버그<br>SE 조직 표준 설정 사전 제공 필요</div>
+      </div>
+    </div>
+
+    <div class="page">05</div>
+  </div>
+
+
+  <!-- ── SLIDE 07 — 타이틀 (운영자) ── -->
+  <div class="slide" id="slide-7">
+    <div style="
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-family: 'Noto Sans KR', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    ">
+      <div style="
+        font-size: 26px;
+        font-weight: 300;
+        color: #666;
+        letter-spacing: 0.08em;
+      ">개발환경 리눅스 전환</div>
+      <div style="
+        font-size: 72px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      "><span style="color:#00C8FF">운영자</span> <span style="color:#ffffff">관점</span></div>
+    </div>
+    <div class="page">—</div>
+  </div>
+
+
+</div>
+
+<!-- ── 네비게이션 버튼 ── -->
+<div class="nav">
+  <button class="nav-btn" id="btn-prev" onclick="go(-1)" disabled>‹</button>
+  <span class="nav-count" id="nav-count">1 / 7</span>
+  <button class="nav-btn" id="btn-next" onclick="go(1)">›</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total  = slides.length;
+  let cur = 0;
+
+  const scaleEl = document.getElementById('slide-1'); // ref for measuring
+
+  function resize() {
+    const s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    slides.forEach(sl => {
+      sl.style.transform = `translate(-50%, -50%) scale(${s})`;
+    });
+  }
+
+  function go(dir) {
+    slides[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(total - 1, cur + dir));
+    slides[cur].classList.add('active');
+    document.getElementById('nav-count').textContent = `${cur + 1} / ${total}`;
+    document.getElementById('btn-prev').disabled = cur === 0;
+    document.getElementById('btn-next').disabled = cur === total - 1;
+  }
+
+  // 키보드 지원
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+  });
+
+  // 터치 스와이프
+  let tx = 0;
+  document.addEventListener('touchstart', e => tx = e.touches[0].clientX);
+  document.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+  });
+
+  resize();
+  window.addEventListener('resize', resize);
+</script>
+</body>
+</html>
