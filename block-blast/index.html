@@ -13,22 +13,28 @@
   user-select: none;
 }
 
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   background: #1a1a2e;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  overflow: hidden;
 }
 
 #game-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
+  gap: var(--gap-main, 12px);
+  padding: var(--pad-main, 12px);
+  width: 100%;
+  max-width: 480px;
 }
 
 /* Header */
@@ -37,21 +43,20 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 360px;
+  padding: 0 4px;
 }
 
 #title {
-  font-size: 28px;
+  font-size: var(--font-title, 24px);
   font-weight: 900;
   background: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: none;
 }
 
 #score-area {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   align-items: center;
 }
 
@@ -60,14 +65,14 @@ body {
 }
 
 .score-label {
-  font-size: 11px;
+  font-size: var(--font-label, 10px);
   color: #888;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .score-value {
-  font-size: 22px;
+  font-size: var(--font-score, 20px);
   font-weight: 700;
   color: #fff;
 }
@@ -76,28 +81,28 @@ body {
 #grid-container {
   position: relative;
   background: #16213e;
-  border-radius: 12px;
-  padding: 6px;
+  border-radius: 10px;
+  padding: var(--grid-pad, 5px);
   box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 #grid {
   display: grid;
-  grid-template-columns: repeat(10, 34px);
-  grid-template-rows: repeat(10, 34px);
-  gap: 2px;
+  grid-template-columns: repeat(10, var(--cell, 30px));
+  grid-template-rows: repeat(10, var(--cell, 30px));
+  gap: var(--cell-gap, 2px);
 }
 
 .cell {
-  width: 34px;
-  height: 34px;
+  width: var(--cell, 30px);
+  height: var(--cell, 30px);
   background: #1a1a3e;
-  border-radius: 4px;
+  border-radius: 3px;
   transition: background 0.15s, transform 0.15s;
 }
 
 .cell.filled {
-  border-radius: 5px;
+  border-radius: 4px;
   box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
@@ -124,15 +129,13 @@ body {
 /* Piece tray */
 #piece-tray {
   display: flex;
-  justify-content: center;
-  gap: 20px;
-  min-height: 120px;
+  justify-content: space-around;
   align-items: center;
-  padding: 10px;
+  min-height: var(--tray-height, 90px);
+  padding: 8px 4px;
   background: #16213e;
-  border-radius: 12px;
+  border-radius: 10px;
   width: 100%;
-  max-width: 360px;
 }
 
 .piece-container {
@@ -142,6 +145,7 @@ body {
   cursor: grab;
   transition: transform 0.2s, opacity 0.2s;
   padding: 4px;
+  flex: 1;
 }
 
 .piece-container:hover {
@@ -159,13 +163,13 @@ body {
 
 .piece-grid {
   display: grid;
-  gap: 2px;
+  gap: 1px;
 }
 
 .piece-cell {
-  width: 22px;
-  height: 22px;
-  border-radius: 3px;
+  width: var(--piece-cell, 18px);
+  height: var(--piece-cell, 18px);
+  border-radius: 2px;
 }
 
 .piece-cell.filled {
@@ -182,17 +186,16 @@ body {
   pointer-events: none;
   z-index: 1000;
   display: none;
-  transition: none;
 }
 
 #drag-piece .piece-grid {
-  gap: 2px;
+  gap: var(--cell-gap, 2px);
 }
 
 #drag-piece .piece-cell {
-  width: 34px;
-  height: 34px;
-  border-radius: 4px;
+  width: var(--cell, 30px);
+  height: var(--cell, 30px);
+  border-radius: 3px;
 }
 
 /* Combo display */
@@ -201,7 +204,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 48px;
+  font-size: 42px;
   font-weight: 900;
   color: #ffd93d;
   text-shadow: 0 0 20px rgba(255, 217, 61, 0.5);
@@ -223,7 +226,7 @@ body {
 /* Score popup */
 .score-popup {
   position: fixed;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   color: #4d96ff;
   pointer-events: none;
@@ -254,18 +257,18 @@ body {
 }
 
 #game-over h2 {
-  font-size: 42px;
+  font-size: 38px;
   color: #ff6b6b;
   text-shadow: 0 0 20px rgba(255,107,107,0.5);
 }
 
 #game-over .final-score {
-  font-size: 28px;
+  font-size: 24px;
   color: #fff;
 }
 
 #game-over .best-score-display {
-  font-size: 18px;
+  font-size: 16px;
   color: #ffd93d;
 }
 
@@ -288,8 +291,7 @@ body {
 /* Streak bar */
 #streak-bar {
   width: 100%;
-  max-width: 360px;
-  height: 6px;
+  height: 5px;
   background: #16213e;
   border-radius: 3px;
   overflow: hidden;
@@ -347,67 +349,87 @@ body {
 // ===================== CONSTANTS & STATE =====================
 
 const GRID_SIZE = 10;
-const CELL_SIZE = 34;
-const GAP = 2;
+
+// Dynamic sizing
+let CELL_SIZE = 30;
+let CELL_GAP = 2;
+let PIECE_CELL = 18;
+
+function calcSizes() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const pad = 24; // total horizontal padding
+  const gridPad = 10; // grid container padding
+
+  // Calculate max cell size that fits the width
+  const availW = Math.min(vw - pad, 480 - pad);
+  const maxCellFromW = Math.floor((availW - gridPad - 9 * 2) / 10);
+
+  // Calculate max cell size that fits the height
+  // Reserve space: header ~50, streak ~10, gap*3 ~36, tray ~110, padding ~24
+  const reservedH = 230;
+  const availH = vh - reservedH;
+  const maxCellFromH = Math.floor((availH - gridPad - 9 * 2) / 10);
+
+  CELL_SIZE = Math.max(20, Math.min(maxCellFromW, maxCellFromH, 40));
+  CELL_GAP = CELL_SIZE >= 30 ? 2 : 1.5;
+  PIECE_CELL = Math.max(12, Math.floor(CELL_SIZE * 0.58));
+
+  const root = document.documentElement.style;
+  root.setProperty('--cell', CELL_SIZE + 'px');
+  root.setProperty('--cell-gap', CELL_GAP + 'px');
+  root.setProperty('--piece-cell', PIECE_CELL + 'px');
+  root.setProperty('--grid-pad', Math.floor(CELL_SIZE * 0.15) + 'px');
+  root.setProperty('--tray-height', Math.floor(PIECE_CELL * 5 + 20) + 'px');
+
+  if (vw < 380) {
+    root.setProperty('--font-title', '20px');
+    root.setProperty('--font-score', '18px');
+    root.setProperty('--font-label', '9px');
+    root.setProperty('--gap-main', '8px');
+    root.setProperty('--pad-main', '8px');
+  } else {
+    root.setProperty('--font-title', '26px');
+    root.setProperty('--font-score', '22px');
+    root.setProperty('--font-label', '11px');
+    root.setProperty('--gap-main', '12px');
+    root.setProperty('--pad-main', '14px');
+  }
+}
 
 const COLORS = [
-  '#ff6b6b', // red
-  '#ffd93d', // yellow
-  '#6bcb77', // green
-  '#4d96ff', // blue
-  '#9b59b6', // purple
-  '#e67e22', // orange
-  '#1abc9c', // teal
-  '#e84393', // pink
-  '#fd79a8', // light pink
-  '#00cec9', // cyan
+  '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#9b59b6',
+  '#e67e22', '#1abc9c', '#e84393', '#fd79a8', '#00cec9',
 ];
 
-// All block shapes (relative positions)
 const SHAPES = [
-  // 1x1
   { cells: [[0,0]], name: '1x1' },
-  // 1x2
   { cells: [[0,0],[0,1]], name: '1x2' },
-  // 2x1
   { cells: [[0,0],[1,0]], name: '2x1' },
-  // 1x3
   { cells: [[0,0],[0,1],[0,2]], name: '1x3' },
-  // 3x1
   { cells: [[0,0],[1,0],[2,0]], name: '3x1' },
-  // 1x4
   { cells: [[0,0],[0,1],[0,2],[0,3]], name: '1x4' },
-  // 4x1
   { cells: [[0,0],[1,0],[2,0],[3,0]], name: '4x1' },
-  // 1x5
   { cells: [[0,0],[0,1],[0,2],[0,3],[0,4]], name: '1x5' },
-  // 5x1
   { cells: [[0,0],[1,0],[2,0],[3,0],[4,0]], name: '5x1' },
-  // 2x2
   { cells: [[0,0],[0,1],[1,0],[1,1]], name: '2x2' },
-  // 3x3
   { cells: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]], name: '3x3' },
-  // L shapes
   { cells: [[0,0],[1,0],[1,1]], name: 'L1' },
   { cells: [[0,0],[0,1],[1,0]], name: 'L2' },
   { cells: [[0,0],[0,1],[1,1]], name: 'L3' },
   { cells: [[0,1],[1,0],[1,1]], name: 'L4' },
-  // Big L shapes
   { cells: [[0,0],[1,0],[2,0],[2,1],[2,2]], name: 'BigL1' },
   { cells: [[0,0],[0,1],[0,2],[1,0],[2,0]], name: 'BigL2' },
   { cells: [[0,0],[0,1],[0,2],[1,2],[2,2]], name: 'BigL3' },
   { cells: [[0,2],[1,2],[2,0],[2,1],[2,2]], name: 'BigL4' },
-  // T shapes
   { cells: [[0,0],[0,1],[0,2],[1,1]], name: 'T1' },
   { cells: [[0,0],[1,0],[1,1],[2,0]], name: 'T2' },
   { cells: [[0,1],[1,0],[1,1],[1,2]], name: 'T3' },
   { cells: [[0,1],[1,0],[1,1],[2,1]], name: 'T4' },
-  // S/Z shapes
   { cells: [[0,0],[0,1],[1,1],[1,2]], name: 'S1' },
   { cells: [[0,1],[0,2],[1,0],[1,1]], name: 'S2' },
   { cells: [[0,0],[1,0],[1,1],[2,1]], name: 'S3' },
   { cells: [[0,1],[1,0],[1,1],[2,0]], name: 'S4' },
-  // 2x3 / 3x2
   { cells: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]], name: '2x3' },
   { cells: [[0,0],[0,1],[1,0],[1,1],[2,0],[2,1]], name: '3x2' },
 ];
@@ -425,6 +447,7 @@ let dragOffsetY = 0;
 // ===================== INIT =====================
 
 function init() {
+  calcSizes();
   grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
   score = 0;
   combo = 0;
@@ -488,8 +511,8 @@ function renderPieces() {
     const { rows, cols } = getShapeBounds(piece.shape);
     const pieceGrid = document.createElement('div');
     pieceGrid.className = 'piece-grid';
-    pieceGrid.style.gridTemplateColumns = `repeat(${cols}, 22px)`;
-    pieceGrid.style.gridTemplateRows = `repeat(${rows}, 22px)`;
+    pieceGrid.style.gridTemplateColumns = `repeat(${cols}, ${PIECE_CELL}px)`;
+    pieceGrid.style.gridTemplateRows = `repeat(${rows}, ${PIECE_CELL}px)`;
 
     const cellSet = new Set(piece.shape.map(([r,c]) => `${r},${c}`));
     for (let r = 0; r < rows; r++) {
@@ -509,7 +532,6 @@ function renderPieces() {
     container.appendChild(pieceGrid);
     tray.appendChild(container);
 
-    // Events
     container.addEventListener('mousedown', (e) => startDrag(e, idx));
     container.addEventListener('touchstart', (e) => startDrag(e, idx), { passive: false });
   });
@@ -533,7 +555,6 @@ function startDrag(e, idx) {
   const piece = draggingPiece;
   const { rows, cols } = getShapeBounds(piece.shape);
 
-  // Build floating piece
   const dragEl = document.getElementById('drag-piece');
   const pieceGrid = dragEl.querySelector('.piece-grid');
   pieceGrid.innerHTML = '';
@@ -557,9 +578,8 @@ function startDrag(e, idx) {
 
   dragEl.style.display = 'block';
 
-  // Offset so piece is above the finger
-  const totalW = cols * CELL_SIZE + (cols - 1) * GAP;
-  const totalH = rows * CELL_SIZE + (rows - 1) * GAP;
+  const totalW = cols * CELL_SIZE + (cols - 1) * CELL_GAP;
+  const totalH = rows * CELL_SIZE + (rows - 1) * CELL_GAP;
   dragOffsetX = totalW / 2;
   dragOffsetY = totalH + 40;
 
@@ -567,7 +587,6 @@ function startDrag(e, idx) {
   dragEl.style.left = (pos.x - dragOffsetX) + 'px';
   dragEl.style.top = (pos.y - dragOffsetY) + 'px';
 
-  // Mark source piece
   document.querySelectorAll('.piece-container')[idx].classList.add('dragging');
 }
 
@@ -580,7 +599,6 @@ function moveDrag(e) {
   dragEl.style.left = (pos.x - dragOffsetX) + 'px';
   dragEl.style.top = (pos.y - dragOffsetY) + 'px';
 
-  // Show preview on grid
   clearPreview();
   const gridPos = getGridPosition(pos.x - dragOffsetX, pos.y - dragOffsetY);
   if (gridPos) {
@@ -603,7 +621,6 @@ function endDrag(e) {
     pieces[draggingIndex].used = true;
     renderPieces();
 
-    // Check line clears
     setTimeout(() => {
       const cleared = checkAndClearLines();
       if (cleared > 0) {
@@ -616,21 +633,16 @@ function endDrag(e) {
       }
       updateStreakBar();
 
-      // If all 3 used, spawn new
       if (pieces.every(p => p.used)) {
         setTimeout(() => spawnPieces(), 300);
       }
 
-      // Check game over
       setTimeout(() => {
-        if (isGameOver()) {
-          showGameOver();
-        }
+        if (isGameOver()) showGameOver();
       }, 350);
     }, 50);
   }
 
-  // Remove dragging class
   const containers = document.querySelectorAll('.piece-container');
   if (containers[draggingIndex]) containers[draggingIndex].classList.remove('dragging');
 
@@ -651,8 +663,9 @@ function getEventPos(e) {
 function getGridPosition(dragX, dragY) {
   const gridEl = document.getElementById('grid');
   const rect = gridEl.getBoundingClientRect();
-  const col = Math.round((dragX - rect.left) / (CELL_SIZE + GAP));
-  const row = Math.round((dragY - rect.top) / (CELL_SIZE + GAP));
+  const step = CELL_SIZE + CELL_GAP;
+  const col = Math.round((dragX - rect.left) / step);
+  const row = Math.round((dragY - rect.top) / step);
   if (row < 0 || col < 0 || row >= GRID_SIZE || col >= GRID_SIZE) return null;
   return { row, col };
 }
@@ -670,7 +683,6 @@ function placePiece(row, col, piece) {
   piece.shape.forEach(([dr, dc]) => {
     grid[row + dr][col + dc] = piece.color;
   });
-  // Score for placing
   addScore(piece.shape.length);
   renderGrid();
 }
@@ -692,7 +704,6 @@ function checkAndClearLines() {
 
   if (rowsToClear.length === 0 && colsToClear.length === 0) return 0;
 
-  // Animate clearing
   const cellsToAnimate = new Set();
   rowsToClear.forEach(r => {
     for (let c = 0; c < GRID_SIZE; c++) cellsToAnimate.add(`${r},${c}`);
@@ -707,7 +718,6 @@ function checkAndClearLines() {
     gridCells[r * GRID_SIZE + c].classList.add('clearing');
   });
 
-  // Clear after animation
   setTimeout(() => {
     rowsToClear.forEach(r => {
       for (let c = 0; c < GRID_SIZE; c++) grid[r][c] = null;
@@ -768,7 +778,6 @@ function addScore(points) {
   score += points;
   updateScore();
 
-  // Popup
   const popup = document.createElement('div');
   popup.className = 'score-popup';
   popup.textContent = '+' + points;
@@ -791,7 +800,7 @@ function showCombo(c) {
   const el = document.getElementById('combo-display');
   el.textContent = `${c}x COMBO!`;
   el.className = '';
-  void el.offsetWidth; // reflow
+  void el.offsetWidth;
   el.className = 'show';
 }
 
@@ -814,9 +823,13 @@ document.addEventListener('touchmove', moveDrag, { passive: false });
 document.addEventListener('touchend', endDrag);
 
 document.getElementById('restart-btn').addEventListener('click', init);
-
-// Prevent context menu on long press
 document.addEventListener('contextmenu', e => e.preventDefault());
+
+// Recalc on resize/orientation change
+window.addEventListener('resize', () => {
+  calcSizes();
+  renderPieces();
+});
 
 // ===================== START =====================
 init();
