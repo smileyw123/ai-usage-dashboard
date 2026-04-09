@@ -282,7 +282,6 @@ function finishSpecialClear() {
   }
 
   if (drops.length === 0) {
-    // nothing to animate, just apply
     board.length = 0; specialBoard.length = 0;
     for (let r=0;r<ROWS;r++) { board.push(remaining[r]); specialBoard.push(remainingSpecial[r]); }
     lines += sorted.length;
@@ -292,6 +291,7 @@ function finishSpecialClear() {
     document.getElementById('score').textContent = score;
     document.getElementById('lines').textContent = lines;
     document.getElementById('level').textContent = level;
+    animating = false;
     finishLock();
     return;
   }
@@ -354,6 +354,7 @@ function finishLock() {
       for (let c=0;c<COLS;c++) { board[row][c]=0; specialBoard[row][c]=null; }
     }
   } else {
+    animating = false;
     spawnNextPiece();
   }
 }
