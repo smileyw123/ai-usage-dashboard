@@ -394,6 +394,7 @@ function finishNormalClear() {
   if (drops.length === 0) {
     board.length=0; specialBoard.length=0;
     for(let r=0;r<ROWS;r++){board.push(remaining[r]);specialBoard.push(remainingSpecial[r]);}
+    animating = false;
     spawnNextPiece();
     return;
   }
