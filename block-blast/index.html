@@ -20,7 +20,7 @@ html, body {
 }
 
 body {
-  background: #1a1a2e;
+  background: linear-gradient(180deg, #e8dff5 0%, #d4e7fa 40%, #dff5e3 100%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -31,59 +31,94 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--gap-main, 12px);
+  gap: var(--gap-main, 10px);
   padding: var(--pad-main, 12px);
   width: 100%;
   max-width: 480px;
 }
 
-/* Header */
+/* ===== Header ===== */
 #header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   width: 100%;
   padding: 0 4px;
 }
 
-#title {
-  font-size: var(--font-title, 24px);
-  font-weight: 900;
-  background: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-#score-area {
+#best-area {
   display: flex;
-  gap: 14px;
   align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.45);
+  padding: 4px 10px;
+  border-radius: 20px;
 }
 
-.score-box {
-  text-align: center;
+#best-area .best-icon {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
 }
 
-.score-label {
-  font-size: var(--font-label, 10px);
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+#best-area .best-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
-.score-value {
-  font-size: var(--font-score, 20px);
+#best-area .best-val {
+  font-size: 13px;
+  color: #9a8bc2;
   font-weight: 700;
-  color: #fff;
 }
 
-/* Grid */
+/* ===== Score - center big ===== */
+#score-display {
+  text-align: center;
+  margin-top: -2px;
+}
+
+#score-display .score-value {
+  font-size: var(--font-score, 44px);
+  font-weight: 900;
+  color: #6c5b9e;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+#score-display .score-label {
+  font-size: 10px;
+  color: #b5a8d5;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-weight: 600;
+}
+
+/* ===== Streak bar ===== */
+#streak-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+#streak-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #a8d8ea, #aa96da, #fcbad3, #f9e8a0);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+/* ===== Grid ===== */
 #grid-container {
   position: relative;
-  background: #16213e;
-  border-radius: 10px;
-  padding: var(--grid-pad, 5px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(8px);
+  border-radius: 18px;
+  padding: var(--grid-pad, 6px);
+  box-shadow: 0 8px 32px rgba(140,120,180,0.15), inset 0 1px 0 rgba(255,255,255,0.6);
 }
 
 #grid {
@@ -96,46 +131,176 @@ body {
 .cell {
   width: var(--cell, 30px);
   height: var(--cell, 30px);
-  background: #1a1a3e;
-  border-radius: 3px;
-  transition: background 0.15s, transform 0.15s;
+  background: rgba(255,255,255,0.35);
+  border-radius: var(--cell-radius, 7px);
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 
 .cell.filled {
-  border-radius: 4px;
-  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  border-radius: var(--cell-radius, 7px);
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.55) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(0,0,0,0.06) 0%, transparent 50%);
+  box-shadow:
+    inset 0 -3px 1px rgba(0,0,0,0.08),
+    inset 0 2px 1px rgba(255,255,255,0.6),
+    0 2px 6px rgba(0,0,0,0.07);
 }
 
 .cell.preview {
   opacity: 0.5;
-  transform: scale(0.95);
+  transform: scale(0.9);
+  border-radius: var(--cell-radius, 7px);
 }
 
 .cell.preview-invalid {
-  background: #ff4444 !important;
+  background: #edb0b0 !important;
+  background-image: none !important;
   opacity: 0.4;
 }
 
+/* Line-will-clear glow hint */
+.cell.will-clear {
+  animation: willClearPulse 0.8s ease-in-out infinite alternate;
+  box-shadow:
+    inset 0 0 8px rgba(255,255,255,0.7),
+    0 0 10px rgba(200,170,240,0.5) !important;
+  filter: brightness(1.25) saturate(1.3);
+}
+
+@keyframes willClearPulse {
+  0% { filter: brightness(1.2) saturate(1.2); }
+  100% { filter: brightness(1.45) saturate(1.5); }
+}
+
 .cell.clearing {
-  animation: clearPop 0.4s ease-out forwards;
+  animation: clearBounce 0.5s ease-out forwards;
+}
+
+.cell.clearing-spin {
+  animation: clearSpin 0.55s ease-out forwards;
+}
+
+.cell.clearing-jelly {
+  animation: clearJelly 0.6s ease-out forwards;
+}
+
+.cell.clearing-float {
+  animation: clearFloat 0.65s ease-out forwards;
+}
+
+.cell.clearing-pop {
+  animation: clearPop 0.45s ease-out forwards;
+}
+
+@keyframes clearBounce {
+  0% { transform: scale(1); opacity: 1; }
+  20% { transform: scale(1.15); opacity: 0.9; }
+  40% { transform: scale(0.9); opacity: 0.7; }
+  60% { transform: scale(1.05); opacity: 0.45; }
+  100% { transform: scale(0.85); opacity: 0; }
+}
+
+@keyframes clearSpin {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(0.9) rotate(180deg); opacity: 0.5; }
+  100% { transform: scale(0.7) rotate(360deg); opacity: 0; }
+}
+
+@keyframes clearJelly {
+  0% { transform: scale(1, 1); opacity: 1; }
+  15% { transform: scale(1.15, 0.85); opacity: 0.85; }
+  30% { transform: scale(0.85, 1.1); opacity: 0.65; }
+  50% { transform: scale(1.05, 0.95); opacity: 0.4; }
+  100% { transform: scale(0.9, 0.9); opacity: 0; }
+}
+
+@keyframes clearFloat {
+  0% { transform: scale(1) translateY(0); opacity: 1; }
+  40% { transform: scale(0.95) translateY(-10px); opacity: 0.6; }
+  100% { transform: scale(0.8) translateY(-25px); opacity: 0; }
 }
 
 @keyframes clearPop {
   0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.8; }
-  100% { transform: scale(0); opacity: 0; }
+  30% { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(0.85); opacity: 0; }
 }
 
-/* Piece tray */
+/* Particles */
+.particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 90;
+  border-radius: 50%;
+  animation: particleFly var(--dur, 0.7s) ease-out forwards;
+}
+
+.particle.star {
+  border-radius: 2px;
+  transform: rotate(45deg);
+  animation: particleStar var(--dur, 0.8s) ease-out forwards;
+}
+
+.particle.heart {
+  border-radius: 0;
+  background: transparent !important;
+  animation: particleHeart var(--dur, 0.9s) ease-out forwards;
+}
+
+.particle.heart::before {
+  content: '';
+  font-size: var(--size, 8px);
+  line-height: 1;
+}
+
+@keyframes particleFly {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx, 20px), var(--dy, -30px)) scale(0); opacity: 0; }
+}
+
+@keyframes particleStar {
+  0% { transform: rotate(45deg) translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: rotate(200deg) translate(var(--dx, 20px), var(--dy, -30px)) scale(0); opacity: 0; }
+}
+
+@keyframes particleHeart {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx, 15px), var(--dy, -40px)) scale(0.3); opacity: 0; }
+}
+
+/* Screen shake */
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-3px, 2px); }
+  40% { transform: translate(3px, -2px); }
+  60% { transform: translate(-2px, 3px); }
+  80% { transform: translate(2px, -1px); }
+}
+
+#grid-container.shaking {
+  animation: shake 0.3s ease-out;
+}
+
+
+@keyframes emojiBurst {
+  0% { transform: translate(0, 0) scale(0.3) rotate(0deg); opacity: 1; }
+  20% { transform: translate(calc(var(--ex) * 0.2), calc(var(--ey) * 0.3)) scale(1.2) rotate(30deg); opacity: 1; }
+  100% { transform: translate(var(--ex), var(--ey)) scale(0.5) rotate(60deg); opacity: 0; }
+}
+
+/* ===== Piece tray ===== */
 #piece-tray {
   display: flex;
   justify-content: space-around;
   align-items: center;
   min-height: var(--tray-height, 90px);
-  padding: 8px 4px;
-  background: #16213e;
-  border-radius: 10px;
+  padding: 10px 4px;
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(8px);
+  border-radius: 18px;
   width: 100%;
+  box-shadow: 0 4px 16px rgba(140,120,180,0.1);
 }
 
 .piece-container {
@@ -163,24 +328,29 @@ body {
 
 .piece-grid {
   display: grid;
-  gap: 1px;
+  gap: 1.5px;
 }
 
 .piece-cell {
   width: var(--piece-cell, 18px);
   height: var(--piece-cell, 18px);
-  border-radius: 2px;
+  border-radius: var(--piece-radius, 5px);
 }
 
 .piece-cell.filled {
-  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.5) 0%, transparent 55%);
+  box-shadow:
+    inset 0 -2px 0 rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    0 1px 4px rgba(0,0,0,0.06);
 }
 
 .piece-cell.empty {
   background: transparent;
 }
 
-/* Dragging piece (floating) */
+/* ===== Dragging piece (floating) ===== */
 #drag-piece {
   position: fixed;
   pointer-events: none;
@@ -195,10 +365,20 @@ body {
 #drag-piece .piece-cell {
   width: var(--cell, 30px);
   height: var(--cell, 30px);
-  border-radius: 3px;
+  border-radius: var(--cell-radius, 7px);
 }
 
-/* Combo display */
+#drag-piece .piece-cell.filled {
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.55) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(0,0,0,0.06) 0%, transparent 50%);
+  box-shadow:
+    inset 0 -3px 1px rgba(0,0,0,0.08),
+    inset 0 2px 1px rgba(255,255,255,0.6),
+    0 5px 14px rgba(0,0,0,0.14);
+}
+
+/* ===== Combo display ===== */
 #combo-display {
   position: fixed;
   top: 50%;
@@ -206,8 +386,8 @@ body {
   transform: translate(-50%, -50%);
   font-size: 42px;
   font-weight: 900;
-  color: #ffd93d;
-  text-shadow: 0 0 20px rgba(255, 217, 61, 0.5);
+  color: #c9a0dc;
+  text-shadow: 0 0 24px rgba(201,160,220,0.5), 0 2px 0 #fff;
   pointer-events: none;
   opacity: 0;
   z-index: 100;
@@ -226,83 +406,105 @@ body {
 /* Score popup */
 .score-popup {
   position: fixed;
-  font-size: 22px;
-  font-weight: 700;
-  color: #4d96ff;
+  font-size: 20px;
+  font-weight: 800;
+  color: #aa96da;
   pointer-events: none;
   z-index: 100;
+  text-shadow: 0 1px 0 #fff;
   animation: scorePopup 0.8s ease-out forwards;
 }
 
 @keyframes scorePopup {
   0% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-60px); }
+  100% { opacity: 0; transform: translateY(-50px); }
 }
 
-/* Game Over overlay */
+/* ===== Game Over - overlay on top of game ===== */
+#game-area {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-main, 10px);
+}
+
+#game-area.game-over-state #grid-container,
+#game-area.game-over-state #piece-tray,
+#game-area.game-over-state #streak-bar {
+  filter: blur(5px) brightness(0.88);
+  pointer-events: none;
+  transition: filter 0.6s ease;
+}
+
 #game-over {
   display: none;
-  position: fixed;
+  position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.8);
-  z-index: 200;
+  z-index: 50;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  gap: 20px;
+  gap: 14px;
+  background: rgba(232, 223, 245, 0.55);
+  border-radius: 18px;
+  opacity: 0;
 }
 
 #game-over.show {
   display: flex;
+  animation: gameOverFadeIn 0.6s ease-out forwards;
+}
+
+@keyframes gameOverFadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 #game-over h2 {
-  font-size: 38px;
-  color: #ff6b6b;
-  text-shadow: 0 0 20px rgba(255,107,107,0.5);
+  font-size: 28px;
+  color: #b07cc6;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+  margin: 0;
+}
+
+#game-over .go-scores {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 #game-over .final-score {
-  font-size: 24px;
-  color: #fff;
+  font-size: 22px;
+  color: #6c5b9e;
+  font-weight: 700;
 }
 
 #game-over .best-score-display {
-  font-size: 16px;
-  color: #ffd93d;
+  font-size: 13px;
+  color: #9a8bc2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 #restart-btn {
-  padding: 14px 40px;
-  font-size: 18px;
+  padding: 12px 40px;
+  font-size: 16px;
   font-weight: 700;
   color: #fff;
-  background: linear-gradient(135deg, #4d96ff, #6bcb77);
+  background: linear-gradient(135deg, #aa96da, #fcbad3);
   border: none;
-  border-radius: 30px;
+  border-radius: 50px;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(170,150,218,0.35);
 }
 
 #restart-btn:hover {
   transform: scale(1.05);
-}
-
-/* Streak bar */
-#streak-bar {
-  width: 100%;
-  height: 5px;
-  background: #16213e;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-#streak-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #4d96ff, #6bcb77, #ffd93d, #ff6b6b);
-  border-radius: 3px;
-  transition: width 0.3s;
+  box-shadow: 0 6px 20px rgba(170,150,218,0.5);
 }
 </style>
 </head>
@@ -310,26 +512,35 @@ body {
 
 <div id="game-container">
   <div id="header">
-    <div id="title">Block Blast!</div>
-    <div id="score-area">
-      <div class="score-box">
-        <div class="score-label">Score</div>
-        <div class="score-value" id="score">0</div>
-      </div>
-      <div class="score-box">
-        <div class="score-label">Best</div>
-        <div class="score-value" id="best-score">0</div>
-      </div>
+    <div id="best-area">
+      <span class="best-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#b5a8d5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6-6 6 6"/><path d="M12 3v12"/><circle cx="12" cy="20" r="2" fill="#b5a8d5" stroke="none"/></svg></span>
+      <span class="best-val" id="best-score">0</span>
     </div>
   </div>
 
-  <div id="streak-bar"><div id="streak-fill"></div></div>
-
-  <div id="grid-container">
-    <div id="grid"></div>
+  <div id="score-display">
+    <div class="score-label">Score</div>
+    <div class="score-value" id="score">0</div>
   </div>
 
-  <div id="piece-tray"></div>
+  <div id="game-area">
+    <div id="streak-bar"><div id="streak-fill"></div></div>
+
+    <div id="grid-container">
+      <div id="grid"></div>
+    </div>
+
+    <div id="piece-tray"></div>
+
+    <div id="game-over">
+      <h2>Game Over!</h2>
+      <div class="go-scores">
+        <div class="final-score" id="final-score"></div>
+        <div class="best-score-display" id="best-score-final"></div>
+      </div>
+      <button id="restart-btn">다시 하기</button>
+    </div>
+  </div>
 </div>
 
 <div id="drag-piece">
@@ -338,100 +549,57 @@ body {
 
 <div id="combo-display"></div>
 
-<div id="game-over">
-  <h2>Game Over!</h2>
-  <div class="final-score" id="final-score"></div>
-  <div class="best-score-display" id="best-score-final"></div>
-  <button id="restart-btn">다시 하기</button>
-</div>
-
 <script>
-// ===================== CONSTANTS & STATE =====================
-
 const GRID_SIZE = 10;
 
-// Dynamic sizing
 let CELL_SIZE = 30;
 let CELL_GAP = 2;
 let PIECE_CELL = 18;
 
-function calcSizes() {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const pad = 24; // total horizontal padding
-  const gridPad = 10; // grid container padding
-
-  // Calculate max cell size that fits the width
-  const availW = Math.min(vw - pad, 480 - pad);
-  const maxCellFromW = Math.floor((availW - gridPad - 9 * 2) / 10);
-
-  // Calculate max cell size that fits the height
-  // Reserve space: header ~50, streak ~10, gap*3 ~36, tray ~110, padding ~24
-  const reservedH = 230;
-  const availH = vh - reservedH;
-  const maxCellFromH = Math.floor((availH - gridPad - 9 * 2) / 10);
-
-  CELL_SIZE = Math.max(20, Math.min(maxCellFromW, maxCellFromH, 40));
-  CELL_GAP = CELL_SIZE >= 30 ? 2 : 1.5;
-  PIECE_CELL = Math.max(12, Math.floor(CELL_SIZE * 0.58));
-
-  const root = document.documentElement.style;
-  root.setProperty('--cell', CELL_SIZE + 'px');
-  root.setProperty('--cell-gap', CELL_GAP + 'px');
-  root.setProperty('--piece-cell', PIECE_CELL + 'px');
-  root.setProperty('--grid-pad', Math.floor(CELL_SIZE * 0.15) + 'px');
-  root.setProperty('--tray-height', Math.floor(PIECE_CELL * 5 + 20) + 'px');
-
-  if (vw < 380) {
-    root.setProperty('--font-title', '20px');
-    root.setProperty('--font-score', '18px');
-    root.setProperty('--font-label', '9px');
-    root.setProperty('--gap-main', '8px');
-    root.setProperty('--pad-main', '8px');
-  } else {
-    root.setProperty('--font-title', '26px');
-    root.setProperty('--font-score', '22px');
-    root.setProperty('--font-label', '11px');
-    root.setProperty('--gap-main', '12px');
-    root.setProperty('--pad-main', '14px');
-  }
-}
-
+// Pastel candy colors
 const COLORS = [
-  '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#9b59b6',
-  '#e67e22', '#1abc9c', '#e84393', '#fd79a8', '#00cec9',
+  '#f4b0c6', // candy pink
+  '#b8e6ca', // mint
+  '#a6d4f2', // baby blue
+  '#f5e4a1', // butter yellow
+  '#cdb4f0', // soft violet
+  '#f9c9a3', // apricot
+  '#a3dcd6', // seafoam
+  '#e0bbf7', // lilac
+  '#f9b5b1', // coral blush
+  '#b3d9f7', // powder blue
 ];
 
 const SHAPES = [
-  { cells: [[0,0]], name: '1x1' },
-  { cells: [[0,0],[0,1]], name: '1x2' },
-  { cells: [[0,0],[1,0]], name: '2x1' },
-  { cells: [[0,0],[0,1],[0,2]], name: '1x3' },
-  { cells: [[0,0],[1,0],[2,0]], name: '3x1' },
-  { cells: [[0,0],[0,1],[0,2],[0,3]], name: '1x4' },
-  { cells: [[0,0],[1,0],[2,0],[3,0]], name: '4x1' },
-  { cells: [[0,0],[0,1],[0,2],[0,3],[0,4]], name: '1x5' },
-  { cells: [[0,0],[1,0],[2,0],[3,0],[4,0]], name: '5x1' },
-  { cells: [[0,0],[0,1],[1,0],[1,1]], name: '2x2' },
-  { cells: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]], name: '3x3' },
-  { cells: [[0,0],[1,0],[1,1]], name: 'L1' },
-  { cells: [[0,0],[0,1],[1,0]], name: 'L2' },
-  { cells: [[0,0],[0,1],[1,1]], name: 'L3' },
-  { cells: [[0,1],[1,0],[1,1]], name: 'L4' },
-  { cells: [[0,0],[1,0],[2,0],[2,1],[2,2]], name: 'BigL1' },
-  { cells: [[0,0],[0,1],[0,2],[1,0],[2,0]], name: 'BigL2' },
-  { cells: [[0,0],[0,1],[0,2],[1,2],[2,2]], name: 'BigL3' },
-  { cells: [[0,2],[1,2],[2,0],[2,1],[2,2]], name: 'BigL4' },
-  { cells: [[0,0],[0,1],[0,2],[1,1]], name: 'T1' },
-  { cells: [[0,0],[1,0],[1,1],[2,0]], name: 'T2' },
-  { cells: [[0,1],[1,0],[1,1],[1,2]], name: 'T3' },
-  { cells: [[0,1],[1,0],[1,1],[2,1]], name: 'T4' },
-  { cells: [[0,0],[0,1],[1,1],[1,2]], name: 'S1' },
-  { cells: [[0,1],[0,2],[1,0],[1,1]], name: 'S2' },
-  { cells: [[0,0],[1,0],[1,1],[2,1]], name: 'S3' },
-  { cells: [[0,1],[1,0],[1,1],[2,0]], name: 'S4' },
-  { cells: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]], name: '2x3' },
-  { cells: [[0,0],[0,1],[1,0],[1,1],[2,0],[2,1]], name: '3x2' },
+  { cells: [[0,0]] },
+  { cells: [[0,0],[0,1]] },
+  { cells: [[0,0],[1,0]] },
+  { cells: [[0,0],[0,1],[0,2]] },
+  { cells: [[0,0],[1,0],[2,0]] },
+  { cells: [[0,0],[0,1],[0,2],[0,3]] },
+  { cells: [[0,0],[1,0],[2,0],[3,0]] },
+  { cells: [[0,0],[0,1],[0,2],[0,3],[0,4]] },
+  { cells: [[0,0],[1,0],[2,0],[3,0],[4,0]] },
+  { cells: [[0,0],[0,1],[1,0],[1,1]] },
+  { cells: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]] },
+  { cells: [[0,0],[1,0],[1,1]] },
+  { cells: [[0,0],[0,1],[1,0]] },
+  { cells: [[0,0],[0,1],[1,1]] },
+  { cells: [[0,1],[1,0],[1,1]] },
+  { cells: [[0,0],[1,0],[2,0],[2,1],[2,2]] },
+  { cells: [[0,0],[0,1],[0,2],[1,0],[2,0]] },
+  { cells: [[0,0],[0,1],[0,2],[1,2],[2,2]] },
+  { cells: [[0,2],[1,2],[2,0],[2,1],[2,2]] },
+  { cells: [[0,0],[0,1],[0,2],[1,1]] },
+  { cells: [[0,0],[1,0],[1,1],[2,0]] },
+  { cells: [[0,1],[1,0],[1,1],[1,2]] },
+  { cells: [[0,1],[1,0],[1,1],[2,1]] },
+  { cells: [[0,0],[0,1],[1,1],[1,2]] },
+  { cells: [[0,1],[0,2],[1,0],[1,1]] },
+  { cells: [[0,0],[1,0],[1,1],[2,1]] },
+  { cells: [[0,1],[1,0],[1,1],[2,0]] },
+  { cells: [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]] },
+  { cells: [[0,0],[0,1],[1,0],[1,1],[2,0],[2,1]] },
 ];
 
 let grid = [];
@@ -444,7 +612,42 @@ let draggingIndex = -1;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 
-// ===================== INIT =====================
+function calcSizes() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const pad = 28;
+  const gridPad = 12;
+
+  const availW = Math.min(vw - pad, 480 - pad);
+  const maxCellFromW = Math.floor((availW - gridPad - 9 * 2) / 10);
+
+  const reservedH = 260;
+  const availH = vh - reservedH;
+  const maxCellFromH = Math.floor((availH - gridPad - 9 * 2) / 10);
+
+  CELL_SIZE = Math.max(20, Math.min(maxCellFromW, maxCellFromH, 40));
+  CELL_GAP = CELL_SIZE >= 28 ? 2.5 : 2;
+  PIECE_CELL = Math.max(12, Math.floor(CELL_SIZE * 0.55));
+
+  const root = document.documentElement.style;
+  root.setProperty('--cell', CELL_SIZE + 'px');
+  root.setProperty('--cell-gap', CELL_GAP + 'px');
+  root.setProperty('--piece-cell', PIECE_CELL + 'px');
+  root.setProperty('--cell-radius', Math.max(5, Math.floor(CELL_SIZE * 0.22)) + 'px');
+  root.setProperty('--piece-radius', Math.max(3, Math.floor(PIECE_CELL * 0.22)) + 'px');
+  root.setProperty('--grid-pad', Math.max(5, Math.floor(CELL_SIZE * 0.18)) + 'px');
+  root.setProperty('--tray-height', Math.floor(PIECE_CELL * 5 + 24) + 'px');
+
+  if (vw < 380) {
+    root.setProperty('--font-score', '38px');
+    root.setProperty('--gap-main', '6px');
+    root.setProperty('--pad-main', '8px');
+  } else {
+    root.setProperty('--font-score', '48px');
+    root.setProperty('--gap-main', '8px');
+    root.setProperty('--pad-main', '14px');
+  }
+}
 
 function init() {
   calcSizes();
@@ -455,6 +658,7 @@ function init() {
   buildGrid();
   spawnPieces();
   document.getElementById('game-over').classList.remove('show');
+  document.getElementById('game-area').classList.remove('game-over-state');
   document.getElementById('best-score').textContent = bestScore;
 }
 
@@ -486,8 +690,6 @@ function renderGrid() {
     }
   });
 }
-
-// ===================== PIECES =====================
 
 function randomPiece() {
   const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
@@ -543,7 +745,7 @@ function getShapeBounds(shape) {
   return { rows: maxR + 1, cols: maxC + 1 };
 }
 
-// ===================== DRAG & DROP =====================
+// ===== DRAG & DROP =====
 
 function startDrag(e, idx) {
   if (pieces[idx].used) return;
@@ -601,18 +803,14 @@ function moveDrag(e) {
 
   clearPreview();
   const gridPos = getGridPosition(pos.x - dragOffsetX, pos.y - dragOffsetY);
-  if (gridPos) {
-    showPreview(gridPos.row, gridPos.col, draggingPiece);
-  }
+  if (gridPos) showPreview(gridPos.row, gridPos.col, draggingPiece);
 }
 
 function endDrag(e) {
   if (!draggingPiece) return;
 
   const pos = getEventPos(e);
-  const dragEl = document.getElementById('drag-piece');
-  dragEl.style.display = 'none';
-
+  document.getElementById('drag-piece').style.display = 'none';
   clearPreview();
 
   const gridPos = getGridPosition(pos.x - dragOffsetX, pos.y - dragOffsetY);
@@ -633,36 +831,27 @@ function endDrag(e) {
       }
       updateStreakBar();
 
-      if (pieces.every(p => p.used)) {
-        setTimeout(() => spawnPieces(), 300);
-      }
-
-      setTimeout(() => {
-        if (isGameOver()) showGameOver();
-      }, 350);
+      if (pieces.every(p => p.used)) setTimeout(() => spawnPieces(), 300);
+      setTimeout(() => { if (isGameOver()) showGameOver(); }, 350);
     }, 50);
   }
 
   const containers = document.querySelectorAll('.piece-container');
   if (containers[draggingIndex]) containers[draggingIndex].classList.remove('dragging');
-
   draggingPiece = null;
   draggingIndex = -1;
 }
 
 function getEventPos(e) {
-  if (e.changedTouches && e.changedTouches.length > 0) {
+  if (e.changedTouches && e.changedTouches.length > 0)
     return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
-  }
-  if (e.touches && e.touches.length > 0) {
+  if (e.touches && e.touches.length > 0)
     return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }
   return { x: e.clientX, y: e.clientY };
 }
 
 function getGridPosition(dragX, dragY) {
-  const gridEl = document.getElementById('grid');
-  const rect = gridEl.getBoundingClientRect();
+  const rect = document.getElementById('grid').getBoundingClientRect();
   const step = CELL_SIZE + CELL_GAP;
   const col = Math.round((dragX - rect.left) / step);
   const row = Math.round((dragY - rect.top) / step);
@@ -670,7 +859,7 @@ function getGridPosition(dragX, dragY) {
   return { row, col };
 }
 
-// ===================== GRID LOGIC =====================
+// ===== GRID LOGIC =====
 
 function canPlace(row, col, shape) {
   return shape.every(([dr, dc]) => {
@@ -680,55 +869,144 @@ function canPlace(row, col, shape) {
 }
 
 function placePiece(row, col, piece) {
-  piece.shape.forEach(([dr, dc]) => {
-    grid[row + dr][col + dc] = piece.color;
-  });
+  piece.shape.forEach(([dr, dc]) => { grid[row + dr][col + dc] = piece.color; });
   addScore(piece.shape.length);
   renderGrid();
 }
 
-function checkAndClearLines() {
-  const rowsToClear = [];
-  const colsToClear = [];
+const CLEAR_ANIMS = ['clearing', 'clearing-spin', 'clearing-jelly', 'clearing-float', 'clearing-pop'];
+const PARTICLE_EMOJIS = ['sparkle', 'heart', 'star'];
 
+function checkAndClearLines() {
+  const rowsToClear = [], colsToClear = [];
   for (let r = 0; r < GRID_SIZE; r++) {
     if (grid[r].every(c => c !== null)) rowsToClear.push(r);
   }
   for (let c = 0; c < GRID_SIZE; c++) {
     let full = true;
-    for (let r = 0; r < GRID_SIZE; r++) {
-      if (!grid[r][c]) { full = false; break; }
-    }
+    for (let r = 0; r < GRID_SIZE; r++) { if (!grid[r][c]) { full = false; break; } }
     if (full) colsToClear.push(c);
   }
-
   if (rowsToClear.length === 0 && colsToClear.length === 0) return 0;
 
+  const totalCleared = rowsToClear.length + colsToClear.length;
+
+  // Pick a random clear animation style for this clear event
+  const animClass = CLEAR_ANIMS[Math.floor(Math.random() * CLEAR_ANIMS.length)];
+
   const cellsToAnimate = new Set();
-  rowsToClear.forEach(r => {
-    for (let c = 0; c < GRID_SIZE; c++) cellsToAnimate.add(`${r},${c}`);
-  });
-  colsToClear.forEach(c => {
-    for (let r = 0; r < GRID_SIZE; r++) cellsToAnimate.add(`${r},${c}`);
-  });
+  rowsToClear.forEach(r => { for (let c = 0; c < GRID_SIZE; c++) cellsToAnimate.add(`${r},${c}`); });
+  colsToClear.forEach(c => { for (let r = 0; r < GRID_SIZE; r++) cellsToAnimate.add(`${r},${c}`); });
 
   const gridCells = document.querySelectorAll('#grid .cell');
+
+  // Update grid data immediately (so other logic sees cleared state)
+  rowsToClear.forEach(r => { for (let c = 0; c < GRID_SIZE; c++) grid[r][c] = null; });
+  colsToClear.forEach(c => { for (let r = 0; r < GRID_SIZE; r++) grid[r][c] = null; });
+
+  // Staggered clear animation - each cell cleans itself up on animationend
+  let delay = 0;
   cellsToAnimate.forEach(key => {
     const [r, c] = key.split(',').map(Number);
-    gridCells[r * GRID_SIZE + c].classList.add('clearing');
+    const cell = gridCells[r * GRID_SIZE + c];
+    const color = cell.style.background;
+
+    setTimeout(() => {
+      // Spawn particles
+      const rect = cell.getBoundingClientRect();
+      spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, color, totalCleared >= 3 ? 5 : 3);
+
+      // Start clear animation
+      cell.classList.remove('filled');
+      cell.classList.add(animClass);
+
+      // When animation finishes, quietly reset the cell
+      cell.addEventListener('animationend', function handler() {
+        cell.removeEventListener('animationend', handler);
+        cell.className = 'cell';
+        cell.style.background = '';
+        cell.style.opacity = '';
+      });
+    }, delay);
+
+    delay += 20;
   });
 
-  setTimeout(() => {
-    rowsToClear.forEach(r => {
-      for (let c = 0; c < GRID_SIZE; c++) grid[r][c] = null;
-    });
-    colsToClear.forEach(c => {
-      for (let r = 0; r < GRID_SIZE; r++) grid[r][c] = null;
-    });
-    renderGrid();
-  }, 400);
+  // Screen shake for multi-line clears
+  if (totalCleared >= 2) {
+    document.getElementById('grid-container').classList.add('shaking');
+    setTimeout(() => document.getElementById('grid-container').classList.remove('shaking'), 300);
+  }
 
-  return rowsToClear.length + colsToClear.length;
+  // Emoji burst for big clears
+  if (totalCleared >= 2) {
+    const gridRect = document.getElementById('grid').getBoundingClientRect();
+    spawnEmojiBurst(gridRect.left + gridRect.width / 2, gridRect.top + gridRect.height / 2, totalCleared);
+  }
+
+  return totalCleared;
+}
+
+function spawnParticles(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    const type = Math.random();
+    const size = 4 + Math.random() * 5;
+    const dx = (Math.random() - 0.5) * 60;
+    const dy = -15 - Math.random() * 45;
+    const dur = 0.5 + Math.random() * 0.4;
+
+    if (type < 0.4) {
+      // Circle particle
+      p.className = 'particle';
+      p.style.background = color;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+    } else if (type < 0.7) {
+      // Star particle
+      p.className = 'particle star';
+      p.style.background = color;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+    } else {
+      // Tiny sparkle
+      p.className = 'particle';
+      p.style.background = '#fff';
+      p.style.width = (size * 0.6) + 'px';
+      p.style.height = (size * 0.6) + 'px';
+      p.style.boxShadow = `0 0 ${size}px ${color}`;
+    }
+
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.setProperty('--dx', dx + 'px');
+    p.style.setProperty('--dy', dy + 'px');
+    p.style.setProperty('--dur', dur + 's');
+    p.style.setProperty('--size', size + 'px');
+
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), dur * 1000 + 50);
+  }
+}
+
+function spawnEmojiBurst(x, y, lines) {
+  const emojis = lines >= 3 ? ['✨','🌟','💖','🎀','🍬','🫧']
+                             : ['✨','💫','🌸'];
+  const count = Math.min(lines * 3, 12);
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.cssText = `
+      position: fixed; pointer-events: none; z-index: 95;
+      font-size: ${14 + Math.random() * 14}px;
+      left: ${x}px; top: ${y}px;
+      animation: emojiBurst ${0.7 + Math.random() * 0.5}s ease-out forwards;
+      --ex: ${(Math.random() - 0.5) * 120}px;
+      --ey: ${-40 - Math.random() * 80}px;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1300);
+  }
 }
 
 function showPreview(row, col, piece) {
@@ -739,21 +1017,53 @@ function showPreview(row, col, piece) {
     const r = row + dr, c = col + dc;
     if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
       const cell = gridCells[r * GRID_SIZE + c];
-      if (valid) {
-        cell.classList.add('preview');
-        cell.style.background = piece.color;
-      } else {
-        cell.classList.add('preview-invalid');
-      }
+      if (valid) { cell.classList.add('preview'); cell.style.background = piece.color; }
+      else cell.classList.add('preview-invalid');
     }
   });
+
+  // If valid, check which lines would complete and highlight them
+  if (valid) {
+    // Build a temporary grid state with the piece placed
+    const placed = new Set(piece.shape.map(([dr, dc]) => `${row + dr},${col + dc}`));
+
+    const willClearRows = [];
+    const willClearCols = [];
+
+    for (let r = 0; r < GRID_SIZE; r++) {
+      let full = true;
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (!grid[r][c] && !placed.has(`${r},${c}`)) { full = false; break; }
+      }
+      if (full) willClearRows.push(r);
+    }
+
+    for (let c = 0; c < GRID_SIZE; c++) {
+      let full = true;
+      for (let r = 0; r < GRID_SIZE; r++) {
+        if (!grid[r][c] && !placed.has(`${r},${c}`)) { full = false; break; }
+      }
+      if (full) willClearCols.push(c);
+    }
+
+    // Highlight all cells in those lines
+    willClearRows.forEach(r => {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        gridCells[r * GRID_SIZE + c].classList.add('will-clear');
+      }
+    });
+    willClearCols.forEach(c => {
+      for (let r = 0; r < GRID_SIZE; r++) {
+        gridCells[r * GRID_SIZE + c].classList.add('will-clear');
+      }
+    });
+  }
 }
 
 function clearPreview() {
-  document.querySelectorAll('#grid .cell.preview, #grid .cell.preview-invalid').forEach(cell => {
-    const r = parseInt(cell.dataset.row);
-    const c = parseInt(cell.dataset.col);
-    cell.classList.remove('preview', 'preview-invalid');
+  document.querySelectorAll('#grid .cell.preview, #grid .cell.preview-invalid, #grid .cell.will-clear').forEach(cell => {
+    const r = parseInt(cell.dataset.row), c = parseInt(cell.dataset.col);
+    cell.classList.remove('preview', 'preview-invalid', 'will-clear');
     cell.style.background = grid[r][c] || '';
   });
 }
@@ -761,23 +1071,19 @@ function clearPreview() {
 function isGameOver() {
   const remaining = pieces.filter(p => !p.used);
   if (remaining.length === 0) return false;
-
   return remaining.every(piece => {
-    for (let r = 0; r < GRID_SIZE; r++) {
-      for (let c = 0; c < GRID_SIZE; c++) {
+    for (let r = 0; r < GRID_SIZE; r++)
+      for (let c = 0; c < GRID_SIZE; c++)
         if (canPlace(r, c, piece.shape)) return false;
-      }
-    }
     return true;
   });
 }
 
-// ===================== SCORE & UI =====================
+// ===== SCORE & UI =====
 
 function addScore(points) {
   score += points;
   updateScore();
-
   const popup = document.createElement('div');
   popup.className = 'score-popup';
   popup.textContent = '+' + points;
@@ -805,33 +1111,27 @@ function showCombo(c) {
 }
 
 function updateStreakBar() {
-  const fill = document.getElementById('streak-fill');
-  fill.style.width = Math.min(combo * 20, 100) + '%';
+  document.getElementById('streak-fill').style.width = Math.min(combo * 20, 100) + '%';
 }
 
 function showGameOver() {
-  document.getElementById('final-score').textContent = `점수: ${score}`;
-  document.getElementById('best-score-final').textContent = `최고 점수: ${bestScore}`;
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('best-score-final').textContent = `best ${bestScore}`;
+  document.getElementById('game-area').classList.add('game-over-state');
   document.getElementById('game-over').classList.add('show');
 }
 
-// ===================== EVENTS =====================
+// ===== EVENTS =====
 
 document.addEventListener('mousemove', moveDrag);
 document.addEventListener('mouseup', endDrag);
 document.addEventListener('touchmove', moveDrag, { passive: false });
 document.addEventListener('touchend', endDrag);
-
 document.getElementById('restart-btn').addEventListener('click', init);
 document.addEventListener('contextmenu', e => e.preventDefault());
 
-// Recalc on resize/orientation change
-window.addEventListener('resize', () => {
-  calcSizes();
-  renderPieces();
-});
+window.addEventListener('resize', () => { calcSizes(); renderPieces(); });
 
-// ===================== START =====================
 init();
 </script>
 </body>
