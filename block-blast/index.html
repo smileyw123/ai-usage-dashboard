@@ -35,6 +35,8 @@ body {
   padding: var(--pad-main, 12px);
   width: 100%;
   max-width: 480px;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 /* ===== Header ===== */
@@ -313,13 +315,15 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  min-height: var(--tray-height, 90px);
-  padding: 10px 4px;
+  height: var(--tray-height, 90px);
+  padding: 0 4px;
   background: #352f42;
   border: 2px solid #9b8bb5;
   border-radius: 14px;
   align-self: stretch;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .piece-container {
@@ -637,18 +641,29 @@ function calcSizes() {
   const vh = window.innerHeight;
   const pad = 28;
   const gridPad = 12;
-  const gaps = (GRID_SIZE - 1) * 2;
+  const gaps = (GRID_SIZE - 1) * 2.5;
+
+  // Fixed heights for non-grid elements:
+  // header ~30, score ~60, streak ~8, gaps ~40, tray = calculated, padding ~28
+  const fixedUI = 166;
 
   const availW = Math.min(vw - pad, 480 - pad);
   const maxCellFromW = Math.floor((availW - gridPad - gaps) / GRID_SIZE);
 
-  const reservedH = 260;
-  const availH = vh - reservedH;
-  const maxCellFromH = Math.floor((availH - gridPad - gaps) / GRID_SIZE);
+  // Calculate max cell from height: vh = fixedUI + gridH + trayH
+  // trayH ≈ PIECE_CELL * 5 + 20, PIECE_CELL ≈ CELL * 0.52
+  // So: vh = fixedUI + CELL*8 + gaps + gridPad + CELL*0.52*5 + 20
+  // vh = fixedUI + 20 + gridPad + CELL*(8 + gaps/CELL + 2.6)
+  // Simplified: solve for CELL
+  const availH = vh - fixedUI - 20 - gridPad;
+  const maxCellFromH = Math.floor(availH / (GRID_SIZE + 2.6));
 
-  CELL_SIZE = Math.max(24, Math.min(maxCellFromW, maxCellFromH, 48));
+  CELL_SIZE = Math.max(22, Math.min(maxCellFromW, maxCellFromH, 48));
   CELL_GAP = CELL_SIZE >= 32 ? 3 : 2.5;
-  PIECE_CELL = Math.max(14, Math.floor(CELL_SIZE * 0.52));
+  PIECE_CELL = Math.max(12, Math.floor(CELL_SIZE * 0.52));
+
+  // Fixed tray height based on largest possible piece (5 rows)
+  const trayH = PIECE_CELL * 5 + 20;
 
   const root = document.documentElement.style;
   root.setProperty('--cell', CELL_SIZE + 'px');
@@ -657,7 +672,7 @@ function calcSizes() {
   root.setProperty('--cell-radius', Math.max(4, Math.floor(CELL_SIZE * 0.15)) + 'px');
   root.setProperty('--piece-radius', Math.max(3, Math.floor(PIECE_CELL * 0.15)) + 'px');
   root.setProperty('--grid-pad', Math.max(5, Math.floor(CELL_SIZE * 0.18)) + 'px');
-  root.setProperty('--tray-height', Math.floor(PIECE_CELL * 5 + 24) + 'px');
+  root.setProperty('--tray-height', trayH + 'px');
 
   if (vw < 380) {
     root.setProperty('--font-score', '38px');
@@ -719,25 +734,18 @@ function canPlaceAnywhere(shape) {
   return false;
 }
 
-function randomPlaceablePiece() {
-  // Filter shapes that can actually be placed on current board
-  const valid = SHAPES.filter(s => canPlaceAnywhere(s.cells));
-  if (valid.length === 0) return null;
-  const shape = valid[Math.floor(Math.random() * valid.length)];
-  const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-  return { shape: shape.cells, color, used: false };
-}
-
 function spawnPieces() {
+  // Filter valid shapes once, then pick 3 from them
+  const validShapes = SHAPES.filter(s => canPlaceAnywhere(s.cells));
+  if (validShapes.length === 0) {
+    showGameOver();
+    return;
+  }
   pieces = [];
   for (let i = 0; i < 3; i++) {
-    const piece = randomPlaceablePiece();
-    if (!piece) {
-      // No shape fits at all - game over
-      showGameOver();
-      return;
-    }
-    pieces.push(piece);
+    const shape = validShapes[Math.floor(Math.random() * validShapes.length)];
+    const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    pieces.push({ shape: shape.cells, color, used: false });
   }
   renderPieces();
 }
@@ -859,6 +867,10 @@ function endDrag(e) {
     pieces[draggingIndex].used = true;
     renderPieces();
 
+    // Spawn next pieces immediately if all used
+    const allUsed = pieces.every(p => p.used);
+    if (allUsed) spawnPieces();
+
     setTimeout(() => {
       const cleared = checkAndClearLines();
       if (cleared > 0) {
@@ -871,8 +883,7 @@ function endDrag(e) {
       }
       updateStreakBar();
 
-      if (pieces.every(p => p.used)) setTimeout(() => spawnPieces(), 300);
-      setTimeout(() => { if (isGameOver()) showGameOver(); }, 350);
+      if (!allUsed && isGameOver()) showGameOver();
     }, 50);
   }
 
