@@ -9,21 +9,26 @@
 html, body { height: 100%; overflow: hidden; touch-action: none; }
 body { background: #2a2535; display: flex; flex-direction: column; align-items: center; font-family: 'Segoe UI', sans-serif; color: #d4cce0; }
 
-.top-bar {
-  display: flex; justify-content: center; gap: 16px; padding: 8px 0; width: 100%;
-  flex-shrink: 0;
+.main-area {
+  flex: 1; display: flex; width: 100%; min-height: 0; justify-content: center; align-items: stretch;
 }
-.top-bar .stat { text-align: center; }
-.top-bar .stat .label { font-size: 11px; color: #9b8bb5; font-weight: bold; }
-.top-bar .stat .value { font-size: 18px; font-weight: bold; }
-.next-preview { display: flex; align-items: center; gap: 4px; }
-.next-preview .label { font-size: 11px; color: #9b8bb5; font-weight: bold; }
 
 .game-area {
-  flex: 1; display: flex; justify-content: center; align-items: center;
-  width: 100%; min-height: 0; position: relative;
+  flex-shrink: 0; display: flex; justify-content: center; align-items: center;
+  min-height: 0; position: relative; padding: 4px;
 }
 #board { border: 2px solid #9b8bb5; background: #352f42; display: block; }
+
+.side-panel {
+  width: 80px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 6px; gap: 14px; justify-content: flex-start;
+}
+.side-panel .stat { text-align: center; }
+.side-panel .stat .label { font-size: 10px; color: #9b8bb5; font-weight: bold; letter-spacing: 0.5px; }
+.side-panel .stat .value { font-size: 16px; font-weight: bold; }
+.side-panel .next-label { font-size: 10px; color: #9b8bb5; font-weight: bold; margin-bottom: 2px; }
+#nextCanvas { display: block; }
 
 .overlay {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -68,29 +73,27 @@ body { background: #2a2535; display: flex; flex-direction: column; align-items: 
 
 @media (min-width: 601px) {
   .controls { display: none; }
-  .top-bar { max-width: 500px; }
-}
-@media (max-width: 600px) {
-  .top-bar { padding: 6px 10px; gap: 10px; }
-  .top-bar .stat .value { font-size: 16px; }
+  .side-panel { width: 100px; padding: 14px 10px; gap: 18px; }
+  .side-panel .stat .value { font-size: 22px; }
+  .side-panel .stat .label { font-size: 12px; }
+  .side-panel .next-label { font-size: 12px; }
 }
 </style>
 </head>
 <body>
 
-<div class="top-bar">
-  <div class="next-preview">
-    <span class="label">NEXT</span>
-    <canvas id="nextCanvas" width="80" height="60"></canvas>
+<div class="main-area">
+  <div class="game-area">
+    <canvas id="board"></canvas>
+    <div class="overlay" id="overlay"></div>
   </div>
-  <div class="stat"><div class="label">SCORE</div><div class="value" id="score">0</div></div>
-  <div class="stat"><div class="label">LEVEL</div><div class="value" id="level">1</div></div>
-  <div class="stat"><div class="label">LINES</div><div class="value" id="lines">0</div></div>
-</div>
-
-<div class="game-area">
-  <canvas id="board"></canvas>
-  <div class="overlay" id="overlay"></div>
+  <div class="side-panel">
+    <div class="next-label">NEXT</div>
+    <canvas id="nextCanvas" width="76" height="76"></canvas>
+    <div class="stat"><div class="label">SCORE</div><div class="value" id="score">0</div></div>
+    <div class="stat"><div class="label">LEVEL</div><div class="value" id="level">1</div></div>
+    <div class="stat"><div class="label">LINES</div><div class="value" id="lines">0</div></div>
+  </div>
 </div>
 
 <div class="controls">
@@ -132,11 +135,12 @@ let dropAnim = null; // falling rows animation
 let cuteParticles = [];
 
 function resize() {
-  const gameArea = document.querySelector('.game-area');
-  const availW = gameArea.clientWidth - 8;
-  const availH = gameArea.clientHeight - 8;
+  const mainArea = document.querySelector('.main-area');
+  const sidePanel = document.querySelector('.side-panel');
+  const availW = mainArea.clientWidth - sidePanel.offsetWidth - 12;
+  const availH = mainArea.clientHeight - 8;
   SZ = Math.floor(Math.min(availW / COLS, availH / ROWS));
-  SZ = Math.max(SZ, 12);
+  SZ = Math.max(SZ, 14);
   canvas.width = SZ * COLS;
   canvas.height = SZ * ROWS;
 }
@@ -507,18 +511,18 @@ function drawBlock(context, x, y, color, alpha, sz, label) {
   if (label) {
     const displayLabel = LABEL_MAP[label] || label;
     context.globalAlpha = alpha;
-    const fontSize = Math.max(7, Math.floor(sz * 0.38));
-    context.font = `bold ${fontSize}px 'Segoe UI', sans-serif`;
+    const fontSize = Math.max(9, Math.floor(sz * 0.55));
+    context.font = `900 ${fontSize}px 'Segoe UI', sans-serif`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    // outline for readability
-    context.lineWidth = 2;
-    context.strokeStyle = 'rgba(0,0,0,0.6)';
-    context.strokeText(displayLabel, bx + bw/2, by + bh/2);
-    context.fillStyle = label === 'YERIN' ? '#f7e1a1' : '#a8d8e8';
-    context.shadowColor = label === 'YERIN' ? '#e0c878' : '#7ebcd4';
-    context.shadowBlur = 6;
-    context.fillText(displayLabel, bx + bw/2, by + bh/2);
+    // thick outline for readability
+    context.lineWidth = 3;
+    context.strokeStyle = 'rgba(0,0,0,0.7)';
+    context.strokeText(displayLabel, bx + bw/2, by + bh/2 + 1);
+    context.fillStyle = label === 'YERIN' ? '#ffe87a' : '#7ee8ff';
+    context.shadowColor = label === 'YERIN' ? '#ffaa00' : '#00aaff';
+    context.shadowBlur = 8;
+    context.fillText(displayLabel, bx + bw/2, by + bh/2 + 1);
     context.shadowBlur = 0;
   }
 
@@ -634,9 +638,9 @@ function drawDropAnim(now) {
 
 function drawNext() {
   nextCtx.clearRect(0,0,nextCanvas.width,nextCanvas.height);
-  const s = next.shape, bsz=15;
-  const ox = Math.floor((nextCanvas.width/bsz - s[0].length)/2);
-  const oy = Math.floor((nextCanvas.height/bsz - s.length)/2);
+  const s = next.shape, bsz=18;
+  const ox = (nextCanvas.width/bsz - s[0].length) / 2;
+  const oy = (nextCanvas.height/bsz - s.length) / 2;
   for(let r=0;r<s.length;r++)
     for(let c=0;c<s[r].length;c++)
       if(s[r][c]) drawBlock(nextCtx, ox+c, oy+r, COLORS[next.color-1], 1, bsz, next.specials[r][c]);
