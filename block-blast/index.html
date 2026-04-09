@@ -20,7 +20,7 @@ html, body {
 }
 
 body {
-  background: linear-gradient(180deg, #e8dff5 0%, #d4e7fa 40%, #dff5e3 100%);
+  background: #2d2b3d;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -50,45 +50,41 @@ body {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.08);
   padding: 4px 10px;
   border-radius: 20px;
 }
 
-#best-area .best-icon {
-  width: 14px;
-  height: 14px;
-  display: inline-block;
-}
-
-#best-area .best-icon svg {
-  width: 100%;
-  height: 100%;
+#best-area .best-label {
+  font-size: 11px;
+  color: #7a7090;
+  font-weight: 600;
 }
 
 #best-area .best-val {
   font-size: 13px;
-  color: #9a8bc2;
+  color: #a99cc8;
   font-weight: 700;
 }
 
 /* ===== Score - center big ===== */
 #score-display {
   text-align: center;
-  margin-top: -2px;
+  margin-top: -6px;
+  margin-bottom: -2px;
 }
 
 #score-display .score-value {
   font-size: var(--font-score, 44px);
   font-weight: 900;
-  color: #6c5b9e;
+  color: #e8e0f0;
   line-height: 1;
   letter-spacing: -1px;
 }
 
 #score-display .score-label {
   font-size: 10px;
-  color: #b5a8d5;
+  color: #7a7090;
   text-transform: uppercase;
   letter-spacing: 3px;
   font-weight: 600;
@@ -96,9 +92,10 @@ body {
 
 /* ===== Streak bar ===== */
 #streak-bar {
-  width: 100%;
+  align-self: center;
+  width: 95%;
   height: 4px;
-  background: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.08);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -114,37 +111,59 @@ body {
 /* ===== Grid ===== */
 #grid-container {
   position: relative;
-  background: rgba(255,255,255,0.45);
-  backdrop-filter: blur(8px);
-  border-radius: 18px;
+  background: #352f42;
+  border: 2px solid #9b8bb5;
+  border-radius: 14px;
   padding: var(--grid-pad, 6px);
-  box-shadow: 0 8px 32px rgba(140,120,180,0.15), inset 0 1px 0 rgba(255,255,255,0.6);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
 #grid {
   display: grid;
-  grid-template-columns: repeat(10, var(--cell, 30px));
-  grid-template-rows: repeat(10, var(--cell, 30px));
+  grid-template-columns: repeat(8, var(--cell, 30px));
+  grid-template-rows: repeat(8, var(--cell, 30px));
   gap: var(--cell-gap, 2px);
 }
 
 .cell {
   width: var(--cell, 30px);
   height: var(--cell, 30px);
-  background: rgba(255,255,255,0.35);
-  border-radius: var(--cell-radius, 7px);
+  background: #3d3650;
+  border-radius: var(--cell-radius, 8px);
   transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+  position: relative;
+  overflow: hidden;
 }
 
 .cell.filled {
-  border-radius: var(--cell-radius, 7px);
-  background-image:
-    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.55) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 80%, rgba(0,0,0,0.06) 0%, transparent 50%);
-  box-shadow:
-    inset 0 -3px 1px rgba(0,0,0,0.08),
-    inset 0 2px 1px rgba(255,255,255,0.6),
-    0 2px 6px rgba(0,0,0,0.07);
+  border-radius: var(--cell-radius, 8px);
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+/* Diagonal gradient: bright top-left → base → dark bottom-right */
+.cell.filled::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg,
+      rgba(255,255,255,0.28) 0%,
+      transparent 50%,
+      rgba(0,0,0,0.18) 100%);
+  z-index: 1;
+}
+
+/* Specular highlight (small bright dot at top-left 28%) + bottom shadow */
+.cell.filled::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 28% 28%, rgba(255,255,255,0.50) 0%, rgba(255,255,255,0) 35%),
+    linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.18) 100%);
+  z-index: 2;
 }
 
 .cell.preview {
@@ -154,18 +173,18 @@ body {
 }
 
 .cell.preview-invalid {
-  background: #edb0b0 !important;
+  background: #6b3a3a !important;
   background-image: none !important;
-  opacity: 0.4;
+  opacity: 0.5;
 }
 
 /* Line-will-clear glow hint */
 .cell.will-clear {
   animation: willClearPulse 0.8s ease-in-out infinite alternate;
   box-shadow:
-    inset 0 0 8px rgba(255,255,255,0.7),
-    0 0 10px rgba(200,170,240,0.5) !important;
-  filter: brightness(1.25) saturate(1.3);
+    inset 0 0 8px rgba(255,255,255,0.4),
+    0 0 12px rgba(180,160,220,0.5) !important;
+  filter: brightness(1.3) saturate(1.2);
 }
 
 @keyframes willClearPulse {
@@ -296,11 +315,11 @@ body {
   align-items: center;
   min-height: var(--tray-height, 90px);
   padding: 10px 4px;
-  background: rgba(255,255,255,0.35);
-  backdrop-filter: blur(8px);
-  border-radius: 18px;
-  width: 100%;
-  box-shadow: 0 4px 16px rgba(140,120,180,0.1);
+  background: #352f42;
+  border: 2px solid #9b8bb5;
+  border-radius: 14px;
+  align-self: stretch;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
 
 .piece-container {
@@ -335,15 +354,36 @@ body {
   width: var(--piece-cell, 18px);
   height: var(--piece-cell, 18px);
   border-radius: var(--piece-radius, 5px);
+  position: relative;
+  overflow: hidden;
 }
 
 .piece-cell.filled {
-  background-image:
-    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.5) 0%, transparent 55%);
-  box-shadow:
-    inset 0 -2px 0 rgba(0,0,0,0.06),
-    inset 0 1px 0 rgba(255,255,255,0.5),
-    0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+.piece-cell.filled::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg,
+      rgba(255,255,255,0.28) 0%,
+      transparent 50%,
+      rgba(0,0,0,0.18) 100%);
+  z-index: 1;
+}
+
+.piece-cell.filled::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 28% 28%, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 35%),
+    linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.15) 100%);
+  z-index: 2;
 }
 
 .piece-cell.empty {
@@ -369,13 +409,8 @@ body {
 }
 
 #drag-piece .piece-cell.filled {
-  background-image:
-    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.55) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 80%, rgba(0,0,0,0.06) 0%, transparent 50%);
-  box-shadow:
-    inset 0 -3px 1px rgba(0,0,0,0.08),
-    inset 0 2px 1px rgba(255,255,255,0.6),
-    0 5px 14px rgba(0,0,0,0.14);
+  border: 1px solid rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 /* ===== Combo display ===== */
@@ -386,8 +421,8 @@ body {
   transform: translate(-50%, -50%);
   font-size: 42px;
   font-weight: 900;
-  color: #c9a0dc;
-  text-shadow: 0 0 24px rgba(201,160,220,0.5), 0 2px 0 #fff;
+  color: #e0c8f0;
+  text-shadow: 0 0 24px rgba(201,160,220,0.6), 0 2px 4px rgba(0,0,0,0.3);
   pointer-events: none;
   opacity: 0;
   z-index: 100;
@@ -408,10 +443,10 @@ body {
   position: fixed;
   font-size: 20px;
   font-weight: 800;
-  color: #aa96da;
+  color: #d8c4f0;
   pointer-events: none;
   z-index: 100;
-  text-shadow: 0 1px 0 #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   animation: scorePopup 0.8s ease-out forwards;
 }
 
@@ -423,17 +458,17 @@ body {
 /* ===== Game Over - overlay on top of game ===== */
 #game-area {
   position: relative;
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: fit-content;
   gap: var(--gap-main, 10px);
 }
 
 #game-area.game-over-state #grid-container,
 #game-area.game-over-state #piece-tray,
 #game-area.game-over-state #streak-bar {
-  filter: blur(5px) brightness(0.88);
+  filter: blur(5px) brightness(0.7);
   pointer-events: none;
   transition: filter 0.6s ease;
 }
@@ -447,7 +482,7 @@ body {
   justify-content: center;
   align-items: center;
   gap: 14px;
-  background: rgba(232, 223, 245, 0.55);
+  background: rgba(45, 43, 61, 0.6);
   border-radius: 18px;
   opacity: 0;
 }
@@ -464,32 +499,23 @@ body {
 
 #game-over h2 {
   font-size: 28px;
-  color: #b07cc6;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+  color: #e0c8f0;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
   margin: 0;
 }
 
-#game-over .go-scores {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
 #game-over .final-score {
-  font-size: 22px;
-  color: #6c5b9e;
-  font-weight: 700;
-}
-
-#game-over .best-score-display {
-  font-size: 13px;
-  color: #9a8bc2;
+  font-size: 88px;
+  color: #e8e0f0;
+  font-weight: 900;
+  line-height: 1;
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
 #restart-btn {
+  margin-top: 16px;
   padding: 12px 40px;
   font-size: 16px;
   font-weight: 700;
@@ -513,7 +539,7 @@ body {
 <div id="game-container">
   <div id="header">
     <div id="best-area">
-      <span class="best-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#b5a8d5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6-6 6 6"/><path d="M12 3v12"/><circle cx="12" cy="20" r="2" fill="#b5a8d5" stroke="none"/></svg></span>
+      <span class="best-label">최고점수 :</span>
       <span class="best-val" id="best-score">0</span>
     </div>
   </div>
@@ -534,10 +560,7 @@ body {
 
     <div id="game-over">
       <h2>Game Over!</h2>
-      <div class="go-scores">
-        <div class="final-score" id="final-score"></div>
-        <div class="best-score-display" id="best-score-final"></div>
-      </div>
+      <div class="final-score" id="final-score"></div>
       <button id="restart-btn">다시 하기</button>
     </div>
   </div>
@@ -550,24 +573,21 @@ body {
 <div id="combo-display"></div>
 
 <script>
-const GRID_SIZE = 10;
+const GRID_SIZE = 8;
 
 let CELL_SIZE = 30;
 let CELL_GAP = 2;
 let PIECE_CELL = 18;
 
-// Pastel candy colors
+// Colors matched from tetris
 const COLORS = [
-  '#f4b0c6', // candy pink
-  '#b8e6ca', // mint
-  '#a6d4f2', // baby blue
-  '#f5e4a1', // butter yellow
-  '#cdb4f0', // soft violet
-  '#f9c9a3', // apricot
-  '#a3dcd6', // seafoam
-  '#e0bbf7', // lilac
-  '#f9b5b1', // coral blush
-  '#b3d9f7', // powder blue
+  '#a8d8cb', // mint
+  '#f2b5d4', // pink
+  '#f7e1a1', // yellow
+  '#a8c8e8', // sky blue
+  '#c5a8e0', // purple
+  '#f4b8a8', // peach
+  '#b5dbb5', // green
 ];
 
 const SHAPES = [
@@ -617,24 +637,25 @@ function calcSizes() {
   const vh = window.innerHeight;
   const pad = 28;
   const gridPad = 12;
+  const gaps = (GRID_SIZE - 1) * 2;
 
   const availW = Math.min(vw - pad, 480 - pad);
-  const maxCellFromW = Math.floor((availW - gridPad - 9 * 2) / 10);
+  const maxCellFromW = Math.floor((availW - gridPad - gaps) / GRID_SIZE);
 
   const reservedH = 260;
   const availH = vh - reservedH;
-  const maxCellFromH = Math.floor((availH - gridPad - 9 * 2) / 10);
+  const maxCellFromH = Math.floor((availH - gridPad - gaps) / GRID_SIZE);
 
-  CELL_SIZE = Math.max(20, Math.min(maxCellFromW, maxCellFromH, 40));
-  CELL_GAP = CELL_SIZE >= 28 ? 2.5 : 2;
-  PIECE_CELL = Math.max(12, Math.floor(CELL_SIZE * 0.55));
+  CELL_SIZE = Math.max(24, Math.min(maxCellFromW, maxCellFromH, 48));
+  CELL_GAP = CELL_SIZE >= 32 ? 3 : 2.5;
+  PIECE_CELL = Math.max(14, Math.floor(CELL_SIZE * 0.52));
 
   const root = document.documentElement.style;
   root.setProperty('--cell', CELL_SIZE + 'px');
   root.setProperty('--cell-gap', CELL_GAP + 'px');
   root.setProperty('--piece-cell', PIECE_CELL + 'px');
-  root.setProperty('--cell-radius', Math.max(5, Math.floor(CELL_SIZE * 0.22)) + 'px');
-  root.setProperty('--piece-radius', Math.max(3, Math.floor(PIECE_CELL * 0.22)) + 'px');
+  root.setProperty('--cell-radius', Math.max(4, Math.floor(CELL_SIZE * 0.15)) + 'px');
+  root.setProperty('--piece-radius', Math.max(3, Math.floor(PIECE_CELL * 0.15)) + 'px');
   root.setProperty('--grid-pad', Math.max(5, Math.floor(CELL_SIZE * 0.18)) + 'px');
   root.setProperty('--tray-height', Math.floor(PIECE_CELL * 5 + 24) + 'px');
 
@@ -691,14 +712,33 @@ function renderGrid() {
   });
 }
 
-function randomPiece() {
-  const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+function canPlaceAnywhere(shape) {
+  for (let r = 0; r < GRID_SIZE; r++)
+    for (let c = 0; c < GRID_SIZE; c++)
+      if (canPlace(r, c, shape)) return true;
+  return false;
+}
+
+function randomPlaceablePiece() {
+  // Filter shapes that can actually be placed on current board
+  const valid = SHAPES.filter(s => canPlaceAnywhere(s.cells));
+  if (valid.length === 0) return null;
+  const shape = valid[Math.floor(Math.random() * valid.length)];
   const color = COLORS[Math.floor(Math.random() * COLORS.length)];
   return { shape: shape.cells, color, used: false };
 }
 
 function spawnPieces() {
-  pieces = [randomPiece(), randomPiece(), randomPiece()];
+  pieces = [];
+  for (let i = 0; i < 3; i++) {
+    const piece = randomPlaceablePiece();
+    if (!piece) {
+      // No shape fits at all - game over
+      showGameOver();
+      return;
+    }
+    pieces.push(piece);
+  }
   renderPieces();
 }
 
@@ -1116,7 +1156,6 @@ function updateStreakBar() {
 
 function showGameOver() {
   document.getElementById('final-score').textContent = score;
-  document.getElementById('best-score-final').textContent = `best ${bestScore}`;
   document.getElementById('game-area').classList.add('game-over-state');
   document.getElementById('game-over').classList.add('show');
 }
