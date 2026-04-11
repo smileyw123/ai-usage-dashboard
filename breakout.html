@@ -2571,11 +2571,12 @@ function update(dt) {
     if (brick.x + brick.w > BOARD_W - PAD) { brick.x = BOARD_W - PAD - brick.w; brick.vx = -Math.abs(brick.vx); }
   }
 
-  // 슬로우 팩터: 번개/레이저변신/캐리어착륙 = 0.05x, 파이어볼 = 0.62x
+  // 슬로우 팩터: 번개/레이저변신 = 0.05x, 로봇모드 = 0.38x, 파이어볼 = 0.62x
   const _thunderSlow = thunderBolts.some(b => b.age >= 0 && b.age < b.life);
   const _tSlowFactor = _thunderSlow ? 0.05
     : paddleState.laserTransform > 0 ? 0.05
-    : (paddleState.carrier > 0 && balls.some(b => b._carrierLanding)) ? 1.0 // 착륙 중엔 속도 그대로(이미 느림)
+    : paddleState.laser > 0 ? 0.38
+    : (paddleState.carrier > 0 && balls.some(b => b._carrierLanding)) ? 1.0
     : paddleState.fire > 0 ? 0.62
     : 1.0;
 
@@ -2775,7 +2776,11 @@ function update(dt) {
     } else {
       laserFireTimer = 0;
     }
-    if (paddleState.laser <= 0) updatePowerDisplay();
+    if (paddleState.laser <= 0) {
+      updatePowerDisplay();
+      // 로봇 모드 종료 → 공 속도 정상으로 복원
+      for (const b of balls) if (!b.stuck) applyBallSpeed(b);
+    }
   } else {
     laserFireTimer = 0;
   }
