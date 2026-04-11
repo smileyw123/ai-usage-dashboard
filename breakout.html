@@ -2844,7 +2844,6 @@ function update(dt) {
         ic.x = paddle.x + paddle.w * (interceptors.indexOf(ic) / 7) * 0.9 + paddle.w * 0.05;
         ic.y = paddle.y - 4;
         if (ic.age >= ic.launchDelay && aliveTargetable.length > 0) {
-          // 가장 가까운 타겟 배정
           const t = aliveTargetable.reduce((closest, b) => {
             const dx = (b.x + b.w/2) - ic.x, dy = (b.y + b.h/2) - ic.y;
             const dc = (closest.x + closest.w/2) - ic.x, dy2 = (closest.y + closest.h/2) - ic.y;
@@ -2854,6 +2853,9 @@ function update(dt) {
           t._interceptorTarget = true;
           ic.state = 'flying';
           sfxPlay('interceptor_launch');
+        } else if (ic.age >= ic.launchDelay && aliveTargetable.length === 0) {
+          // 타겟 없으면 출격 없이 바로 done
+          ic.state = 'done';
         }
         allDone = false;
 
@@ -2899,10 +2901,10 @@ function update(dt) {
       }
     }
 
-    // 모든 인터셉터가 done 또는 타겟 없으면 캐리어 모드 해제
-    const activeBricks = bricks.filter(b => b.alive && b.type !== 'gold');
-    const allReturned = interceptors.every(ic => ic.state === 'done' || ic.state === 'bay');
-    if ((allReturned && interceptors.some(ic => ic.state === 'done')) || activeBricks.length === 0) {
+    // 모든 인터셉터가 전원 귀환 완료(done)일 때만 캐리어 모드 해제
+    const allReturned = interceptors.length > 0 &&
+      interceptors.every(ic => ic.state === 'done');
+    if (allReturned) {
       interceptors = [];
       paddleState.carrier = 0;
       paddleState.carrierTransform = 0;
