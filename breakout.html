@@ -2771,24 +2771,24 @@ function update(dt) {
   if (paddleState.fire > 0) { paddleState.fire -= 1; if(paddleState.fire<=0) updatePowerDisplay(); }
   if (paddleState.laserTransform > 0) paddleState.laserTransform = Math.max(0, paddleState.laserTransform - dt);
 
-  // 캐리어 변신 타이머 감소 → 완료되면 인터셉터 8기 발진 준비
+  // 캐리어 변신 타이머 감소
   if (paddleState.carrierTransform > 0) {
     paddleState.carrierTransform = Math.max(0, paddleState.carrierTransform - dt);
-    if (paddleState.carrierTransform <= 0 && interceptors.length === 0) {
-      // 모든 볼이 착륙 완료됐을 때만 인터셉터 발진
-      const allLanded = balls.every(b => b.stuck && !b._carrierLanding);
-      if (!allLanded) return; // 아직 착륙 중인 볼 있음
-      // 인터셉터 8기 생성
+  }
+
+  // 변신 완료 + 볼 착륙 완료 → 인터셉터 발진 (매 프레임 체크)
+  if (paddleState.carrier > 0 && paddleState.carrierTransform <= 0 && interceptors.length === 0) {
+    const allLanded = balls.every(b => b.stuck && !b._carrierLanding);
+    if (allLanded) {
       for (let i = 0; i < 8; i++) {
         interceptors.push({
           x: paddle.x + paddle.w * 0.2 + (paddle.w * 0.6) * (i / 7),
           y: paddle.y,
           vx: 0, vy: 0,
-          state: 'bay',     // bay → launch → flying → hit → returning → bay
+          state: 'bay',
           target: null,
           launchDelay: i * 0.18,
-          age: 0,
-          returnX: 0, returnY: 0
+          age: 0
         });
       }
     }
