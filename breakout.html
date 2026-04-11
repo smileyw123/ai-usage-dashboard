@@ -2211,9 +2211,17 @@ function _noise(ctx, dest, now, vol, dur, lp, hp) {
 
 function sfxPlay(type) {
   const ctx = getSfxCtx(); if (!ctx) return;
-  // suspended 상태면 resume 시도 후 이번 소리는 건너뜀 (다음 소리부터 정상 재생)
-  if (ctx.state === 'suspended') { ctx.resume().catch(() => {}); return; }
+  if (ctx.state === 'suspended') {
+    // resume 완료 후 즉시 재생 (소리를 버리지 않음)
+    ctx.resume().then(() => _sfxPlayNow(type)).catch(() => {});
+    return;
+  }
   if (ctx.state !== 'running') return;
+  _sfxPlayNow(type);
+}
+
+function _sfxPlayNow(type) {
+  const ctx = getSfxCtx(); if (!ctx || ctx.state !== 'running') return;
   const D = _sfxDest || ctx.destination;
   const T = ctx.currentTime;
   try {
