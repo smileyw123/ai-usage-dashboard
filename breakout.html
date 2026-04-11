@@ -284,16 +284,16 @@ const THEMES = [
     ball: '#ffffff',
     accent: '#c8e4ec',
   },
-  { // Level 6 - Forest (rich woods)
-    name: 'WOODLAND',
-    bodyBg: '#0c140e',
-    boardBg: '#18221a',
-    gridBg: 'leaves',
-    brickStyle: 'wood',
-    palette: ['#7a4d28','#8c5a30','#6a3f20','#7d4826','#a05f32','#664022'],
-    paddle: '#8c5a30',
-    ball: '#e0c080',
-    accent: '#a8bc70',
+  { // Level 6 - Aurora (deep teal + soft violet)
+    name: 'AURORA',
+    bodyBg: '#060e14',
+    boardBg: '#0c1a24',
+    gridBg: 'softgrid',
+    brickStyle: 'crystal',
+    palette: ['#5ecfb8','#7ab8d8','#9890d8','#60c8a8','#8ab0e8','#4ec0a8','#a890d0'],
+    paddle: '#7ab8d8',
+    ball: '#e8f8f4',
+    accent: '#5ecfb8',
   },
   { // Level 7 - Deep Space
     name: 'NEBULA',
@@ -329,16 +329,16 @@ const THEMES = [
     ball: '#e8f4fa',
     accent: '#5cc0d4',
   },
-  { // Level 10 - Ember Core
-    name: 'EMBER',
-    bodyBg: '#140404',
-    boardBg: '#200807',
-    gridBg: 'lava',
-    brickStyle: 'lava',
-    palette: ['#e8492a','#f5703a','#ff8f40','#d43e20','#ec5830','#ff9e50'],
-    paddle: '#f5703a',
-    ball: '#ffeab0',
-    accent: '#ff8f40',
+  { // Level 10 - Midnight (deep navy + neon accents)
+    name: 'MIDNIGHT',
+    bodyBg: '#04060f',
+    boardBg: '#080c1c',
+    gridBg: 'grid',
+    brickStyle: 'neon',
+    palette: ['#4d8fff','#7060ff','#9050e8','#3090ff','#6040f0','#50a0ff','#8870ff'],
+    paddle: '#4d8fff',
+    ball: '#e8eeff',
+    accent: '#6060ff',
   },
 ];
 
@@ -1916,7 +1916,7 @@ function applyPowerUp(type) {
       paddleState.expand = 1;
       paddle.w = 110;
       break;
-    case 'C': paddleState.catch = 1; break;
+    case 'C': paddleState.catch = 240; break;
     case 'S': paddleState.slow = 1; paddleState.fast = 0; for (const b of balls) applyBallSpeed(b); break;
     case 'D': {
       const newBalls = [];
@@ -2517,6 +2517,7 @@ function update(dt) {
     laserFireTimer = 0;
   }
   if (paddleState.fire > 0) { paddleState.fire -= 1; if(paddleState.fire<=0) updatePowerDisplay(); }
+  if (paddleState.catch > 0) { paddleState.catch -= 1; if(paddleState.catch<=0) updatePowerDisplay(); }
   if (paddleState.magnet > 0) {
     paddleState.magnet -= 1;
     if (paddleState.magnet <= 0) {
@@ -2758,16 +2759,17 @@ function drawLaserPaddle() {
   ctx.fillRect(px+2, py+1, pw-4, 1.5);
   ctx.restore();
 
-  // 변신 플래시 + 스파크
+  // 변신 글로우 + 스파크 (투명 흰색 글로우)
   if (tp > 0) {
-    const flashA = tp * Math.abs(Math.sin(tp * Math.PI * 9)) * 0.82;
-    if (flashA > 0.02) {
+    const flickerA = tp * Math.abs(Math.sin(tp * Math.PI * 9)) * 0.45;
+    if (flickerA > 0.01) {
       ctx.save();
-      ctx.globalAlpha = flashA;
-      ctx.shadowColor = '#ffe860'; ctx.shadowBlur = 30;
-      ctx.fillStyle = '#ffe860';
-      roundedPath(px-10, py-towerH-4, pw+20, ph+towerH+6, 5);
-      ctx.fill();
+      ctx.globalAlpha = flickerA;
+      ctx.shadowColor = '#a0c8ff'; ctx.shadowBlur = 40;
+      ctx.strokeStyle = 'rgba(160,200,255,0.6)';
+      ctx.lineWidth = 2;
+      roundedPath(px-8, py-towerH-2, pw+16, ph+towerH+4, 6);
+      ctx.stroke();
       ctx.restore();
     }
     if (Math.random() < tp * 0.55) {
@@ -2775,7 +2777,7 @@ function drawLaserPaddle() {
         x: px + Math.random()*pw, y: py + (Math.random()-0.5)*ph*1.2,
         vx: (Math.random()-0.5)*5, vy: -1.5-Math.random()*4,
         life: 0.12+Math.random()*0.14, age: 0,
-        size: 1.5+Math.random()*2.5, color: '#ffe060',
+        size: 1.5+Math.random()*2.5, color: '#a0c8ff',
         spin: 0, gravity: 0.08, type: 'sparkle'
       });
     }
