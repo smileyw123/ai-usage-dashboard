@@ -210,21 +210,21 @@ const BRICK_COLORS = {
 
 // Power-up definitions
 const POWERUPS = {
-  L: { name:'LASER',     color:'#f4a8a8', text:'L', desc:'LASER' },
-  E: { name:'EXPAND',    color:'#a8e8b5', text:'E', desc:'EXPAND' },
-  C: { name:'CATCH',     color:'#a8c8e8', text:'C', desc:'CATCH' },
-  S: { name:'SLOW',      color:'#a8e8e8', text:'S', desc:'SLOW' },
-  D: { name:'DISRUPT',   color:'#c5a8e0', text:'D', desc:'SPLIT' },
-  M: { name:'MULTIBALL', color:'#f2b5d4', text:'M', desc:'MULTI' },
-  P: { name:'PLAYER',    color:'#ffe87a', text:'P', desc:'1UP' },
-  F: { name:'FIREBALL',  color:'#f4b580', text:'F', desc:'FIRE' },
-  G: { name:'MAGNET',    color:'#d8c5f0', text:'G', desc:'MAGNET' },
-  T: { name:'THUNDER',   color:'#ffe87a', text:'T', desc:'THUNDER' },
-  K: { name:'CARRIER',   color:'#a0d4ff', text:'K', desc:'CARRIER' },
-  X: { name:'SHRINK',    color:'#8a8594', text:'X', desc:'SHRINK', bad:true },
-  H: { name:'HASTEN',    color:'#d0606c', text:'H', desc:'FAST', bad:true }
+  L: { name:'LASER',     color:'#f4a8a8', desc:'LASER' },
+  E: { name:'EXPAND',    color:'#a8e8b5', desc:'EXPAND' },
+  C: { name:'CATCH',     color:'#a8c8e8', desc:'CATCH' },
+  S: { name:'SLOW',      color:'#a8e8e8', desc:'SLOW' },
+  D: { name:'DISRUPT',   color:'#c5a8e0', desc:'SPLIT' },
+  M: { name:'MULTIBALL', color:'#f2b5d4', desc:'MULTI' },
+  P: { name:'PLAYER',    color:'#ffe87a', desc:'1UP' },
+  F: { name:'FIREBALL',  color:'#f4b580', desc:'FIRE' },
+  G: { name:'MAGNET',    color:'#d8c5f0', desc:'MAGNET' },  // legacy
+  T: { name:'THUNDER',   color:'#ffe87a', desc:'THUNDER' },
+  K: { name:'CARRIER',   color:'#a0d4ff', desc:'CARRIER' },
+  X: { name:'SHRINK',    color:'#8a8594', desc:'SHRINK', bad:true },
+  H: { name:'HASTEN',    color:'#d0606c', desc:'FAST',   bad:true }
 };
-const GOOD_POWERUPS = ['L','E','C','S','D','M','P','F','G','T','K'];
+const GOOD_POWERUPS = ['L','E','C','S','D','M','P','F','T','K'];
 const BAD_POWERUPS  = ['X','H'];
 
 // ====== LEVEL THEMES ======
@@ -1247,7 +1247,7 @@ function resetBallAndPaddle() {
     moveLeft: false, moveRight: false
   };
   paddleState = {
-    expand: 0, shrink: 0, catch: 0, laser: 0, magnet: 0,
+    expand: 0, shrink: 0, catch: 0, laser: 0,
     fire: 0, slow: 0, fast: 0, laserTransform: 0,
     carrier: 0, carrierTransform: 0
   };
@@ -1785,6 +1785,176 @@ function drawConfetti() {
 }
 
 // ==== powerup items (falling) ====
+// ── 파워업 벡터 아이콘 (좌표 원점=중앙, s=반경) ──
+function drawPowerUpIcon(type, s) {
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = s * 0.18;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  switch (type) {
+
+    case 'L': { // 레이저 — 포신 + 빔 두 줄
+      const bw = s*0.22, bh = s*1.3;
+      ctx.fillRect(-bw/2, -s*0.55, bw, bh*0.5); // 포신
+      ctx.globalAlpha *= 0.6;
+      ctx.fillRect(-s*0.55, -s*0.1, s*1.1, s*0.12); // 빔
+      ctx.fillRect(-s*0.55,  s*0.2, s*1.1, s*0.12);
+      ctx.globalAlpha = ctx.globalAlpha / 0.6;
+      break;
+    }
+
+    case 'E': { // 확장 — 양방향 화살표 ←→
+      const aw = s*0.55, ah = s*0.28;
+      ctx.beginPath();
+      // 왼쪽 화살
+      ctx.moveTo(-aw, 0); ctx.lineTo(-aw+ah, -ah); ctx.moveTo(-aw, 0); ctx.lineTo(-aw+ah, ah);
+      ctx.moveTo(-aw, 0); ctx.lineTo(aw, 0); // 중앙 선
+      // 오른쪽 화살
+      ctx.lineTo(aw-ah, -ah); ctx.moveTo(aw, 0); ctx.lineTo(aw-ah, ah);
+      ctx.stroke();
+      break;
+    }
+
+    case 'C': { // 캐치 — U자 자석 + 양 끝 극
+      ctx.lineWidth = s * 0.22;
+      ctx.beginPath();
+      ctx.arc(0, -s*0.05, s*0.5, Math.PI, 0, false);
+      ctx.stroke();
+      // 극 (빨강/파랑 대신 밝게)
+      ctx.lineWidth = s*0.22;
+      ctx.beginPath(); ctx.moveTo(-s*0.5, -s*0.05); ctx.lineTo(-s*0.5, s*0.4); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo( s*0.5, -s*0.05); ctx.lineTo( s*0.5, s*0.4); ctx.stroke();
+      break;
+    }
+
+    case 'S': { // 슬로우 — 시계 + 짧은 바늘
+      ctx.lineWidth = s*0.14;
+      ctx.beginPath(); ctx.arc(0, 0, s*0.55, 0, Math.PI*2); ctx.stroke();
+      ctx.lineWidth = s*0.18;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -s*0.38); ctx.stroke(); // 긴 바늘
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(s*0.22, s*0.1); ctx.stroke(); // 짧은 바늘
+      // 12시 눈금
+      ctx.lineWidth = s*0.12;
+      ctx.beginPath(); ctx.moveTo(0, -s*0.52); ctx.lineTo(0, -s*0.65); ctx.stroke();
+      break;
+    }
+
+    case 'D': { // 분열 — 위에서 아래 두 줄로 갈라짐
+      ctx.beginPath();
+      ctx.moveTo(0, -s*0.6);
+      ctx.lineTo(0, -s*0.1);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, -s*0.1); ctx.lineTo(-s*0.45, s*0.55);
+      ctx.moveTo(0, -s*0.1); ctx.lineTo( s*0.45, s*0.55);
+      ctx.stroke();
+      // 끝 점
+      ctx.beginPath(); ctx.arc(-s*0.45, s*0.55, s*0.1, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc( s*0.45, s*0.55, s*0.1, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0, -s*0.6, s*0.1, 0, Math.PI*2); ctx.fill();
+      break;
+    }
+
+    case 'M': { // 멀티볼 — 원 3개
+      const r2 = s*0.28;
+      [[0,-s*0.42],[-s*0.4,s*0.28],[s*0.4,s*0.28]].forEach(([x,y]) => {
+        ctx.beginPath(); ctx.arc(x, y, r2, 0, Math.PI*2); ctx.fill();
+      });
+      break;
+    }
+
+    case 'P': { // 1UP — 하트
+      ctx.beginPath();
+      ctx.moveTo(0, s*0.5);
+      ctx.bezierCurveTo(-s*1.1, -s*0.1, -s*1.1, -s*0.9, 0, -s*0.3);
+      ctx.bezierCurveTo( s*1.1, -s*0.9,  s*1.1, -s*0.1, 0, s*0.5);
+      ctx.fill();
+      break;
+    }
+
+    case 'F': { // 파이어볼 — 불꽃 실루엣
+      ctx.beginPath();
+      ctx.moveTo(0, -s*0.75);
+      ctx.bezierCurveTo( s*0.5, -s*0.4,  s*0.7,  s*0.1, s*0.35, s*0.6);
+      ctx.bezierCurveTo( s*0.15, s*0.82,  -s*0.15, s*0.82, -s*0.35, s*0.6);
+      ctx.bezierCurveTo(-s*0.7,  s*0.1, -s*0.5, -s*0.4, 0, -s*0.75);
+      ctx.fill();
+      // 내부 밝은 코어
+      ctx.globalAlpha *= 0.5;
+      ctx.fillStyle = 'rgba(255,255,255,1)';
+      ctx.beginPath();
+      ctx.ellipse(0, s*0.12, s*0.18, s*0.3, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = ctx.globalAlpha / 0.5;
+      break;
+    }
+
+    case 'T': { // 번개 — 지그재그 볼트
+      ctx.beginPath();
+      ctx.moveTo( s*0.18, -s*0.75);
+      ctx.lineTo(-s*0.12,  s*0.0);
+      ctx.lineTo( s*0.22,  s*0.0);
+      ctx.lineTo(-s*0.18,  s*0.75);
+      ctx.lineWidth = s*0.22;
+      ctx.stroke();
+      break;
+    }
+
+    case 'K': { // 캐리어 — 유선형 선체 + 날개
+      // 선체
+      ctx.beginPath();
+      ctx.moveTo(0, -s*0.7);
+      ctx.lineTo( s*0.45, s*0.3);
+      ctx.lineTo( s*0.45, s*0.6);
+      ctx.lineTo(-s*0.45, s*0.6);
+      ctx.lineTo(-s*0.45, s*0.3);
+      ctx.closePath(); ctx.fill();
+      // 날개
+      ctx.beginPath();
+      ctx.moveTo(-s*0.45, s*0.1);
+      ctx.lineTo(-s*0.95, s*0.6);
+      ctx.lineTo(-s*0.45, s*0.5);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo( s*0.45, s*0.1);
+      ctx.lineTo( s*0.95, s*0.6);
+      ctx.lineTo( s*0.45, s*0.5);
+      ctx.closePath(); ctx.fill();
+      // 엔진 구멍
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      [-s*0.22, 0, s*0.22].forEach(x => {
+        ctx.beginPath(); ctx.arc(x, s*0.45, s*0.09, 0, Math.PI*2); ctx.fill();
+      });
+      break;
+    }
+
+    case 'X': { // 축소 — 안쪽 화살표 →←
+      const aw = s*0.55, ah = s*0.28;
+      ctx.beginPath();
+      ctx.moveTo(-aw, -s*0.1); ctx.lineTo(0, -s*0.1);
+      ctx.moveTo(-aw+ah, -s*0.1-ah); ctx.lineTo(-aw, -s*0.1); ctx.lineTo(-aw+ah, -s*0.1+ah);
+      ctx.moveTo(aw, s*0.1); ctx.lineTo(0, s*0.1);
+      ctx.moveTo(aw-ah, s*0.1-ah); ctx.lineTo(aw, s*0.1); ctx.lineTo(aw-ah, s*0.1+ah);
+      ctx.stroke();
+      break;
+    }
+
+    case 'H': { // 가속 — 겹친 오른쪽 화살표 >>>
+      const gap = s*0.32;
+      [-gap, 0, gap].forEach(ox => {
+        ctx.beginPath();
+        ctx.moveTo(ox - s*0.22, -s*0.45);
+        ctx.lineTo(ox + s*0.22,  0);
+        ctx.lineTo(ox - s*0.22,  s*0.45);
+        ctx.stroke();
+      });
+      break;
+    }
+  }
+}
+
 function drawPowerUp(pu) {
   const def = POWERUPS[pu.type];
   const cx = pu.x, cy = pu.y;
@@ -1866,16 +2036,10 @@ function drawPowerUp(pu) {
   ctx.arc(0, 0, rad * pulse * 0.95, 0, Math.PI*2);
   ctx.stroke();
 
-  // letter (big and clear)
-  const fontSize = Math.floor(rad * 1.1);
-  ctx.font = `900 ${fontSize}px 'Segoe UI', sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = 'rgba(0,0,0,0.75)';
-  ctx.strokeText(def.text, 0, 1);
-  ctx.fillStyle = '#fff';
-  ctx.fillText(def.text, 0, 1);
+  // 벡터 아이콘
+  ctx.save();
+  drawPowerUpIcon(pu.type, rad * 0.62);
+  ctx.restore();
 
   ctx.restore();
 
@@ -1901,8 +2065,8 @@ function applyPowerUp(type) {
   switch (type) {
     case 'L':
       paddleState.laser = 600;
-      paddleState.laserTransform = 1.8; // 변신 애니메이션 1.8초
-      paddleState.magnet = 0;
+      paddleState.laserTransform = 1.8;
+      paddleState.catch = 0; // 레이저 작동 시 캐치 해제
       // 이유 불문하고 붙어있는 공 모두 즉시 발사
       for (const b of balls) {
         if (b.stuck) {
@@ -1920,7 +2084,7 @@ function applyPowerUp(type) {
       paddleState.expand = 1;
       paddle.w = 110;
       break;
-    case 'C': paddleState.catch = 240; break;
+    case 'C': paddleState.catch = 5; break;  // 5번 잡기
     case 'S': paddleState.slow = 1; paddleState.fast = 0; for (const b of balls) applyBallSpeed(b); break;
     case 'D': {
       const newBalls = [];
@@ -1947,22 +2111,26 @@ function applyPowerUp(type) {
     }
     case 'P': lives++; updateStats(); break;
     case 'F': paddleState.fire = 1000; sfxPlay('fire'); break;
-    case 'G': paddleState.magnet = 90; break;
     case 'T': fireThunder(); break;
     case 'K':
       // 공을 천천히 패들로 유도 (극저속)
       paddleState.carrier = 1;
-      paddleState.carrierTransform = 2.0; // 변신 2초
+      paddleState.carrierTransform = 2.0;
+      paddleState.laser = 0;       // 로봇 → 캐리어 전환
+      paddleState.laserTransform = 0;
+      laserFireTimer = 0;
       for (const b of balls) {
-        if (!b.stuck) {
-          // 패들 방향으로 속도 재조정 (느리게)
-          const spd = 1.2;
+        // stuck 볼도 포함 — 전부 착륙 플래그 설정
+        b._carrierLanding = true;
+        b.stuck = false; // 혹시 붙어있으면 해제해서 유도 로직 타게
+        b.launched = true;
+        if (Math.hypot(b.vx, b.vy) < 0.1) {
+          // 멈춰있는 볼엔 초기 속도 부여
           const dx = (paddle.x + paddle.w/2) - b.x;
           const dy = (paddle.y - b.r - 2) - b.y;
           const dist = Math.hypot(dx, dy) || 1;
-          b.vx = (dx / dist) * spd;
-          b.vy = (dy / dist) * spd;
-          b._carrierLanding = true;
+          b.vx = (dx / dist) * 2;
+          b.vy = (dy / dist) * 2;
         }
       }
       sfxPlay('carrier_warp');
@@ -2412,6 +2580,34 @@ function update(dt) {
       ball.y = paddle.y - ball.r - 2;
       continue;
     }
+    // 착륙 중인 볼: 매 프레임 패들 중심으로 유도 + 거리 비례 감속
+    if (ball._carrierLanding) {
+      const tx = paddle.x + paddle.w / 2;
+      const ty = paddle.y - ball.r - 1;
+      const dx = tx - ball.x;
+      const dy = ty - ball.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      // 거리 멀수록 빠름, 가까울수록 느림 (최소 0.4, 최대 3.5)
+      const spd = Math.max(0.4, Math.min(3.5, dist * 0.12));
+      ball.vx = (dx / dist) * spd;
+      ball.vy = (dy / dist) * spd;
+      // ★ 실제 위치 이동 (없으면 공이 얼어붙음)
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+      // 바닥으로 빠져도 죽지 않음
+      if (ball._dead) ball._dead = false;
+      // 패들 근처 도달 시 착륙
+      if (dist < 4) {
+        ball.x = tx;
+        ball.y = ty;
+        ball.stuck = true;
+        ball.launched = false;
+        ball.stickOffset = 0;
+        ball._carrierLanding = false;
+      }
+      continue; // 벽/패들 충돌 계산 건너뜀
+    }
+
     ball.x += ball.vx * _tSlowFactor;
     ball.y += ball.vy * _tSlowFactor;
 
@@ -2447,12 +2643,16 @@ function update(dt) {
       const newAngle = -Math.PI/2 + hitPos * (Math.PI/3);
       ball.vx = Math.cos(newAngle) * speed;
       ball.vy = Math.sin(newAngle) * speed;
-      // catch/magnet sticks at the actual hit position
-      if (paddleState.catch > 0 || paddleState.magnet > 0 || ball._carrierLanding) {
+      // catch sticks ball and decrements counter
+      if (paddleState.catch > 0 || ball._carrierLanding) {
         ball.stuck = true;
         ball.launched = false;
         ball.stickOffset = ball.x - (paddle.x + paddle.w/2);
         ball._carrierLanding = false;
+        if (paddleState.catch > 0) {
+          paddleState.catch--;
+          updatePowerDisplay();
+        }
       }
     }
 
@@ -2569,31 +2769,16 @@ function update(dt) {
     laserFireTimer = 0;
   }
   if (paddleState.fire > 0) { paddleState.fire -= 1; if(paddleState.fire<=0) updatePowerDisplay(); }
-  if (paddleState.catch > 0) { paddleState.catch -= 1; if(paddleState.catch<=0) updatePowerDisplay(); }
-  if (paddleState.magnet > 0) {
-    paddleState.magnet -= 1;
-    if (paddleState.magnet <= 0) {
-      updatePowerDisplay();
-      // 자석 만료 → 붙어있던 공 자동 발사 (패들 위치 기반 각도)
-      for (const b of balls) {
-        if (b.stuck) {
-          const spd = currentBallSpeed();
-          const hitPos = Math.max(-0.9, Math.min(0.9, (b.stickOffset || 0) / (paddle.w * 0.5)));
-          const ang = -Math.PI / 2 + hitPos * (Math.PI / 3);
-          b.vx = Math.cos(ang) * spd;
-          b.vy = Math.sin(ang) * spd;
-          b.stuck = false; b.launched = true;
-        }
-      }
-    }
-  }
   if (paddleState.laserTransform > 0) paddleState.laserTransform = Math.max(0, paddleState.laserTransform - dt);
 
   // 캐리어 변신 타이머 감소 → 완료되면 인터셉터 8기 발진 준비
   if (paddleState.carrierTransform > 0) {
     paddleState.carrierTransform = Math.max(0, paddleState.carrierTransform - dt);
     if (paddleState.carrierTransform <= 0 && interceptors.length === 0) {
-      // 인터셉터 8기 생성 (bay 상태로 초기화, 순차 발진)
+      // 모든 볼이 착륙 완료됐을 때만 인터셉터 발진
+      const allLanded = balls.every(b => b.stuck && !b._carrierLanding);
+      if (!allLanded) return; // 아직 착륙 중인 볼 있음
+      // 인터셉터 8기 생성
       for (let i = 0; i < 8; i++) {
         interceptors.push({
           x: paddle.x + paddle.w * 0.2 + (paddle.w * 0.6) * (i / 7),
@@ -2612,6 +2797,18 @@ function update(dt) {
   // 인터셉터 업데이트
   if (interceptors.length > 0) {
     const aliveTargetable = bricks.filter(b => b.alive && b.type !== 'gold' && !b._interceptorTarget);
+    const anyBricksLeft = bricks.some(b => b.alive && b.type !== 'gold');
+
+    // 벽돌 다 사라지면 bay/flying 인터셉터 즉시 귀환
+    if (!anyBricksLeft) {
+      for (const ic of interceptors) {
+        if (ic.state === 'flying' || ic.state === 'bay') {
+          if (ic.target) { ic.target._interceptorTarget = false; ic.target = null; }
+          ic.state = 'returning';
+        }
+      }
+    }
+
     let allDone = true;
 
     for (const ic of interceptors) {
@@ -2708,10 +2905,12 @@ function update(dt) {
   // screenShake 감소
   if (screenShake > 0) screenShake = Math.max(0, screenShake - dt * 2.5);
 
-  // win check — 번개 이펙트가 끝난 후에 레벨 전환 (이펙트 도중엔 대기)
+  // win check — 번개 이펙트 + 인터셉터 전원 귀환 후에 레벨 전환
   const _thunderAnimActive = thunderBolts.some(b => b.age >= 0 && b.age < b.life);
+  const _interceptorsActive = interceptors.length > 0 &&
+    interceptors.some(ic => ic.state !== 'done');
   const destructibleLeft = bricks.length > 0 && bricks.some(b => b.alive && b.type !== 'gold');
-  if (!destructibleLeft && bricks.length > 0 && !levelTransition && !_thunderAnimActive) {
+  if (!destructibleLeft && bricks.length > 0 && !levelTransition && !_thunderAnimActive && !_interceptorsActive) {
     sfxPlay('level_up');
     levelTransition = { phase: 'celebrate', t: 0, level: level };
     spawnConfetti();
@@ -3016,6 +3215,86 @@ function drawInterceptors() {
   }
 }
 
+function drawSpaceshipPaddle() {
+  const px = paddle.x, py = paddle.y, pw = paddle.w, ph = paddle.h;
+  const tNow = performance.now() * 0.001;
+  const theme = currentTheme();
+  const baseColor = paddleState.fire > 0 ? '#f4b580'
+                  : paddleState.catch > 0 ? '#a8c8e8'
+                  : theme.paddle;
+  const {r, g, b} = hexToRgb(baseColor);
+  const ep = 0.55 + 0.45 * Math.sin(tNow * 4.2);
+  const rad = ph * 0.5;
+
+  const glowPoints = [
+    [px + pw*0.18, py + ph],
+    [px + pw*0.5,  py + ph],
+    [px + pw*0.82, py + ph],
+  ];
+
+  // ── 엔진 글로우 ──
+  ctx.save();
+  glowPoints.forEach(([gx, gy]) => {
+    const g2 = ctx.createRadialGradient(gx, gy, 0, gx, gy + 5, pw*0.22);
+    g2.addColorStop(0, `rgba(${Math.min(255,r+60)},${Math.min(255,g+80)},255,${0.45*ep})`);
+    g2.addColorStop(1, 'rgba(80,140,255,0)');
+    ctx.fillStyle = g2;
+    ctx.fillRect(gx - pw*0.22, gy - 2, pw*0.44, pw*0.3);
+  });
+  ctx.restore();
+
+  // ── 사이드 핀 ──
+  ctx.save();
+  ctx.fillStyle = `rgba(${Math.max(0,r-20)},${Math.max(0,g-20)},${Math.max(0,b-20)},0.88)`;
+  ctx.beginPath();
+  ctx.moveTo(px,           py + ph*0.2);
+  ctx.lineTo(px - 5,       py + ph*0.9);
+  ctx.lineTo(px + pw*0.08, py + ph);
+  ctx.lineTo(px,           py + ph);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(px + pw,           py + ph*0.2);
+  ctx.lineTo(px + pw + 5,       py + ph*0.9);
+  ctx.lineTo(px + pw - pw*0.08, py + ph);
+  ctx.lineTo(px + pw,           py + ph);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+
+  // ── 메인 바디 (클립 전용 save/restore) ──
+  ctx.save();
+  roundedPath(px, py, pw, ph, rad);
+  ctx.clip();
+  const hull = ctx.createLinearGradient(px, py, px, py + ph);
+  hull.addColorStop(0,   `rgba(${Math.min(255,r+38)},${Math.min(255,g+38)},${Math.min(255,b+38)},1)`);
+  hull.addColorStop(0.5, baseColor);
+  hull.addColorStop(1,   `rgba(${Math.max(0,r-28)},${Math.max(0,g-28)},${Math.max(0,b-28)},1)`);
+  ctx.fillStyle = hull;
+  ctx.fillRect(px, py, pw, ph);
+  // 패널 라인
+  ctx.strokeStyle = `rgba(${Math.max(0,r-40)},${Math.max(0,g-40)},${Math.max(0,b-40)},0.35)`;
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(px + pw*0.5, py + 2); ctx.lineTo(px + pw*0.5, py + ph - 2);
+  ctx.stroke();
+  // 상단 하이라이트
+  ctx.fillStyle = 'rgba(255,255,255,0.22)';
+  ctx.fillRect(px + rad, py + 1, pw - rad*2, 1.8);
+  ctx.restore(); // clip 해제
+
+  // ── 엔진 노즐 점 ──
+  ctx.save();
+  glowPoints.forEach(([nx, ny]) => {
+    ctx.fillStyle = `rgba(${Math.max(0,r-50)},${Math.max(0,g-50)},${Math.max(0,b-50)},1)`;
+    ctx.beginPath(); ctx.arc(nx, ny, 2.2, 0, Math.PI*2); ctx.fill();
+    const ng = ctx.createRadialGradient(nx, ny, 0, nx, ny, 4.5);
+    ng.addColorStop(0, `rgba(180,230,255,${0.9*ep})`);
+    ng.addColorStop(1, 'rgba(80,160,255,0)');
+    ctx.fillStyle = ng;
+    ctx.beginPath(); ctx.arc(nx, ny, 4.5, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.restore();
+}
+
 function drawLaserPaddle() {
   const px = paddle.x, py = paddle.y, pw = paddle.w, ph = paddle.h;
   const tNow = performance.now() * 0.001;
@@ -3204,21 +3483,23 @@ function draw() {
     }
   }
 
-  // paddle
-  if (paddleState.laser > 0) {
-    drawLaserPaddle();
-  } else if (paddleState.carrier > 0) {
+  // paddle — carrier > laser > normal 우선순위
+  if (paddleState.carrier > 0) {
     drawCarrierPaddle();
+  } else if (paddleState.laser > 0) {
+    drawLaserPaddle();
   } else {
-    let paddleColor = theme.paddle;
-    if (paddleState.fire > 0) paddleColor = '#f4b580';
-    else if (paddleState.magnet > 0) paddleColor = '#d8c5f0';
+    drawSpaceshipPaddle();
+  }
+
+  // 캐치 남은 횟수 — 패들 위에 작게
+  if (paddleState.catch > 0) {
     ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    roundedPath(paddle.x+1, paddle.y+2, paddle.w, paddle.h, paddle.h*0.5);
-    ctx.fill();
+    ctx.font = 'bold 8px Inter, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillStyle = 'rgba(168,200,232,0.92)';
+    ctx.fillText(`×${paddleState.catch}`, paddle.x + paddle.w/2, paddle.y - 3);
     ctx.restore();
-    drawBrick(paddle.x, paddle.y, paddle.w, paddle.h, paddleColor);
   }
 
   // balls
