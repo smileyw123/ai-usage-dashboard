@@ -891,7 +891,7 @@ function drawBall(cx, cy, r, fire) {
 function currentBallSpeed() {
   // 레벨당 속도 증가량 완화 (0.18 → 0.09), cap 레벨 25
   const cappedLevel = Math.min(level, 25);
-  const base = 3.8 + cappedLevel * 0.09;
+  const base = 3.2 + cappedLevel * 0.09;
   let mul = 1;
   if (paddleState.slow) mul *= 0.6;
   if (paddleState.fast) mul *= 1.5;
