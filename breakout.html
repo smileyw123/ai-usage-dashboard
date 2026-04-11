@@ -860,8 +860,34 @@ function drawBrick_lava(x, y, w, h, color, alpha) {
   ctx.restore();
 }
 
-function drawBall(cx, cy, r, fire) {
+function drawBall(cx, cy, r, fire, ghost) {
   const theme = currentTheme();
+  const tNow = performance.now() * 0.001;
+
+  if (ghost) {
+    // 고스트 모드: 반투명 파란빛, 깜빡이는 링
+    const pulse = 0.45 + 0.35 * Math.sin(tNow * 10);
+    ctx.save();
+    // 외부 글로우
+    const gg = ctx.createRadialGradient(cx, cy, 0, cx, cy, r*2.8);
+    gg.addColorStop(0, `rgba(100,200,255,${0.35*pulse})`);
+    gg.addColorStop(1, 'rgba(100,200,255,0)');
+    ctx.fillStyle = gg;
+    ctx.fillRect(cx-r*2.8, cy-r*2.8, r*5.6, r*5.6);
+    // 반투명 바디
+    ctx.globalAlpha = 0.35 + 0.3 * pulse;
+    ctx.fillStyle = '#80d0ff';
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+    // 링 (에너지 링)
+    ctx.globalAlpha = 0.7 + 0.3 * pulse;
+    ctx.strokeStyle = '#c0eaff';
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = '#60c0ff'; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(cx, cy, r * 0.95, 0, Math.PI*2); ctx.stroke();
+    ctx.restore();
+    return;
+  }
+
   const ballColor = fire ? '#ff8040' : theme.ball;
   const {r:cr, g:cg, b:cb} = hexToRgb(ballColor);
   ctx.save();
@@ -1259,7 +1285,9 @@ function resetBallAndPaddle() {
     r: 7,
     vx: 0, vy: 0,
     launched: false,
-    stuck: true
+    stuck: true,
+    bounceCount: 0,
+    ghost: false
   }];
   powerUps = [];
   lasers = [];
@@ -2587,6 +2615,7 @@ function update(dt) {
     : paddleState.laser > 0 ? 0.38
     : (paddleState.carrier > 0 && balls.some(b => b._carrierLanding)) ? 1.0
     : paddleState.fire > 0 ? 0.62
+    : balls.some(b => b.ghost) ? 0.45
     : 1.0;
 
   // balls
@@ -2650,14 +2679,25 @@ function update(dt) {
       }
     }
 
-    if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); sfxPlay('wall'); }
-    if (ball.x + ball.r > BOARD_W) { ball.x = BOARD_W - ball.r; ball.vx = -Math.abs(ball.vx); sfxPlay('wall'); }
-    if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); sfxPlay('wall'); }
+    if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); sfxPlay('wall'); ball.bounceCount = (ball.bounceCount||0)+1; }
+    if (ball.x + ball.r > BOARD_W) { ball.x = BOARD_W - ball.r; ball.vx = -Math.abs(ball.vx); sfxPlay('wall'); ball.bounceCount = (ball.bounceCount||0)+1; }
+    if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); sfxPlay('wall'); ball.bounceCount = (ball.bounceCount||0)+1; }
 
-    // paddle collision (full ball edge, not just center)
+    // 50회 바운스 초과 → 고스트 모드
+    if (!ball.ghost && (ball.bounceCount||0) > 50) {
+      ball.ghost = true;
+      ball.bounceCount = 0;
+      spawnParticles(ball.x, ball.y, '#c0e0ff', 14);
+      sfxPlay('powerup');
+    }
+
+    // paddle collision
     if (ball.y + ball.r > paddle.y && ball.y - ball.r < paddle.y + paddle.h &&
         ball.x + ball.r > paddle.x && ball.x - ball.r < paddle.x + paddle.w && ball.vy > 0) {
       sfxPlay('paddle');
+      // 고스트 모드 해제
+      ball.ghost = false;
+      ball.bounceCount = 0;
       ball.y = paddle.y - ball.r;
       const hitPos = (ball.x - (paddle.x + paddle.w/2)) / (paddle.w/2);
       const speed = Math.hypot(ball.vx, ball.vy);
@@ -2685,7 +2725,15 @@ function update(dt) {
       if (!brick.alive) continue;
       if (ball.x + ball.r > brick.x && ball.x - ball.r < brick.x + brick.w &&
           ball.y + ball.r > brick.y && ball.y - ball.r < brick.y + brick.h) {
-        // collision response (skip bounce if fire)
+
+        if (ball.ghost) {
+          // 고스트: 튕기지 않고 통과하며 파괴 (골드 제외)
+          if (brick.type !== 'gold') damageBrick(brick, 99, false);
+          // continue — 다음 벽돌도 체크 (break 안 함)
+          continue;
+        }
+
+        // 일반 충돌 반응
         if (paddleState.fire <= 0 || brick.type === 'gold' || brick.type === 'hard') {
           const overlapLeft   = (ball.x + ball.r) - brick.x;
           const overlapRight  = (brick.x + brick.w) - (ball.x - ball.r);
@@ -2695,18 +2743,17 @@ function update(dt) {
           const minY = Math.min(overlapTop, overlapBottom);
           if (minX < minY) {
             ball.vx = -ball.vx;
-            // 볼을 벽돌 밖으로 밀어내기 (겹침 해소 → 끼임 방지)
             ball.x += overlapLeft < overlapRight ? -(overlapLeft + 0.5) : (overlapRight + 0.5);
           } else {
             ball.vy = -ball.vy;
             ball.y += overlapTop < overlapBottom ? -(overlapTop + 0.5) : (overlapBottom + 0.5);
           }
-          // 수평 궤도 방지: vy가 너무 작으면 좌우 무한루프에 빠짐
           const MIN_VY = 1.8;
           if (Math.abs(ball.vy) < MIN_VY) {
             ball.vy = ball.vy >= 0 ? MIN_VY : -MIN_VY;
           }
         }
+        ball.bounceCount = (ball.bounceCount||0) + 1;
         damageBrick(brick, 1, false);
         break;
       }
@@ -3528,7 +3575,7 @@ function draw() {
 
   // balls
   for (const ball of balls) {
-    drawBall(ball.x, ball.y, ball.r, paddleState.fire > 0);
+    drawBall(ball.x, ball.y, ball.r, paddleState.fire > 0, ball.ghost);
   }
 
   // 인터셉터
