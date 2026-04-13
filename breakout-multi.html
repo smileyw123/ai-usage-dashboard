@@ -318,7 +318,13 @@ body {
 
 <div id="mpLobby">
   <div class="mp-card">
-    <input class="mp-inp" id="mpNameInp" placeholder="닉네임 입력" maxlength="8" autocomplete="off">
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <label for="mpNameInp" style="font-size:9px;color:rgba(100,80,140,0.5);font-weight:700;letter-spacing:2px;text-transform:uppercase;padding-left:4px;">닉네임</label>
+      <div style="position:relative;">
+        <input class="mp-inp" id="mpNameInp" placeholder="이름 입력" maxlength="8" autocomplete="off" style="padding-right:36px;">
+        <span id="mpNameEditIcon" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:rgba(140,110,180,0.5);pointer-events:none;transition:opacity .2s;">✎</span>
+      </div>
+    </div>
     <button class="mp-btn mp-btn-w" id="mpBtnCreate">방 만들기</button>
     <div class="mp-div">참가하기</div>
     <input class="mp-inp mp-inp-code" id="mpCodeInp" placeholder="XXXX" maxlength="4" autocomplete="off">
@@ -4232,7 +4238,24 @@ mpShowLobby();
 (()=>{
   try {
     const saved = localStorage.getItem('breakout_nickname');
-    if (saved) document.getElementById('mpNameInp').value = saved;
+    const inp = document.getElementById('mpNameInp');
+    if (saved) inp.value = saved;
+
+    // 포커스 시 전체 선택 → 쉽게 수정 가능
+    inp.addEventListener('focus', () => inp.select());
+
+    // 입력할 때마다 즉시 localStorage 저장
+    inp.addEventListener('input', () => {
+      const v = inp.value.trim();
+      if (v) try { localStorage.setItem('breakout_nickname', v); } catch(e) {}
+      // 연필 아이콘: 입력 중엔 숨김, 값 있으면 표시
+      const icon = document.getElementById('mpNameEditIcon');
+      if (icon) icon.style.opacity = (document.activeElement === inp) ? '0' : '0.5';
+    });
+    inp.addEventListener('blur', () => {
+      const icon = document.getElementById('mpNameEditIcon');
+      if (icon) icon.style.opacity = inp.value ? '0.5' : '0';
+    });
   } catch(e) {}
 })();
 
@@ -4369,12 +4392,14 @@ function mpRenderWaitList(players){
   const list=document.getElementById('mpPList');list.innerHTML='';
   Object.entries(players).forEach(([pid,p])=>{
     const isHost=pid===mpHostId;
-    const ready=p.ready||isHost; // 방장은 항상 ready
+    const isMe=pid===mpMyPid;
+    const ready=p.ready||isHost;
+    const displayName=isMe?mpMyName:(p.name||'?'); // 내 이름은 로컬값 우선
     const d=document.createElement('div');d.className='mp-prow';
     d.innerHTML=`<div class="mp-pdot" style="background:${p.color}"></div>
-      <span>${p.name||'?'}</span>
+      <span>${displayName}</span>
       ${isHost?'<span class="mp-badge">방장</span>':''}
-      ${pid===mpMyPid?'<span class="mp-badge">나</span>':''}
+      ${isMe?'<span class="mp-badge">나</span>':''}
       <div class="mp-ready-dot" style="background:${ready?'#7bc67e':'rgba(160,130,200,0.25)'}"></div>`;
     list.appendChild(d);
   });
@@ -4527,9 +4552,10 @@ function mpRenderHud(){
 
   bar.innerHTML='';
   Object.entries(all).forEach(([pid,p])=>{
-    const isMe = pid===mpMyPid;
-    const isTop = (p.score||0)===maxScore && maxScore>0;
-    const dead = !p.alive||p.lives<=0;
+    const isMe=pid===mpMyPid;
+    const isTop=(p.score||0)===maxScore&&maxScore>0;
+    const dead=!p.alive||p.lives<=0;
+    const displayName=isMe?mpMyName:(p.name||'?'); // 내 이름은 로컬값 우선
 
     // 점수 색상: 1등=골드, 나=밝은흰색, 타인=회색
     const scoreColor = isTop ? '#ffd700' : isMe ? '#ffffff' : 'rgba(255,255,255,0.38)';
@@ -4540,7 +4566,7 @@ function mpRenderHud(){
     d.className='mp-hp'+(isMe?' me':'')+(dead?' dead':'');
     const h='♥'.repeat(Math.max(0,p.lives||0));
     d.innerHTML=`<div class="mp-dot" style="background:${p.color};${isMe?'box-shadow:0 0 5px '+p.color:''}"></div>
-      <div class="mp-nm" style="color:${nameColor}">${p.name}</div>
+      <div class="mp-nm" style="color:${nameColor}">${displayName}</div>
       <div class="mp-sc" style="color:${scoreColor};${isTop?'text-shadow:0 0 8px rgba(255,215,0,0.5)':''}">${(p.score||0).toLocaleString()}</div>
       <div class="mp-lv" style="color:${isMe?'rgba(255,255,255,0.4)':'rgba(255,255,255,0.18)'}">${h}</div>`;
     bar.appendChild(d);
@@ -4590,7 +4616,7 @@ function mpShowResult(sorted){
     <div class="mp-rrow">
       <div class="mp-rn" style="font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;${rankStyle[i]||'background:rgba(160,130,200,0.15);color:#3d2f6a'}">${i+1}</div>
       <div class="mp-rdot" style="background:${p.color}"></div>
-      <div class="mp-rname">${p.name||'(이름없음)'}${(p.name||'')===(mpMyName||'')?'<span style="opacity:.35;font-size:9px"> (나)</span>':''}</div>
+      <div class="mp-rname">${p.name||'?'}${p.name===mpMyName?'<span style="opacity:.35;font-size:9px"> (나)</span>':''}</div>
       <div class="mp-rsc">${(p.score||0).toLocaleString()}</div>
     </div>`).join('');
   document.getElementById('mpResultSub').textContent=`LV.${level} · ${sorted.length}명 플레이`;
