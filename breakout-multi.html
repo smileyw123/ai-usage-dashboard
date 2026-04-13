@@ -4252,6 +4252,7 @@ const mpDb = firebase.database();
 let mpActive = false;
 const mpMyPid = 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 let mpMyName='', mpMyColor='', mpRoomCode='', mpIsHost=false, mpRoomRef=null;
+let mpHostId='';
 let mpRemotePlayers={}, mpSyncT=0;
 let mpBkLis=null, mpPlLis=null, mpLvLis=null;
 const MP_COLORS=['#f87171','#4ade80','#60a5fa','#fbbf24','#a78bfa','#f472b6'];
@@ -4289,7 +4290,7 @@ document.getElementById('mpBtnCreate').onclick=async()=>{
   mpMyName=document.getElementById('mpNameInp').value.trim();
   if(!mpMyName){mpShowErr('닉네임을 입력하세요');return;}
   try { localStorage.setItem('breakout_nickname', mpMyName); } catch(e) {}
-  mpMyColor=MP_COLORS[0]; mpRoomCode=mpGenCode(); mpIsHost=true;
+  mpMyColor=MP_COLORS[0]; mpRoomCode=mpGenCode(); mpIsHost=true; mpHostId=mpMyPid;
   await mpDb.ref(`rooms/${mpRoomCode}`).set({
     status:'waiting',level:1,hostId:mpMyPid,created:Date.now(),
     players:{[mpMyPid]:{name:mpMyName,color:mpMyColor,score:0,lives:3,paddleX:BOARD_W/2-35,alive:true}}
@@ -4312,6 +4313,7 @@ document.getElementById('mpBtnJoin').onclick=async()=>{
   if(room.status!=='waiting'){mpShowErr('이미 시작된 게임이에요');return;}
   const ex=Object.keys(room.players||{});
   if(ex.length>=6){mpShowErr('방이 꽉 찼어요 (최대 6명)');return;}
+  mpHostId=room.hostId||ex[0]||''; // 방장 PID 기억
   mpMyColor=MP_COLORS[ex.length%MP_COLORS.length]; mpRoomCode=code; mpIsHost=false;
   await mpDb.ref(`rooms/${mpRoomCode}/players/${mpMyPid}`).set(
     {name:mpMyName,color:mpMyColor,score:0,lives:3,paddleX:BOARD_W/2-35,alive:true}
@@ -4344,12 +4346,11 @@ function mpEnterWait(){
 }
 function mpRenderWaitList(players){
   const list=document.getElementById('mpPList');list.innerHTML='';
-  const pids=Object.keys(players);
   Object.entries(players).forEach(([pid,p])=>{
     const d=document.createElement('div');d.className='mp-prow';
     d.innerHTML=`<div class="mp-pdot" style="background:${p.color}"></div>
-      <span>${p.name}</span>
-      ${pid===pids[0]?'<span class="mp-badge">방장</span>':''}
+      <span>${p.name||'?'}</span>
+      ${pid===mpHostId?'<span class="mp-badge">방장</span>':''}
       ${pid===mpMyPid?'<span class="mp-badge">나</span>':''}`;
     list.appendChild(d);
   });
@@ -4379,6 +4380,16 @@ function mpStartGame(){
   document.getElementById('mpResult').classList.add('mp-hidden');
   document.querySelector('.top-hud').style.display='none';
   document.getElementById('mpHud').style.display='flex';
+
+  // ★ 게임 시작 시 이름·색상 Firebase 재확인 (undefined 방지)
+  mpRoomRef.child(`players/${mpMyPid}`).update({
+    name: mpMyName,
+    color: mpMyColor,
+    score: 0,
+    lives: 3,
+    alive: true
+  });
+
   mpRoomRef.child('level').once('value').then(snap=>{
     level=snap.val()||1;
     mpRoomRef.child('bricks').once('value').then(bSnap=>{
@@ -4501,7 +4512,7 @@ function mpShowResult(sorted){
     <div class="mp-rrow">
       <div class="mp-rn">${medals[i]||i+1}</div>
       <div class="mp-rdot" style="background:${p.color}"></div>
-      <div class="mp-rname">${p.name}${p.name===mpMyName?'<span style="opacity:.35;font-size:9px"> (나)</span>':''}</div>
+      <div class="mp-rname">${p.name||'(이름없음)'}${(p.name||'')===(mpMyName||'')?'<span style="opacity:.35;font-size:9px"> (나)</span>':''}</div>
       <div class="mp-rsc">${(p.score||0).toLocaleString()}</div>
     </div>`).join('');
   document.getElementById('mpResultSub').textContent=`LV.${level} · ${sorted.length}명 플레이`;
@@ -4511,7 +4522,7 @@ function mpShowResult(sorted){
 }
 document.getElementById('mpBtnReplay').onclick=()=>{
   if(mpRoomRef){mpRoomRef.child(`players/${mpMyPid}`).remove();mpRoomRef=null;}
-  mpRoomCode='';mpIsHost=false;level=1;
+  mpRoomCode='';mpIsHost=false;mpHostId='';level=1;
   document.getElementById('mpResult').classList.add('mp-hidden');
   mpShowLobby();
 };
