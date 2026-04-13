@@ -159,43 +159,111 @@ body {
   letter-spacing: 0.3px;
 }
 
-/* ══ MULTIPLAYER ══ */
+/* ══ MULTIPLAYER LOBBY ══ */
 #mpLobby,#mpWait,#mpResult{
   position:fixed;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;z-index:1000;background:#0e0d14;
+  align-items:center;justify-content:center;z-index:1000;
+}
+#mpLobby{
+  background:linear-gradient(145deg,#f8f0fa 0%,#eef4fb 40%,#f0faf5 100%);
+}
+#mpWait,#mpResult{
+  background:linear-gradient(145deg,#f8f0fa 0%,#eef4fb 40%,#f0faf5 100%);
 }
 #mpLobby.mp-hidden,#mpWait.mp-hidden,#mpResult.mp-hidden{display:none!important;}
+
+/* lobby card */
 .mp-card{
-  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-  border-radius:26px;padding:32px 26px;width:92%;max-width:340px;
-  display:flex;flex-direction:column;gap:12px;backdrop-filter:blur(20px);
+  background:rgba(255,255,255,0.72);
+  border:1px solid rgba(200,190,220,0.35);
+  border-radius:28px;padding:32px 26px;width:92%;max-width:340px;
+  display:flex;flex-direction:column;gap:11px;
+  box-shadow:0 8px 40px rgba(160,130,200,0.12), 0 2px 8px rgba(0,0,0,0.06);
+  backdrop-filter:blur(24px);
 }
-.mp-logo{text-align:center;font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:2px;}
-.mp-logo em{color:rgba(255,255,255,0.3);font-style:normal;}
+
+/* logo */
+.mp-logo{
+  text-align:center;font-size:22px;font-weight:900;letter-spacing:-.5px;
+  margin-bottom:4px;color:#2d2640;
+}
+.mp-logo em{color:rgba(120,100,160,0.45);font-style:normal;}
+.mp-logo-sub{
+  text-align:center;font-size:10px;font-weight:700;letter-spacing:2.5px;
+  text-transform:uppercase;color:rgba(120,100,160,0.5);margin-top:-4px;margin-bottom:2px;
+}
+
+/* inputs */
 .mp-inp{
-  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);
-  border-radius:13px;padding:12px 15px;color:#fff;
+  background:rgba(240,235,250,0.7);border:1.5px solid rgba(180,165,210,0.3);
+  border-radius:14px;padding:13px 15px;color:#2d2640;
   font-size:15px;font-family:'Inter',sans-serif;outline:none;width:100%;
+  transition:border-color .2s,background .2s;
 }
-.mp-inp::placeholder{color:rgba(255,255,255,0.25);}
-.mp-inp:focus{border-color:rgba(255,255,255,0.28);}
-.mp-inp-code{font-family:'JetBrains Mono',monospace;font-size:20px;letter-spacing:8px;text-align:center;text-transform:uppercase;}
-.mp-btn{border:none;border-radius:999px;padding:13px;font-size:12px;font-weight:800;
-  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;}
-.mp-btn-w{background:#fff;color:#0e0d14;}
-.mp-btn-g{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);}
-.mp-div{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.18);font-size:10px;font-weight:700;letter-spacing:1px;}
-.mp-div::before,.mp-div::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08);}
-.mp-err{font-size:11px;color:#f87171;text-align:center;min-height:14px;font-weight:600;}
+.mp-inp::placeholder{color:rgba(120,100,160,0.38);}
+.mp-inp:focus{border-color:rgba(160,130,210,0.6);background:rgba(248,244,255,0.9);}
+.mp-inp-code{
+  font-family:'JetBrains Mono',monospace;font-size:22px;
+  letter-spacing:10px;text-align:center;text-transform:uppercase;
+  color:#3d2f6a;
+}
+
+/* buttons */
+.mp-btn{
+  border:none;border-radius:999px;padding:13px;
+  font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;
+}
+.mp-btn-w{
+  background:linear-gradient(135deg,#c5a8e0,#9db8e8);
+  color:#fff;
+  box-shadow:0 4px 16px rgba(160,130,210,0.3);
+}
+.mp-btn-w:active{transform:scale(0.97);}
+.mp-btn-g{
+  background:rgba(160,130,200,0.1);
+  color:rgba(80,60,120,0.7);
+  border:1.5px solid rgba(160,130,200,0.2);
+}
+.mp-btn-g:active{background:rgba(160,130,200,0.18);}
+
+/* divider */
+.mp-div{
+  display:flex;align-items:center;gap:8px;
+  color:rgba(120,100,160,0.38);font-size:10px;font-weight:700;letter-spacing:1.5px;
+}
+.mp-div::before,.mp-div::after{content:'';flex:1;height:1px;background:rgba(160,130,200,0.18);}
+
+/* error */
+.mp-err{font-size:11px;color:#d06070;text-align:center;min-height:14px;font-weight:600;}
+
+/* wait room */
 .mp-code-wrap{text-align:center;padding:10px 0 6px;}
-.mp-code-lbl{font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}
-.mp-code-val{font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:700;letter-spacing:10px;}
+.mp-code-lbl{font-size:9px;color:rgba(100,80,140,0.5);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}
+.mp-code-val{
+  font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:700;
+  letter-spacing:10px;color:#3d2f6a;
+}
 .mp-plist{display:flex;flex-direction:column;gap:7px;min-height:50px;}
-.mp-prow{display:flex;align-items:center;gap:9px;padding:9px 12px;background:rgba(255,255,255,0.05);border-radius:11px;font-size:13px;font-weight:600;}
+.mp-prow{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 12px;background:rgba(200,185,230,0.12);border-radius:11px;
+  font-size:13px;font-weight:600;color:#2d2640;
+}
 .mp-pdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-.mp-badge{font-size:9px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.45);font-weight:700;margin-left:auto;}
-.mp-hint{font-size:11px;color:rgba(255,255,255,0.24);text-align:center;}
-.mp-url{font-size:9px;color:rgba(255,255,255,0.28);background:rgba(255,255,255,0.04);border-radius:8px;padding:7px 10px;text-align:center;word-break:break-all;line-height:1.5;}
+.mp-badge{
+  font-size:9px;padding:2px 7px;border-radius:999px;
+  background:rgba(160,130,200,0.15);color:rgba(80,60,130,0.6);
+  font-weight:700;margin-left:auto;
+}
+.mp-hint{font-size:11px;color:rgba(100,80,140,0.5);text-align:center;}
+.mp-url{
+  font-size:9px;color:rgba(100,80,140,0.4);
+  background:rgba(180,165,210,0.1);border-radius:8px;
+  padding:7px 10px;text-align:center;word-break:break-all;line-height:1.5;
+}
+
+/* hud */
 .mp-hud{
   flex-shrink:0;width:100%;display:none;align-items:stretch;
   background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);
@@ -211,12 +279,34 @@ body {
 .mp-nm{font-size:8px;color:rgba(255,255,255,0.3);margin-bottom:1px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mp-sc{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;line-height:1;}
 .mp-lv{font-size:8px;color:rgba(255,255,255,0.26);margin-top:2px;letter-spacing:1px;}
+
+/* result */
 .mp-rl{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
-.mp-rrow{display:flex;align-items:center;gap:10px;padding:10px 13px;background:rgba(255,255,255,0.05);border-radius:13px;}
+.mp-rrow{display:flex;align-items:center;gap:10px;padding:10px 13px;background:rgba(200,185,230,0.12);border-radius:13px;}
 .mp-rn{font-size:16px;font-weight:900;width:26px;text-align:center;}
 .mp-rdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.mp-rname{flex:1;font-size:13px;font-weight:700;text-align:left;}
-.mp-rsc{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;}
+.mp-rname{flex:1;font-size:13px;font-weight:700;text-align:left;color:#2d2640;}
+.mp-rsc{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#3d2f6a;}
+
+/* decorative blobs */
+#mpLobby::before,#mpLobby::after,#mpWait::before,#mpResult::before{
+  content:'';position:absolute;border-radius:50%;pointer-events:none;
+}
+#mpLobby::before{
+  width:280px;height:280px;
+  background:radial-gradient(circle,rgba(200,175,240,0.28) 0%,transparent 70%);
+  top:-60px;right:-60px;
+}
+#mpLobby::after{
+  width:220px;height:220px;
+  background:radial-gradient(circle,rgba(160,210,200,0.2) 0%,transparent 70%);
+  bottom:-40px;left:-40px;
+}
+#mpWait::before,#mpResult::before{
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(200,175,240,0.2) 0%,transparent 70%);
+  top:-80px;right:-80px;
+}
 
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -226,7 +316,6 @@ body {
 
 <div id="mpLobby">
   <div class="mp-card">
-    <div class="mp-logo">🧱 벽돌깨기 <em>MULTI</em></div>
     <input class="mp-inp" id="mpNameInp" placeholder="닉네임 입력" maxlength="8" autocomplete="off">
     <button class="mp-btn mp-btn-w" id="mpBtnCreate">방 만들기</button>
     <div class="mp-div">참가하기</div>
@@ -252,8 +341,7 @@ body {
 </div>
 <div id="mpResult" class="mp-hidden">
   <div class="mp-card">
-    <div class="mp-logo">🏆 결과</div>
-    <div class="mp-hint" id="mpResultSub" style="margin-bottom:12px">최종 순위</div>
+    <div class="mp-hint" id="mpResultSub" style="margin-bottom:12px;font-size:13px;font-weight:700;color:#3d2f6a;">🏆 최종 순위</div>
     <div class="mp-rl" id="mpRList"></div>
     <button class="mp-btn mp-btn-w" id="mpBtnReplay">처음으로</button>
   </div>
@@ -4139,6 +4227,13 @@ window.addEventListener('resize', () => resize());
 mpShowLobby();
 // Auto-join from URL
 (()=>{ const r=new URLSearchParams(location.search).get('room'); if(r) document.getElementById('mpCodeInp').value=r.toUpperCase(); })();
+// Load saved nickname
+(()=>{
+  try {
+    const saved = localStorage.getItem('breakout_nickname');
+    if (saved) document.getElementById('mpNameInp').value = saved;
+  } catch(e) {}
+})();
 
 // ══════════════════════════════════════════════════════════
 //  FIREBASE MULTIPLAYER LAYER
@@ -4180,6 +4275,8 @@ function mpShowErr(msg){
 
 // ── Solo Play ──
 document.getElementById('mpBtnSolo').onclick=()=>{
+  const name=document.getElementById('mpNameInp').value.trim();
+  if(name) try { localStorage.setItem('breakout_nickname', name); } catch(e) {}
   document.getElementById('mpLobby').classList.add('mp-hidden');
   document.querySelector('.top-hud').style.display='';
   document.getElementById('mpHud').style.display='none';
@@ -4191,6 +4288,7 @@ document.getElementById('mpBtnSolo').onclick=()=>{
 document.getElementById('mpBtnCreate').onclick=async()=>{
   mpMyName=document.getElementById('mpNameInp').value.trim();
   if(!mpMyName){mpShowErr('닉네임을 입력하세요');return;}
+  try { localStorage.setItem('breakout_nickname', mpMyName); } catch(e) {}
   mpMyColor=MP_COLORS[0]; mpRoomCode=mpGenCode(); mpIsHost=true;
   await mpDb.ref(`rooms/${mpRoomCode}`).set({
     status:'waiting',level:1,hostId:mpMyPid,created:Date.now(),
@@ -4207,6 +4305,7 @@ document.getElementById('mpBtnJoin').onclick=async()=>{
   const code=document.getElementById('mpCodeInp').value.trim().toUpperCase();
   if(!mpMyName){mpShowErr('닉네임을 입력하세요');return;}
   if(code.length!==4){mpShowErr('방 코드 4자리를 입력하세요');return;}
+  try { localStorage.setItem('breakout_nickname', mpMyName); } catch(e) {}
   const snap=await mpDb.ref(`rooms/${code}`).once('value');
   if(!snap.exists()){mpShowErr('존재하지 않는 방이에요');return;}
   const room=snap.val();
