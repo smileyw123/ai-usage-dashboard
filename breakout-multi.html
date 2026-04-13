@@ -259,7 +259,7 @@ body {
 .mp-hint{font-size:11px;color:rgba(100,80,140,0.5);text-align:center;}
 .mp-room-list{
   display:flex;flex-direction:column;gap:6px;
-  max-height:148px;overflow-y:auto;scrollbar-width:none;
+  height:148px;overflow-y:auto;scrollbar-width:none;
 }
 .mp-room-list::-webkit-scrollbar{display:none;}
 .mp-room-item{
@@ -4431,14 +4431,17 @@ document.getElementById('mpBtnJoin').onclick=async()=>{
 // ── Room List ──
 function mpLoadRoomList(){
   const list=document.getElementById('mpRoomList');
+  const joinBtn=document.getElementById('mpBtnJoin');
   if(!list) return;
   list.innerHTML='<div class="mp-room-empty">불러오는 중...</div>';
   mpSelectedRoomCode='';
+  joinBtn.classList.add('disabled');
   mpDb.ref('rooms').once('value').then(snap=>{
     const all=snap.val()||{};
     const waiting=Object.entries(all).filter(([,r])=>r.status==='waiting'&&r.title);
     if(waiting.length===0){
       list.innerHTML='<div class="mp-room-empty">참여 가능한 방이 없어요</div>';
+      joinBtn.classList.add('disabled');
       return;
     }
     list.innerHTML='';
@@ -4453,6 +4456,7 @@ function mpLoadRoomList(){
         document.querySelectorAll('.mp-room-item').forEach(el=>el.classList.remove('selected'));
         d.classList.add('selected');
         mpSelectedRoomCode=code;
+        joinBtn.classList.remove('disabled'); // 방 선택 시 활성화
       };
       list.appendChild(d);
     });
@@ -4473,13 +4477,17 @@ function mpEnterWait(){
     const pl=snap.val()||{};
     mpRenderWaitList(pl);
     const n=Object.keys(pl).length;
+    // ★ 매번 버튼 상태 재확인 (방장 여부 기준)
+    const amIHost = mpHostId === mpMyPid;
+    document.getElementById('mpBtnStart').classList.toggle('mp-hidden', !amIHost);
     document.getElementById('mpWaitHint').textContent=
       n<=1?'친구에게 코드를 알려주세요!':n+'명 참가 중 · 방장이 시작하면 게임이 시작됩니다';
-    // 참가 인원 표시 (방장에게만)
     const rc=document.getElementById('mpReadyCount');
-    if(mpIsHost && rc){
+    if(amIHost && rc){
       rc.classList.remove('mp-hidden');
       rc.textContent=`현재 ${n}명 참가`;
+    } else if(rc){
+      rc.classList.add('mp-hidden');
     }
   });
 
@@ -4513,6 +4521,7 @@ document.getElementById('mpBtnLeave').onclick=()=>{
     mpRoomRef.child(`players/${mpMyPid}`).remove();
     mpRoomRef.child('players').off();mpRoomRef.child('status').off();mpRoomRef=null;
   }
+  mpIsHost=false; mpHostId=''; mpRoomCode=''; mpRoomTitle=''; // ★ 상태 초기화
   document.getElementById('mpWait').classList.add('mp-hidden');
   document.getElementById('mpLobby').classList.remove('mp-hidden');
 };
