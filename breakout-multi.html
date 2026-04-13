@@ -257,6 +257,8 @@ body {
   font-weight:700;margin-left:auto;
 }
 .mp-hint{font-size:11px;color:rgba(100,80,140,0.5);text-align:center;}
+.mp-ready-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-left:auto;transition:background .3s;}
+.mp-btn:disabled,.mp-btn.disabled{opacity:0.35;pointer-events:none;}
 .mp-url{
   font-size:9px;color:rgba(100,80,140,0.4);
   background:rgba(180,165,210,0.1);border-radius:8px;
@@ -335,7 +337,8 @@ body {
     <div class="mp-plist" id="mpPList"></div>
     <div class="mp-hint" id="mpWaitHint">친구에게 코드를 알려주세요</div>
     <div class="mp-url" id="mpUrlBox"></div>
-    <button class="mp-btn mp-btn-w mp-hidden" id="mpBtnStart">게임 시작</button>
+    <button class="mp-btn mp-btn-g mp-hidden" id="mpBtnReady">준비 완료</button>
+    <button class="mp-btn mp-btn-w mp-hidden disabled" id="mpBtnStart">게임 시작</button>
     <button class="mp-btn mp-btn-g" id="mpBtnLeave">나가기</button>
   </div>
 </div>
@@ -1724,7 +1727,8 @@ function updatePowerDisplay() {
 
 function launchBall() {
   if (gameOver || won || levelTransition) return;
-  if (paddleState.carrier > 0) return; // 캐리어 모드 중엔 수동 발사 차단
+  if (paddleState.carrier > 0) return;
+  if (mpActive && mpCountdown > 0) return; // 카운트다운 중 발사 차단
   for (const ball of balls) {
     if (ball.stuck) {
       const speed = currentBallSpeed();
@@ -4250,6 +4254,7 @@ let mpActive = false;
 const mpMyPid = 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 let mpMyName='', mpMyColor='', mpRoomCode='', mpIsHost=false, mpRoomRef=null;
 let mpHostId='';
+let mpCountdown=0, mpCdInterval=null;
 let mpRemotePlayers={}, mpSyncT=0;
 let mpBkLis=null, mpPlLis=null, mpLvLis=null;
 const MP_COLORS=['#f87171','#4ade80','#60a5fa','#fbbf24','#a78bfa','#f472b6'];
@@ -4290,7 +4295,7 @@ document.getElementById('mpBtnCreate').onclick=async()=>{
   mpMyColor=MP_COLORS[0]; mpRoomCode=mpGenCode(); mpIsHost=true; mpHostId=mpMyPid;
   await mpDb.ref(`rooms/${mpRoomCode}`).set({
     status:'waiting',level:1,hostId:mpMyPid,created:Date.now(),
-    players:{[mpMyPid]:{name:mpMyName,color:mpMyColor,score:0,lives:3,paddleX:BOARD_W/2-35,alive:true}}
+    players:{[mpMyPid]:{name:mpMyName,color:mpMyColor,score:0,lives:3,paddleX:BOARD_W/2-35,alive:true,ready:true}}
   });
   mpDb.ref(`rooms/${mpRoomCode}/players/${mpMyPid}`).onDisconnect().remove();
   mpRoomRef=mpDb.ref(`rooms/${mpRoomCode}`);
@@ -4313,7 +4318,7 @@ document.getElementById('mpBtnJoin').onclick=async()=>{
   mpHostId=room.hostId||ex[0]||''; // 방장 PID 기억
   mpMyColor=MP_COLORS[ex.length%MP_COLORS.length]; mpRoomCode=code; mpIsHost=false;
   await mpDb.ref(`rooms/${mpRoomCode}/players/${mpMyPid}`).set(
-    {name:mpMyName,color:mpMyColor,score:0,lives:3,paddleX:BOARD_W/2-35,alive:true}
+    {name:mpMyName,color:mpMyColor,score:0,lives:3,paddleX:BOARD_W/2-35,alive:true,ready:false}
   );
   mpDb.ref(`rooms/${mpRoomCode}/players/${mpMyPid}`).onDisconnect().remove();
   mpRoomRef=mpDb.ref(`rooms/${mpRoomCode}`);
@@ -4328,15 +4333,34 @@ function mpEnterWait(){
   const url=location.origin+location.pathname+'?room='+mpRoomCode;
   document.getElementById('mpUrlBox').textContent='공유링크: '+url;
   const sb=document.getElementById('mpBtnStart');
+  const rb=document.getElementById('mpBtnReady');
   sb.classList.toggle('mp-hidden',!mpIsHost);
+  rb.classList.toggle('mp-hidden',mpIsHost);
+
   mpRoomRef.child('players').on('value',snap=>{
     const pl=snap.val()||{};
     mpRenderWaitList(pl);
-    sb.classList.toggle('mp-hidden',!mpIsHost);
     const n=Object.keys(pl).length;
-    document.getElementById('mpWaitHint').textContent=
-      n<=1?'친구에게 코드를 알려주세요!':n+'명 대기 중 · 방장이 시작 버튼을 눌러주세요';
+
+    if(mpIsHost){
+      // 방장: 모든 비방장 플레이어가 ready 상태일 때만 시작 활성화
+      const others=Object.entries(pl).filter(([pid])=>pid!==mpMyPid);
+      const allReady=others.length>0 && others.every(([,p])=>p.ready);
+      sb.classList.toggle('disabled', !allReady);
+      document.getElementById('mpWaitHint').textContent=
+        n<=1?'친구에게 코드를 알려주세요!':
+        allReady?'모두 준비 완료! 시작 버튼을 눌러주세요 🎮':
+        n+'명 대기 중 · 플레이어 준비를 기다리는 중...';
+    } else {
+      // 비방장: 내 ready 상태 버튼에 반영
+      const myReady=pl[mpMyPid]?.ready||false;
+      rb.textContent=myReady?'준비 취소':'준비 완료';
+      rb.className='mp-btn '+(myReady?'mp-btn-w':'mp-btn-g');
+      document.getElementById('mpWaitHint').textContent=
+        myReady?'준비 완료! 방장이 시작하길 기다리는 중 ⏳':'준비 완료 버튼을 눌러주세요';
+    }
   });
+
   mpRoomRef.child('status').on('value',snap=>{
     if(snap.val()==='playing') mpStartGame();
   });
@@ -4344,14 +4368,23 @@ function mpEnterWait(){
 function mpRenderWaitList(players){
   const list=document.getElementById('mpPList');list.innerHTML='';
   Object.entries(players).forEach(([pid,p])=>{
+    const isHost=pid===mpHostId;
+    const ready=p.ready||isHost; // 방장은 항상 ready
     const d=document.createElement('div');d.className='mp-prow';
     d.innerHTML=`<div class="mp-pdot" style="background:${p.color}"></div>
       <span>${p.name||'?'}</span>
-      ${pid===mpHostId?'<span class="mp-badge">방장</span>':''}
-      ${pid===mpMyPid?'<span class="mp-badge">나</span>':''}`;
+      ${isHost?'<span class="mp-badge">방장</span>':''}
+      ${pid===mpMyPid?'<span class="mp-badge">나</span>':''}
+      <div class="mp-ready-dot" style="background:${ready?'#7bc67e':'rgba(160,130,200,0.25)'}"></div>`;
     list.appendChild(d);
   });
 }
+// ── 준비완료 버튼 (비방장) ──
+document.getElementById('mpBtnReady').onclick=()=>{
+  if(!mpRoomRef) return;
+  const cur=document.getElementById('mpBtnReady').textContent.includes('취소');
+  mpRoomRef.child(`players/${mpMyPid}/ready`).set(!cur);
+};
 document.getElementById('mpBtnStart').onclick=async()=>{
   const bd={};
   LEVEL_PATTERNS[0].forEach((row,r)=>{
@@ -4395,6 +4428,37 @@ function mpStartGame(){
       resetBallAndPaddle();levelTransition=null;particles=[];confetti=[];
       applyTheme();resize();mpRenderHud();
       mpSetListeners();lastTime=0;requestAnimationFrame(loop);
+
+      // ── 5,4,3,2,1 카운트다운 ──
+      mpCountdown=5;
+      const ga=document.querySelector('.game-area');
+      const cdWrap=document.createElement('div');
+      cdWrap.id='mpCdOverlay';
+      cdWrap.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:15;pointer-events:none;background:rgba(0,0,0,0.18);';
+      const cdNum=document.createElement('div');
+      cdNum.id='mpCdNum';
+      cdNum.style.cssText='font-family:"JetBrains Mono",monospace;font-size:100px;font-weight:700;color:#fff;text-shadow:0 0 40px rgba(255,255,255,0.7);transition:transform 0.15s ease,opacity 0.15s ease;letter-spacing:-4px;';
+      cdNum.textContent='5';
+      cdWrap.appendChild(cdNum);
+      ga.appendChild(cdWrap);
+
+      // 첫 번째 펄스
+      cdNum.style.transform='scale(1.4)';
+      setTimeout(()=>{cdNum.style.transform='scale(1)';},180);
+
+      mpCdInterval=setInterval(()=>{
+        mpCountdown--;
+        if(mpCountdown<=0){
+          clearInterval(mpCdInterval);mpCdInterval=null;mpCountdown=0;
+          cdNum.style.transform='scale(2)';
+          cdNum.style.opacity='0';
+          setTimeout(()=>{ const o=document.getElementById('mpCdOverlay'); if(o)o.remove(); },300);
+        } else {
+          cdNum.textContent=mpCountdown;
+          cdNum.style.transform='scale(1.4)';
+          setTimeout(()=>{cdNum.style.transform='scale(1)';},180);
+        }
+      },1000);
     });
   });
 }
@@ -4457,15 +4521,28 @@ function mpRenderHud(){
   const bar=document.getElementById('mpHud');
   if(!bar||!mpActive) return;
   const all={...mpRemotePlayers,[mpMyPid]:{name:mpMyName,color:mpMyColor,score,lives,alive:lives>0}};
+
+  // 최고점 계산
+  const maxScore=Math.max(...Object.values(all).map(p=>p.score||0));
+
   bar.innerHTML='';
   Object.entries(all).forEach(([pid,p])=>{
+    const isMe = pid===mpMyPid;
+    const isTop = (p.score||0)===maxScore && maxScore>0;
+    const dead = !p.alive||p.lives<=0;
+
+    // 점수 색상: 1등=골드, 나=밝은흰색, 타인=회색
+    const scoreColor = isTop ? '#ffd700' : isMe ? '#ffffff' : 'rgba(255,255,255,0.38)';
+    // 이름 색상: 나=밝게, 타인=흐리게
+    const nameColor = isMe ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.25)';
+
     const d=document.createElement('div');
-    d.className='mp-hp'+(pid===mpMyPid?' me':'')+((!p.alive||p.lives<=0)?' dead':'');
+    d.className='mp-hp'+(isMe?' me':'')+(dead?' dead':'');
     const h='♥'.repeat(Math.max(0,p.lives||0));
-    d.innerHTML=`<div class="mp-dot" style="background:${p.color}"></div>
-      <div class="mp-nm">${p.name}</div>
-      <div class="mp-sc" style="color:${pid===mpMyPid?'#ff9f43':p.color}">${(p.score||0).toLocaleString()}</div>
-      <div class="mp-lv">${h}</div>`;
+    d.innerHTML=`<div class="mp-dot" style="background:${p.color};${isMe?'box-shadow:0 0 5px '+p.color:''}"></div>
+      <div class="mp-nm" style="color:${nameColor}">${p.name}</div>
+      <div class="mp-sc" style="color:${scoreColor};${isTop?'text-shadow:0 0 8px rgba(255,215,0,0.5)':''}">${(p.score||0).toLocaleString()}</div>
+      <div class="mp-lv" style="color:${isMe?'rgba(255,255,255,0.4)':'rgba(255,255,255,0.18)'}">${h}</div>`;
     bar.appendChild(d);
   });
   if(canvas) bar.style.width=canvas.width+'px';
@@ -4504,10 +4581,14 @@ function mpEndGame(){
   });
 }
 function mpShowResult(sorted){
-  const medals=['🥇','🥈','🥉'];
+  const rankStyle=[
+    'background:#f5c842;color:#7a5c00',
+    'background:#d0d0d8;color:#555',
+    'background:#d4926a;color:#6b3a1f',
+  ];
   document.getElementById('mpRList').innerHTML=sorted.map((p,i)=>`
     <div class="mp-rrow">
-      <div class="mp-rn">${medals[i]||i+1}</div>
+      <div class="mp-rn" style="font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;${rankStyle[i]||'background:rgba(160,130,200,0.15);color:#3d2f6a'}">${i+1}</div>
       <div class="mp-rdot" style="background:${p.color}"></div>
       <div class="mp-rname">${p.name||'(이름없음)'}${(p.name||'')===(mpMyName||'')?'<span style="opacity:.35;font-size:9px"> (나)</span>':''}</div>
       <div class="mp-rsc">${(p.score||0).toLocaleString()}</div>
