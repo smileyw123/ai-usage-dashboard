@@ -38,17 +38,17 @@ body {
   align-items: center;
 }
 .hud-label {
-  font-size: 9px;
+  font-size: 8px;
   color: rgba(255,255,255,0.35);
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  margin-bottom: 1px;
+  margin-bottom: 2px;
   text-align: center;
 }
 .hud-value {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.5px;
@@ -56,18 +56,8 @@ body {
   text-align: center;
 }
 .hud-best {
-  font-size: 16px;
-  color: rgba(255,220,80,0.85);
-}
-.hud-score {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 34px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -1px;
-  line-height: 1;
-  text-align: center;
-  justify-self: center;
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255,215,0,0.5);
 }
 
 /* ── power toast ── */
@@ -174,13 +164,16 @@ body {
 
 <div class="top-hud">
   <div class="hud-side">
+    <span class="hud-label">LEVEL</span>
+    <span class="hud-value" id="level">1</span>
+  </div>
+  <div class="hud-side">
     <span class="hud-label">LIVES</span>
     <span class="hud-value" id="lives">3</span>
   </div>
-  <div class="hud-score" id="score">0</div>
   <div class="hud-side">
-    <span class="hud-label">LEVEL</span>
-    <span class="hud-value" id="level">1</span>
+    <span class="hud-label">SCORE</span>
+    <span class="hud-value" id="score">0</span>
   </div>
   <div class="hud-side">
     <span class="hud-label">BEST</span>
