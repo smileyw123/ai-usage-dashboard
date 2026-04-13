@@ -4468,25 +4468,29 @@ function mpEnterWait(){
   document.getElementById('mpWaitCode').textContent=mpRoomTitle||mpRoomCode;
   const url=location.origin+location.pathname;
   document.getElementById('mpUrlBox').textContent='공유링크: '+url;
-  const sb=document.getElementById('mpBtnStart');
-  sb.classList.toggle('mp-hidden',!mpIsHost);
+
+  // 항상 먼저 숨기고 → 리스너에서 방장인 경우만 보이게
+  document.getElementById('mpBtnStart').classList.add('mp-hidden');
 
   mpRoomRef.child('players').on('value',snap=>{
     const pl=snap.val()||{};
     mpRenderWaitList(pl);
     const n=Object.keys(pl).length;
-    // ★ 매번 버튼 상태 재확인 (방장 여부 기준)
-    const amIHost = mpHostId === mpMyPid;
-    document.getElementById('mpBtnStart').classList.toggle('mp-hidden', !amIHost);
+    // mpHostId를 Firebase에서 읽어 확정 (mpIsHost 변수 의존 제거)
+    const amHost = mpHostId && mpHostId===mpMyPid;
+    const sb=document.getElementById('mpBtnStart');
+    if(amHost){ sb.classList.remove('mp-hidden'); }
+    else       { sb.classList.add('mp-hidden');    }
     document.getElementById('mpWaitHint').textContent=
       n<=1?'친구에게 코드를 알려주세요!':n+'명 참가 중 · 방장이 시작하면 게임이 시작됩니다';
     const rc=document.getElementById('mpReadyCount');
-    if(amIHost && rc){
-      rc.classList.remove('mp-hidden');
-      rc.textContent=`현재 ${n}명 참가`;
-    } else if(rc){
-      rc.classList.add('mp-hidden');
-    }
+    if(rc){ rc.classList.toggle('mp-hidden',!amHost);
+      if(amHost) rc.textContent=`현재 ${n}명 참가`; }
+  });
+
+  // Firebase에서 hostId 재확인 (로컬 변수 오염 방지)
+  mpRoomRef.child('hostId').once('value').then(s=>{
+    if(s.val()) mpHostId=s.val();
   });
 
   mpRoomRef.child('status').on('value',snap=>{
