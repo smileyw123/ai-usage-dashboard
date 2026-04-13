@@ -361,21 +361,21 @@ body {
       </button>
     </div>
 
-    <!-- 탭 컨텐츠 래퍼 -->
-    <div style="position:relative;">
+    <!-- 탭 컨텐츠 -->
+    <div id="mpTabContent">
       <!-- 방 만들기 패널 -->
       <div id="mpPanelCreate" style="display:flex;flex-direction:column;gap:10px;">
         <input class="mp-inp" id="mpTitleInp" placeholder="방 제목 입력" maxlength="12" autocomplete="off">
         <button class="mp-btn mp-btn-w" id="mpBtnCreate">방 만들기</button>
       </div>
       <!-- 참여하기 패널 -->
-      <div id="mpPanelJoin" style="position:absolute;top:0;left:0;right:0;display:flex;flex-direction:column;gap:8px;visibility:hidden;pointer-events:none;">
+      <div id="mpPanelJoin" style="display:none;flex-direction:column;gap:8px;">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px;">
           <span style="font-size:9px;color:rgba(100,80,140,0.45);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">참여 가능한 방</span>
           <button onclick="mpLoadRoomList()" style="border:none;background:none;font-size:11px;color:rgba(120,90,160,0.6);font-weight:700;cursor:pointer;padding:2px 4px;">↻ 새로고침</button>
         </div>
         <div class="mp-room-list" id="mpRoomList"><div class="mp-room-empty">방 목록을 불러오는 중...</div></div>
-        <button class="mp-btn mp-btn-w" id="mpBtnJoin">입장하기</button>
+        <button class="mp-btn mp-btn-w disabled" id="mpBtnJoin">입장하기</button>
       </div>
     </div>
 
@@ -4293,10 +4293,8 @@ function mpSwitchTab(tab){
   const isCreate = tab==='create';
   const pc=document.getElementById('mpPanelCreate');
   const pj=document.getElementById('mpPanelJoin');
-  pc.style.visibility = isCreate ? 'visible' : 'hidden';
-  pc.style.pointerEvents = isCreate ? '' : 'none';
-  pj.style.visibility = isCreate ? 'hidden' : 'visible';
-  pj.style.pointerEvents = isCreate ? 'none' : '';
+  pc.style.display = isCreate ? 'flex' : 'none';
+  pj.style.display = isCreate ? 'none' : 'flex';
   const tC=document.getElementById('mpTabCreate');
   const tJ=document.getElementById('mpTabJoin');
   tC.style.background = isCreate?'linear-gradient(135deg,#c5a8e0,#9db8e8)':'transparent';
