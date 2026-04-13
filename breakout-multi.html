@@ -318,20 +318,49 @@ body {
 
 <div id="mpLobby">
   <div class="mp-card">
+    <!-- 같이하기 -->
+    <div class="mp-div">같이하기</div>
+
+    <!-- 닉네임 -->
     <div style="display:flex;flex-direction:column;gap:5px;">
       <label for="mpNameInp" style="font-size:9px;color:rgba(100,80,140,0.5);font-weight:700;letter-spacing:2px;text-transform:uppercase;padding-left:4px;">닉네임</label>
       <div style="position:relative;">
         <input class="mp-inp" id="mpNameInp" placeholder="이름 입력" maxlength="8" autocomplete="off" style="padding-right:36px;">
-        <span id="mpNameEditIcon" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:rgba(140,110,180,0.5);pointer-events:none;transition:opacity .2s;">✎</span>
+        <span id="mpNameEditIcon" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:rgba(140,110,180,0.5);pointer-events:none;">✎</span>
       </div>
     </div>
-    <button class="mp-btn mp-btn-w" id="mpBtnCreate">방 만들기</button>
-    <div class="mp-div">참가하기</div>
-    <input class="mp-inp mp-inp-code" id="mpCodeInp" placeholder="XXXX" maxlength="4" autocomplete="off">
-    <button class="mp-btn mp-btn-g" id="mpBtnJoin">참가</button>
-    <div class="mp-div">혼자 하기</div>
-    <button class="mp-btn mp-btn-g" id="mpBtnSolo">1인 플레이</button>
+
+    <!-- 탭 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;background:rgba(160,130,200,0.1);border-radius:12px;padding:3px;gap:3px;">
+      <button id="mpTabCreate" onclick="mpSwitchTab('create')"
+        style="border:none;border-radius:9px;padding:9px;font-size:12px;font-weight:800;letter-spacing:0.5px;cursor:pointer;font-family:'Inter',sans-serif;background:linear-gradient(135deg,#c5a8e0,#9db8e8);color:#fff;box-shadow:0 2px 8px rgba(160,130,210,0.3);">
+        방 만들기
+      </button>
+      <button id="mpTabJoin" onclick="mpSwitchTab('join')"
+        style="border:none;border-radius:9px;padding:9px;font-size:12px;font-weight:800;letter-spacing:0.5px;cursor:pointer;font-family:'Inter',sans-serif;background:transparent;color:rgba(100,80,140,0.55);">
+        참여하기
+      </button>
+    </div>
+
+    <!-- 탭 컨텐츠 래퍼: 두 패널이 같은 공간 차지 -->
+    <div style="position:relative;">
+      <div id="mpPanelCreate" style="display:flex;flex-direction:column;gap:10px;">
+        <div style="visibility:hidden;pointer-events:none;">
+          <input class="mp-inp mp-inp-code" placeholder="XXXX" tabindex="-1">
+        </div>
+        <button class="mp-btn mp-btn-w" id="mpBtnCreate">방 만들기</button>
+      </div>
+      <div id="mpPanelJoin" style="position:absolute;top:0;left:0;right:0;display:flex;flex-direction:column;gap:10px;visibility:hidden;pointer-events:none;">
+        <input class="mp-inp mp-inp-code" id="mpCodeInp" placeholder="XXXX" maxlength="4" autocomplete="off">
+        <button class="mp-btn mp-btn-w" id="mpBtnJoin">입장하기</button>
+      </div>
+    </div>
+
     <div class="mp-err" id="mpErr"></div>
+
+    <!-- 혼자하기 -->
+    <div class="mp-div">혼자하기</div>
+    <button class="mp-btn mp-btn-g" id="mpBtnSolo">1인 플레이</button>
   </div>
 </div>
 <div id="mpWait" class="mp-hidden">
@@ -4237,8 +4266,35 @@ window.addEventListener('resize', () => resize());
 
 // Show lobby first
 mpShowLobby();
+function mpSwitchTab(tab){
+  const isCreate = tab==='create';
+  const pc=document.getElementById('mpPanelCreate');
+  const pj=document.getElementById('mpPanelJoin');
+  pc.style.visibility = isCreate ? 'visible' : 'hidden';
+  pc.style.pointerEvents = isCreate ? '' : 'none';
+  pj.style.visibility = isCreate ? 'hidden' : 'visible';
+  pj.style.pointerEvents = isCreate ? 'none' : '';
+  const tC=document.getElementById('mpTabCreate');
+  const tJ=document.getElementById('mpTabJoin');
+  tC.style.background = isCreate?'linear-gradient(135deg,#c5a8e0,#9db8e8)':'transparent';
+  tC.style.color       = isCreate?'#fff':'rgba(100,80,140,0.55)';
+  tC.style.boxShadow   = isCreate?'0 2px 8px rgba(160,130,210,0.3)':'none';
+  tJ.style.background  = isCreate?'transparent':'linear-gradient(135deg,#c5a8e0,#9db8e8)';
+  tJ.style.color        = isCreate?'rgba(100,80,140,0.55)':'#fff';
+  tJ.style.boxShadow    = isCreate?'none':'0 2px 8px rgba(160,130,210,0.3)';
+  // URL에 방코드 있으면 참여 탭 자동 선택
+}
+
 // Auto-join from URL
-(()=>{ const r=new URLSearchParams(location.search).get('room'); if(r) document.getElementById('mpCodeInp').value=r.toUpperCase(); })();
+(()=>{
+  const r=new URLSearchParams(location.search).get('room');
+  if(r){
+    document.getElementById('mpCodeInp').value=r.toUpperCase();
+    mpSwitchTab('join'); // 코드 있으면 참여 탭으로
+  } else {
+    mpSwitchTab('create'); // 기본은 방만들기 탭
+  }
+})();
 // Load saved nickname
 (()=>{
   try {
