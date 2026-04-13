@@ -3952,9 +3952,6 @@ function draw() {
     }
   }
 
-  // Remote paddles (multiplayer)
-  if (mpActive) mpDrawRemotePaddles();
-
   // paddle — carrier > laser > normal 우선순위
   if (paddleState.carrier > 0) {
     drawCarrierPaddle();
@@ -4467,7 +4464,7 @@ function mpRenderHud(){
     const h='♥'.repeat(Math.max(0,p.lives||0));
     d.innerHTML=`<div class="mp-dot" style="background:${p.color}"></div>
       <div class="mp-nm">${p.name}</div>
-      <div class="mp-sc" style="color:${p.color}">${(p.score||0).toLocaleString()}</div>
+      <div class="mp-sc" style="color:${pid===mpMyPid?'#ff9f43':p.color}">${(p.score||0).toLocaleString()}</div>
       <div class="mp-lv">${h}</div>`;
     bar.appendChild(d);
   });
