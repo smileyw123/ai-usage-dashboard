@@ -4180,7 +4180,9 @@ function pressLeft(v) { paddle.moveLeft = v; }
 function pressRight(v) { paddle.moveRight = v; }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'r' || e.key === 'R') { reset(); return; }
+  // input/textarea에 포커스 중이면 게임 키 핸들러 무시
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'r' || e.key === 'R') { if (!mpActive) reset(); return; }
   if (gameOver) return;
   if (e.key === 'ArrowLeft') pressLeft(true);
   if (e.key === 'ArrowRight') pressRight(true);
@@ -4193,6 +4195,7 @@ document.addEventListener('keydown', e => {
   e.preventDefault();
 });
 document.addEventListener('keyup', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   if (e.key === 'ArrowLeft') pressLeft(false);
   if (e.key === 'ArrowRight') pressRight(false);
 });
@@ -4240,9 +4243,6 @@ mpShowLobby();
     const saved = localStorage.getItem('breakout_nickname');
     const inp = document.getElementById('mpNameInp');
     if (saved) inp.value = saved;
-
-    // 포커스 시 전체 선택 → 쉽게 수정 가능
-    inp.addEventListener('focus', () => inp.select());
 
     // 입력할 때마다 즉시 localStorage 저장
     inp.addEventListener('input', () => {
