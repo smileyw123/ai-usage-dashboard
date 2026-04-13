@@ -343,7 +343,10 @@ body {
     <div class="mp-plist" id="mpPList"></div>
     <div class="mp-hint" id="mpWaitHint">친구에게 코드를 알려주세요</div>
     <div class="mp-url" id="mpUrlBox"></div>
-    <button class="mp-btn mp-btn-w mp-hidden" id="mpBtnStart">게임 시작</button>
+    <div style="display:flex;align-items:center;gap:10px;" id="mpStartRow">
+      <button class="mp-btn mp-btn-w mp-hidden" id="mpBtnStart" style="flex:1;">게임 시작</button>
+      <span id="mpReadyCount" class="mp-hidden" style="font-size:11px;font-weight:700;color:rgba(100,80,140,0.55);white-space:nowrap;"></span>
+    </div>
     <button class="mp-btn mp-btn-g" id="mpBtnLeave">나가기</button>
   </div>
 </div>
@@ -4363,6 +4366,12 @@ function mpEnterWait(){
     const n=Object.keys(pl).length;
     document.getElementById('mpWaitHint').textContent=
       n<=1?'친구에게 코드를 알려주세요!':n+'명 참가 중 · 방장이 시작하면 게임이 시작됩니다';
+    // 참가 인원 표시 (방장에게만)
+    const rc=document.getElementById('mpReadyCount');
+    if(mpIsHost && rc){
+      rc.classList.remove('mp-hidden');
+      rc.textContent=`현재 ${n}명 참가`;
+    }
   });
 
   mpRoomRef.child('status').on('value',snap=>{
