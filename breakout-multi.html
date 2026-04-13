@@ -4466,35 +4466,38 @@ function mpEnterWait(){
   document.getElementById('mpLobby').classList.add('mp-hidden');
   document.getElementById('mpWait').classList.remove('mp-hidden');
   document.getElementById('mpWaitCode').textContent=mpRoomTitle||mpRoomCode;
-  const url=location.origin+location.pathname;
-  document.getElementById('mpUrlBox').textContent='공유링크: '+url;
+  document.getElementById('mpUrlBox').textContent='공유링크: '+location.origin+location.pathname;
 
-  // 항상 먼저 숨기고 → 리스너에서 방장인 경우만 보이게
+  // 버튼 무조건 숨김 (초기)
   document.getElementById('mpBtnStart').classList.add('mp-hidden');
 
-  mpRoomRef.child('players').on('value',snap=>{
-    const pl=snap.val()||{};
+  // 방 전체를 listen → hostId를 항상 Firebase에서 직접 읽음 (로컬 변수 오염 방지)
+  mpRoomRef.on('value', snap=>{
+    const room=snap.val();
+    if(!room) return;
+    const pl=room.players||{};
+    const freshHostId=room.hostId||'';
+
+    // mpHostId 항상 최신으로 동기화
+    if(freshHostId) mpHostId=freshHostId;
+
     mpRenderWaitList(pl);
-    const n=Object.keys(pl).length;
-    // mpHostId를 Firebase에서 읽어 확정 (mpIsHost 변수 의존 제거)
-    const amHost = mpHostId && mpHostId===mpMyPid;
+
+    // ★ 핵심: Firebase에서 읽은 hostId로만 판단
+    const amHost = !!(freshHostId && freshHostId===mpMyPid);
     const sb=document.getElementById('mpBtnStart');
-    if(amHost){ sb.classList.remove('mp-hidden'); }
-    else       { sb.classList.add('mp-hidden');    }
+    amHost ? sb.classList.remove('mp-hidden') : sb.classList.add('mp-hidden');
+
+    const n=Object.keys(pl).length;
     document.getElementById('mpWaitHint').textContent=
       n<=1?'친구에게 코드를 알려주세요!':n+'명 참가 중 · 방장이 시작하면 게임이 시작됩니다';
     const rc=document.getElementById('mpReadyCount');
-    if(rc){ rc.classList.toggle('mp-hidden',!amHost);
-      if(amHost) rc.textContent=`현재 ${n}명 참가`; }
-  });
+    if(rc){
+      rc.classList.toggle('mp-hidden',!amHost);
+      if(amHost) rc.textContent=`현재 ${n}명 참가`;
+    }
 
-  // Firebase에서 hostId 재확인 (로컬 변수 오염 방지)
-  mpRoomRef.child('hostId').once('value').then(s=>{
-    if(s.val()) mpHostId=s.val();
-  });
-
-  mpRoomRef.child('status').on('value',snap=>{
-    if(snap.val()==='playing') mpStartGame();
+    if(room.status==='playing') mpStartGame();
   });
 }
 function mpRenderWaitList(players){
@@ -4521,7 +4524,8 @@ document.getElementById('mpBtnStart').onclick=async()=>{
 document.getElementById('mpBtnLeave').onclick=()=>{
   if(mpRoomRef){
     mpRoomRef.child(`players/${mpMyPid}`).remove();
-    mpRoomRef.child('players').off();mpRoomRef.child('status').off();mpRoomRef=null;
+    mpRoomRef.off(); // 전체 리스너 제거
+    mpRoomRef=null;
   }
   mpIsHost=false; mpHostId=''; mpRoomCode=''; mpRoomTitle=''; // ★ 상태 초기화
   document.getElementById('mpWait').classList.add('mp-hidden');
@@ -4530,7 +4534,7 @@ document.getElementById('mpBtnLeave').onclick=()=>{
 
 // ── Game Start ──
 function mpStartGame(){
-  mpRoomRef.child('players').off();mpRoomRef.child('status').off();
+  mpRoomRef.off(); // 대기실 리스너 전체 제거
   mpActive=true;
   document.getElementById('mpWait').classList.add('mp-hidden');
   document.getElementById('mpLobby').classList.add('mp-hidden');
