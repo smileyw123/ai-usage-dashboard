@@ -257,6 +257,25 @@ body {
   font-weight:700;margin-left:auto;
 }
 .mp-hint{font-size:11px;color:rgba(100,80,140,0.5);text-align:center;}
+.mp-room-list{
+  display:flex;flex-direction:column;gap:6px;
+  max-height:148px;overflow-y:auto;scrollbar-width:none;
+}
+.mp-room-list::-webkit-scrollbar{display:none;}
+.mp-room-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 13px;background:rgba(200,185,230,0.1);
+  border:1.5px solid transparent;border-radius:12px;
+  cursor:pointer;transition:all .15s;
+}
+.mp-room-item:active{background:rgba(160,130,200,0.18);}
+.mp-room-item.selected{
+  background:rgba(160,130,200,0.18);
+  border-color:rgba(160,130,200,0.5);
+}
+.mp-room-name{font-size:13px;font-weight:700;color:#2d2640;}
+.mp-room-meta{font-size:10px;color:rgba(100,80,140,0.5);font-weight:600;}
+.mp-room-empty{font-size:12px;color:rgba(100,80,140,0.35);text-align:center;padding:20px 0;}
 .mp-ready-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-left:auto;transition:background .3s;}
 .mp-btn:disabled,.mp-btn.disabled{opacity:0.35;pointer-events:none;}
 .mp-url{
@@ -342,16 +361,20 @@ body {
       </button>
     </div>
 
-    <!-- 탭 컨텐츠 래퍼: 두 패널이 같은 공간 차지 -->
+    <!-- 탭 컨텐츠 래퍼 -->
     <div style="position:relative;">
+      <!-- 방 만들기 패널 -->
       <div id="mpPanelCreate" style="display:flex;flex-direction:column;gap:10px;">
-        <div style="visibility:hidden;pointer-events:none;">
-          <input class="mp-inp mp-inp-code" placeholder="XXXX" tabindex="-1">
-        </div>
+        <input class="mp-inp" id="mpTitleInp" placeholder="방 제목 입력" maxlength="12" autocomplete="off">
         <button class="mp-btn mp-btn-w" id="mpBtnCreate">방 만들기</button>
       </div>
-      <div id="mpPanelJoin" style="position:absolute;top:0;left:0;right:0;display:flex;flex-direction:column;gap:10px;visibility:hidden;pointer-events:none;">
-        <input class="mp-inp mp-inp-code" id="mpCodeInp" placeholder="XXXX" maxlength="4" autocomplete="off">
+      <!-- 참여하기 패널 -->
+      <div id="mpPanelJoin" style="position:absolute;top:0;left:0;right:0;display:flex;flex-direction:column;gap:8px;visibility:hidden;pointer-events:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px;">
+          <span style="font-size:9px;color:rgba(100,80,140,0.45);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">참여 가능한 방</span>
+          <button onclick="mpLoadRoomList()" style="border:none;background:none;font-size:11px;color:rgba(120,90,160,0.6);font-weight:700;cursor:pointer;padding:2px 4px;">↻ 새로고침</button>
+        </div>
+        <div class="mp-room-list" id="mpRoomList"><div class="mp-room-empty">방 목록을 불러오는 중...</div></div>
         <button class="mp-btn mp-btn-w" id="mpBtnJoin">입장하기</button>
       </div>
     </div>
@@ -366,8 +389,8 @@ body {
 <div id="mpWait" class="mp-hidden">
   <div class="mp-card">
     <div class="mp-code-wrap">
-      <div class="mp-code-lbl">방 코드</div>
-      <div class="mp-code-val" id="mpWaitCode">----</div>
+      <div class="mp-code-lbl">방 제목</div>
+      <div id="mpWaitCode" style="font-family:'Inter',sans-serif;font-size:22px;font-weight:900;letter-spacing:-0.5px;color:#3d2f6a;text-align:center;padding:4px 0;">----</div>
     </div>
     <div class="mp-plist" id="mpPList"></div>
     <div class="mp-hint" id="mpWaitHint">친구에게 코드를 알려주세요</div>
@@ -4282,18 +4305,13 @@ function mpSwitchTab(tab){
   tJ.style.background  = isCreate?'transparent':'linear-gradient(135deg,#c5a8e0,#9db8e8)';
   tJ.style.color        = isCreate?'rgba(100,80,140,0.55)':'#fff';
   tJ.style.boxShadow    = isCreate?'none':'0 2px 8px rgba(160,130,210,0.3)';
-  // URL에 방코드 있으면 참여 탭 자동 선택
+  // 참여하기 탭 진입 시 방 목록 자동 로드
+  if(!isCreate) setTimeout(mpLoadRoomList, 0);
 }
 
 // Auto-join from URL
 (()=>{
-  const r=new URLSearchParams(location.search).get('room');
-  if(r){
-    document.getElementById('mpCodeInp').value=r.toUpperCase();
-    mpSwitchTab('join'); // 코드 있으면 참여 탭으로
-  } else {
-    mpSwitchTab('create'); // 기본은 방만들기 탭
-  }
+  mpSwitchTab('create'); // 기본은 방만들기 탭
 })();
 // Load saved nickname
 (()=>{
@@ -4333,8 +4351,8 @@ const mpDb = firebase.database();
 
 let mpActive = false;
 const mpMyPid = 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-let mpMyName='', mpMyColor='', mpRoomCode='', mpIsHost=false, mpRoomRef=null;
-let mpHostId='';
+let mpMyName='', mpMyColor='', mpRoomCode='', mpRoomTitle='', mpIsHost=false, mpRoomRef=null;
+let mpHostId='', mpSelectedRoomCode='';
 let mpCountdown=0, mpCdInterval=null;
 let mpRemotePlayers={}, mpSyncT=0;
 let mpBkLis=null, mpPlLis=null, mpLvLis=null;
@@ -4371,14 +4389,17 @@ document.getElementById('mpBtnSolo').onclick=()=>{
 // ── Create Room ──
 document.getElementById('mpBtnCreate').onclick=async()=>{
   mpMyName=document.getElementById('mpNameInp').value.trim();
+  mpRoomTitle=document.getElementById('mpTitleInp').value.trim();
   if(!mpMyName){mpShowErr('닉네임을 입력하세요');return;}
+  if(!mpRoomTitle){mpShowErr('방 제목을 입력하세요');return;}
   try { localStorage.setItem('breakout_nickname', mpMyName); } catch(e) {}
   mpMyColor=MP_COLORS[0]; mpRoomCode=mpGenCode(); mpIsHost=true; mpHostId=mpMyPid;
   await mpDb.ref(`rooms/${mpRoomCode}`).set({
-    status:'waiting',level:1,hostId:mpMyPid,created:Date.now(),
+    title:mpRoomTitle, status:'waiting',level:1,hostId:mpMyPid,created:Date.now(),
     players:{[mpMyPid]:{name:mpMyName,color:mpMyColor,score:0,lives:3,paddleX:BOARD_W/2-35,alive:true,ready:true}}
   });
   mpDb.ref(`rooms/${mpRoomCode}/players/${mpMyPid}`).onDisconnect().remove();
+  mpDb.ref(`rooms/${mpRoomCode}`).onDisconnect().update({status:'closed'});
   mpRoomRef=mpDb.ref(`rooms/${mpRoomCode}`);
   mpEnterWait();
 };
@@ -4386,18 +4407,19 @@ document.getElementById('mpBtnCreate').onclick=async()=>{
 // ── Join Room ──
 document.getElementById('mpBtnJoin').onclick=async()=>{
   mpMyName=document.getElementById('mpNameInp').value.trim();
-  const code=document.getElementById('mpCodeInp').value.trim().toUpperCase();
   if(!mpMyName){mpShowErr('닉네임을 입력하세요');return;}
-  if(code.length!==4){mpShowErr('방 코드 4자리를 입력하세요');return;}
+  if(!mpSelectedRoomCode){mpShowErr('입장할 방을 선택해주세요');return;}
   try { localStorage.setItem('breakout_nickname', mpMyName); } catch(e) {}
-  const snap=await mpDb.ref(`rooms/${code}`).once('value');
-  if(!snap.exists()){mpShowErr('존재하지 않는 방이에요');return;}
+  const snap=await mpDb.ref(`rooms/${mpSelectedRoomCode}`).once('value');
+  if(!snap.exists()){mpShowErr('존재하지 않는 방이에요');mpLoadRoomList();return;}
   const room=snap.val();
-  if(room.status!=='waiting'){mpShowErr('이미 시작된 게임이에요');return;}
+  if(room.status!=='waiting'){mpShowErr('이미 시작된 게임이에요');mpLoadRoomList();return;}
   const ex=Object.keys(room.players||{});
-  if(ex.length>=6){mpShowErr('방이 꽉 찼어요 (최대 6명)');return;}
-  mpHostId=room.hostId||ex[0]||''; // 방장 PID 기억
-  mpMyColor=MP_COLORS[ex.length%MP_COLORS.length]; mpRoomCode=code; mpIsHost=false;
+  if(ex.length>=6){mpShowErr('방이 꽉 찼어요 (최대 6명)');mpLoadRoomList();return;}
+  mpHostId=room.hostId||ex[0]||'';
+  mpRoomTitle=room.title||'';
+  mpMyColor=MP_COLORS[ex.length%MP_COLORS.length];
+  mpRoomCode=mpSelectedRoomCode; mpIsHost=false;
   await mpDb.ref(`rooms/${mpRoomCode}/players/${mpMyPid}`).set(
     {name:mpMyName,color:mpMyColor,score:0,lives:3,paddleX:BOARD_W/2-35,alive:true,ready:false}
   );
@@ -4406,12 +4428,43 @@ document.getElementById('mpBtnJoin').onclick=async()=>{
   mpEnterWait();
 };
 
+// ── Room List ──
+function mpLoadRoomList(){
+  const list=document.getElementById('mpRoomList');
+  if(!list) return;
+  list.innerHTML='<div class="mp-room-empty">불러오는 중...</div>';
+  mpSelectedRoomCode='';
+  mpDb.ref('rooms').once('value').then(snap=>{
+    const all=snap.val()||{};
+    const waiting=Object.entries(all).filter(([,r])=>r.status==='waiting'&&r.title);
+    if(waiting.length===0){
+      list.innerHTML='<div class="mp-room-empty">참여 가능한 방이 없어요</div>';
+      return;
+    }
+    list.innerHTML='';
+    waiting.sort((a,b)=>(b[1].created||0)-(a[1].created||0));
+    waiting.forEach(([code,room])=>{
+      const n=Object.keys(room.players||{}).length;
+      const d=document.createElement('div');
+      d.className='mp-room-item';
+      d.innerHTML=`<span class="mp-room-name">${room.title}</span>
+        <span class="mp-room-meta">${n}명 · 대기중</span>`;
+      d.onclick=()=>{
+        document.querySelectorAll('.mp-room-item').forEach(el=>el.classList.remove('selected'));
+        d.classList.add('selected');
+        mpSelectedRoomCode=code;
+      };
+      list.appendChild(d);
+    });
+  });
+}
+
 // ── Wait Room ──
 function mpEnterWait(){
   document.getElementById('mpLobby').classList.add('mp-hidden');
   document.getElementById('mpWait').classList.remove('mp-hidden');
-  document.getElementById('mpWaitCode').textContent=mpRoomCode;
-  const url=location.origin+location.pathname+'?room='+mpRoomCode;
+  document.getElementById('mpWaitCode').textContent=mpRoomTitle||mpRoomCode;
+  const url=location.origin+location.pathname;
   document.getElementById('mpUrlBox').textContent='공유링크: '+url;
   const sb=document.getElementById('mpBtnStart');
   sb.classList.toggle('mp-hidden',!mpIsHost);
