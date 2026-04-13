@@ -343,8 +343,7 @@ body {
     <div class="mp-plist" id="mpPList"></div>
     <div class="mp-hint" id="mpWaitHint">친구에게 코드를 알려주세요</div>
     <div class="mp-url" id="mpUrlBox"></div>
-    <button class="mp-btn mp-btn-g mp-hidden" id="mpBtnReady">준비 완료</button>
-    <button class="mp-btn mp-btn-w mp-hidden disabled" id="mpBtnStart">게임 시작</button>
+    <button class="mp-btn mp-btn-w mp-hidden" id="mpBtnStart">게임 시작</button>
     <button class="mp-btn mp-btn-g" id="mpBtnLeave">나가기</button>
   </div>
 </div>
@@ -4356,32 +4355,14 @@ function mpEnterWait(){
   const url=location.origin+location.pathname+'?room='+mpRoomCode;
   document.getElementById('mpUrlBox').textContent='공유링크: '+url;
   const sb=document.getElementById('mpBtnStart');
-  const rb=document.getElementById('mpBtnReady');
   sb.classList.toggle('mp-hidden',!mpIsHost);
-  rb.classList.toggle('mp-hidden',mpIsHost);
 
   mpRoomRef.child('players').on('value',snap=>{
     const pl=snap.val()||{};
     mpRenderWaitList(pl);
     const n=Object.keys(pl).length;
-
-    if(mpIsHost){
-      // 방장: 모든 비방장 플레이어가 ready 상태일 때만 시작 활성화
-      const others=Object.entries(pl).filter(([pid])=>pid!==mpMyPid);
-      const allReady=others.length>0 && others.every(([,p])=>p.ready);
-      sb.classList.toggle('disabled', !allReady);
-      document.getElementById('mpWaitHint').textContent=
-        n<=1?'친구에게 코드를 알려주세요!':
-        allReady?'모두 준비 완료! 시작 버튼을 눌러주세요 🎮':
-        n+'명 대기 중 · 플레이어 준비를 기다리는 중...';
-    } else {
-      // 비방장: 내 ready 상태 버튼에 반영
-      const myReady=pl[mpMyPid]?.ready||false;
-      rb.textContent=myReady?'준비 취소':'준비 완료';
-      rb.className='mp-btn '+(myReady?'mp-btn-w':'mp-btn-g');
-      document.getElementById('mpWaitHint').textContent=
-        myReady?'준비 완료! 방장이 시작하길 기다리는 중 ⏳':'준비 완료 버튼을 눌러주세요';
-    }
+    document.getElementById('mpWaitHint').textContent=
+      n<=1?'친구에게 코드를 알려주세요!':n+'명 참가 중 · 방장이 시작하면 게임이 시작됩니다';
   });
 
   mpRoomRef.child('status').on('value',snap=>{
@@ -4393,23 +4374,15 @@ function mpRenderWaitList(players){
   Object.entries(players).forEach(([pid,p])=>{
     const isHost=pid===mpHostId;
     const isMe=pid===mpMyPid;
-    const ready=p.ready||isHost;
-    const displayName=isMe?mpMyName:(p.name||'?'); // 내 이름은 로컬값 우선
+    const displayName=isMe?mpMyName:(p.name||'?');
     const d=document.createElement('div');d.className='mp-prow';
     d.innerHTML=`<div class="mp-pdot" style="background:${p.color}"></div>
       <span>${displayName}</span>
       ${isHost?'<span class="mp-badge">방장</span>':''}
-      ${isMe?'<span class="mp-badge">나</span>':''}
-      <div class="mp-ready-dot" style="background:${ready?'#7bc67e':'rgba(160,130,200,0.25)'}"></div>`;
+      ${isMe?'<span class="mp-badge">나</span>':''}`;
     list.appendChild(d);
   });
 }
-// ── 준비완료 버튼 (비방장) ──
-document.getElementById('mpBtnReady').onclick=()=>{
-  if(!mpRoomRef) return;
-  const cur=document.getElementById('mpBtnReady').textContent.includes('취소');
-  mpRoomRef.child(`players/${mpMyPid}/ready`).set(!cur);
-};
 document.getElementById('mpBtnStart').onclick=async()=>{
   const bd={};
   LEVEL_PATTERNS[0].forEach((row,r)=>{
