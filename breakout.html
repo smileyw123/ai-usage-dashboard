@@ -23,7 +23,7 @@ body {
   flex-shrink: 0;
   width: auto;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   align-items: center;
   padding: 10px 14px 6px;
   position: relative;
@@ -54,6 +54,10 @@ body {
   letter-spacing: -0.5px;
   line-height: 1;
   text-align: center;
+}
+.hud-best {
+  font-size: 16px;
+  color: rgba(255,220,80,0.85);
 }
 .hud-score {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -177,6 +181,10 @@ body {
   <div class="hud-side">
     <span class="hud-label">LEVEL</span>
     <span class="hud-value" id="level">1</span>
+  </div>
+  <div class="hud-side">
+    <span class="hud-label">BEST</span>
+    <span class="hud-value hud-best" id="best">0</span>
   </div>
 </div>
 
@@ -351,6 +359,7 @@ function currentTheme() {
 
 let SCALE = 1;
 let score, lives, level, gameOver, won, paused;
+let bestScore = parseInt(localStorage.getItem('breakout_best') || '0', 10);
 let paddle, balls, bricks;
 let powerUps = [];
 let lasers = [];
@@ -1204,6 +1213,186 @@ const LEVEL_PATTERNS = [
     'H######H',
     'GHBBBBHG',
   ],
+  // Level 31 - Twin peaks
+  [
+    '#......#',
+    '##....##',
+    '###..###',
+    '########',
+    'H#HBBH#H',
+    'GGGGGGGG',
+  ],
+  // Level 32 - Labyrinth
+  [
+    'H#H#H#H#',
+    '#.#.#.#.',
+    'H#H#H#H#',
+    '.#.#.#.#',
+    'H#H#H#H#',
+    'BBBBBBBB',
+  ],
+  // Level 33 - Bullseye
+  [
+    '.######.',
+    '#HHHHHH#',
+    '#H#BB#H#',
+    '#H#BB#H#',
+    '#HHHHHH#',
+    '.######.',
+  ],
+  // Level 34 - Barricade
+  [
+    'HHHHHHHH',
+    '........',
+    'HHHHHHHH',
+    '........',
+    'HHHHHHHH',
+    'BBBBBBBB',
+  ],
+  // Level 35 - Galaxy spiral
+  [
+    'G......G',
+    '.#HBBH#.',
+    '.H####H.',
+    '.H####H.',
+    '.#HBBH#.',
+    'G......G',
+  ],
+  // Level 36 - Zigzag blitz
+  [
+    '#.#.#.#.',
+    'B#B#B#B#',
+    '#H#H#H#H',
+    'H#H#H#H#',
+    '#B#B#B#B',
+    '.#.#.#.#',
+  ],
+  // Level 37 - Diamond mine
+  [
+    '...GG...',
+    '..HBBH..',
+    '.H####H.',
+    '.H####H.',
+    '..HBBH..',
+    '...GG...',
+  ],
+  // Level 38 - Shattered
+  [
+    '#.##.##.',
+    '##.##.##',
+    'B.BB.BB.',
+    '.BB.BB.B',
+    'HH.HH.HH',
+    'H.HH.HH.',
+  ],
+  // Level 39 - Sentinel
+  [
+    'G#H##H#G',
+    '#HBBBBH#',
+    'H######H',
+    'H######H',
+    '#HBBBBH#',
+    'G#H##H#G',
+  ],
+  // Level 40 - Supernova
+  [
+    'GBHBBHBG',
+    'B######B',
+    'H##GG##H',
+    'H##GG##H',
+    'B######B',
+    'GBHBBHBG',
+  ],
+  // Level 41 - Pixel art A
+  [
+    '.######.',
+    '#H....H#',
+    '#HHHHHH#',
+    '#H....H#',
+    '#H....H#',
+    '########',
+  ],
+  // Level 42 - Honeycomb fort
+  [
+    'H#H#H#H#',
+    '#HBBBBH#',
+    'H#HBBH#H',
+    '#H#HH#H#',
+    'HBBBBBBH',
+    '########',
+  ],
+  // Level 43 - Cross fire
+  [
+    '..#BB#..',
+    '..####..',
+    'BBHHHBB#', // typo fix below
+    '########',
+    '..####..',
+    '..#BB#..',
+  ],
+  // Level 44 - Arrowhead
+  [
+    '...##...',
+    '..H##H..',
+    '.HB##BH.',
+    'HB####BH',
+    '########',
+    'GHBBBBHG',
+  ],
+  // Level 45 - Wormhole
+  [
+    'GH....HG',
+    'H.HBBH.H',
+    '.H#HH#H.',
+    '.H#HH#H.',
+    'H.HBBH.H',
+    'GH....HG',
+  ],
+  // Level 46 - Cascade
+  [
+    '########',
+    'HHHHHHHH',
+    'BBBBBBBB',
+    'HHHHHHHH',
+    '########',
+    'GHBBBBHG',
+  ],
+  // Level 47 - Black hole
+  [
+    '#HBBBBH#',
+    'H......H',
+    'B..GG..B',
+    'B..GG..B',
+    'H......H',
+    '#HBBBBH#',
+  ],
+  // Level 48 - Inferno grid
+  [
+    'HBHBHBHB',
+    'BHBHBHBH',
+    'HBHGHBHB', // typo fix
+    'BHBGHBHB',
+    'HBHBHBHB',
+    'BHBHBHBH',
+  ],
+  // Level 49 - The wall
+  [
+    'GGGGGGGG',
+    'HHHHHHHH',
+    'BBBBBBBB',
+    'BBBBBBBB',
+    'HHHHHHHH',
+    'GGGGGGGG',
+  ],
+  // Level 50 - Final boss
+  [
+    'GHBBBBHG',
+    'HHHHHHHH',
+    'BGGHHGGB',
+    'BGGHHGGB',
+    'HHHHHHHH',
+    'GHBBBBHG',
+  ],
 ];
 
 function initBricks() {
@@ -1310,6 +1499,7 @@ function reset() {
   resetBallAndPaddle();
   overlay.style.display = 'none';
   updateStats();
+  document.getElementById('best').textContent = bestScore;
   applyTheme();
   resize();
 }
@@ -1323,6 +1513,11 @@ function updateStats() {
   document.getElementById('score').textContent = score;
   document.getElementById('lives').textContent = lives;
   document.getElementById('level').textContent = level;
+  if (score > bestScore) {
+    bestScore = score;
+    try { localStorage.setItem('breakout_best', bestScore); } catch(e) {}
+  }
+  document.getElementById('best').textContent = bestScore;
 }
 
 function showPowerToast(type) {
@@ -2581,7 +2776,7 @@ function update(dt) {
       levelTransition.phase = 'transition';
       levelTransition.t = 0;
       // check if final level
-      if (level >= 30) {
+      if (level >= 50) {
         gameOver = true;
         showOverlay(`YOU WIN!\n<div class="sub">Score: ${score}</div>\n<button class="btn" id="restartBtn">PLAY AGAIN</button>`);
         levelTransition = null;
@@ -3730,14 +3925,14 @@ function drawLevelBanner() {
   roundedPath(barX, barY, barW, 3, 1.5);
   ctx.fill();
   // filled portion
-  const fillW = (progressLevel / 30) * barW;
+  const fillW = (progressLevel / 50) * barW;
   ctx.fillStyle = theme.accent;
   roundedPath(barX, barY, fillW, 3, 1.5);
   ctx.fill();
   // small text below: x / 30
   ctx.fillStyle = 'rgba(255,255,255,0.4)';
   ctx.font = '600 9px Inter, sans-serif';
-  ctx.fillText(`${progressLevel} / 30`, cx, barY + 12);
+  ctx.fillText(`${progressLevel} / 50`, cx, barY + 12);
 
   ctx.restore();
 }
